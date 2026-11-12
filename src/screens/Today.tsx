@@ -14,6 +14,7 @@ export function Today() {
   const { state, today, todayRec, todayError, reloadToday, index } = useStore();
   const [open, setOpen] = useState<Task | null>(null);
   const [play, setPlay] = useState(false);
+  const [spin, setSpin] = useState(0);
   const log = state.days[today] ?? { done: [], adv: [] };
   const plan = todayRec?.plan;
   const doneCount = plan ? plan.required.filter((id) => log.done.includes(id)).length : 0;
@@ -77,7 +78,7 @@ export function Today() {
     <main className="screen">
       <div className="date-row">
         <span className="date">{longItalianDate(today)}</span>
-        <span className="brand">PyCoil <Logo size={30} /></span>
+        <button className="brand" onClick={() => setSpin((n) => n + 1)} aria-label="PyCoil: fai girare il serpente">PyCoil <Logo size={30} spin={spin} /></button>
       </div>
 
       <div className="home-top">

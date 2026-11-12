@@ -120,11 +120,14 @@ export function OuroborosShapes({ p = GREEN, spot = p.spot, crown = false, shade
   );
 }
 
-export function Logo({ size = 30 }: { size?: number }) {
+/** Icona dell'app. Ogni volta che `spin` cambia (e non è 0) il serpente fa un giro in senso antiorario. */
+export function Logo({ size = 30, spin = 0 }: { size?: number; spin?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 512 512" role="img" aria-label="Logo PyCoil">
       <rect width="512" height="512" rx="114" fill="#FCF0CF" />
-      <OuroborosShapes />
+      <g key={spin} className={spin ? 'logo-spin' : undefined}>
+        <OuroborosShapes />
+      </g>
     </svg>
   );
 }

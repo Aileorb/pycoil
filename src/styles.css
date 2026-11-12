@@ -124,7 +124,10 @@ a { color: var(--blue); }
 /* ---------------------------------------------------------------- home */
 .date-row { display: flex; align-items: center; justify-content: space-between; height: 36px; }
 .date-row .date { font-size: 13px; font-weight: 600; letter-spacing: 0.4px; color: var(--text2); text-transform: uppercase; }
-.brand { display: flex; align-items: center; gap: 7px; font-size: 15px; font-weight: 700; }
+.brand { display: flex; align-items: center; gap: 7px; font-size: 15px; font-weight: 700; color: inherit; }
+.logo-spin { transform-box: view-box; transform-origin: 256px 256px; animation: logo-spin 0.9s cubic-bezier(0.45, 0, 0.2, 1); }
+@keyframes logo-spin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+@media (prefers-reduced-motion: reduce) { .logo-spin { animation-duration: 0.01s; } }
 .streak-card { border-radius: 28px; background: linear-gradient(140deg, var(--streak-a), var(--streak-b)); padding: 14px 18px 14px 6px; display: flex; align-items: center; gap: 6px; }
 .streak-card.lost { background: linear-gradient(140deg, #efede8, #d9d4c9); color: #1c1c1e; }
 .streak-num { display: flex; align-items: center; gap: 2px; }
