@@ -67,7 +67,9 @@ pip install -r requirements-content.txt
 npm run verify:content    # esegue davvero tutto il codice dei contenuti
 ```
 
-Ogni push su `main` esegue la stessa pipeline in GitHub Actions e pubblica su GitHub Pages.
+Ogni push su `main` esegue la stessa pipeline in GitHub Actions e, se tutto è verde, pubblica la build sul branch `gh-pages` e i soli contenuti sul branch `content`.
+
+**Attivazione di GitHub Pages (una volta sola):** *Settings → Pages → Build and deployment → Source: Deploy from a branch → `gh-pages` / `(root)` → Save*. Dopo un minuto l'app è su https://aileorb.github.io/pycoil/.
 
 ## Scrivere contenuti
 
