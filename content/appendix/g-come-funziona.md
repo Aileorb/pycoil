@@ -23,11 +23,11 @@ Le sezioni imparate tornano come esercizi dopo 1, 3, 7, 14 e 30 giorni (ripetizi
 
 | Azione | Punti |
 |---|---|
-| Task completata | 10 |
+| Task completata | +10 |
 | Giusta al primo colpo | +5 |
-| Sezione letta fino in fondo | 2 |
+| Sezione letta fino in fondo | +2 |
 | Parte letta tutta | +10 |
-| Task avanzata | 40 |
+| Task avanzata | +40 |
 | Giornata completa | +10 |
 
 Ogni giorno di streak aggiunge l'1% ai punti, fino al +50%. Un progetto si sblocca con la Parte prerequisito letta all'80% e il 70% degli esercizi *Scrivi* giusti al primo colpo.
