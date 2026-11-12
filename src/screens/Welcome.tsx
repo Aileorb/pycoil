@@ -11,17 +11,15 @@ const LEVELS: { id: LevelId; name: string; desc: string; start: string }[] = [
   { id: 'intermedio', name: 'Intermedio', desc: 'Programmo già bene, voglio scrivere Python come si deve.', start: 'Si parte dalla Parte II · Python idiomatico' },
   { id: 'avanzato', name: 'Avanzato', desc: 'Python lo so: portami alle librerie per l’ingegneria.', start: 'Si parte dalla Parte III · NumPy e Matplotlib' }
 ];
-const YEARS = ['1°', '2°', '3°', 'Magistrale'];
 const ORDER: LevelId[] = ['principiante', 'base', 'intermedio', 'avanzato'];
 
 export function Welcome() {
   const { index, update, today } = useStore();
   const [level, setLevel] = useState<LevelId>('base');
-  const [year, setYear] = useState<string | null>(null);
   const [quiz, setQuiz] = useState<{ i: number; score: Record<string, number>; picked: number | null } | null>(null);
   const [suggested, setSuggested] = useState<LevelId | null>(null);
 
-  const start = (lv: LevelId) => update((s) => ({ ...s, level: lv, year, createdOn: s.createdOn ?? today }));
+  const start = (lv: LevelId) => update((s) => ({ ...s, level: lv, createdOn: s.createdOn ?? today }));
 
   if (quiz && index) {
     const qs = index.quiz;
@@ -96,12 +94,6 @@ export function Welcome() {
             {level === l.id ? <Check size={24} /> : <Todo size={24} />}
           </button>
         ))}
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <span className="section-label" style={{ padding: '0 4px' }}>Anno di corso · facoltativo</span>
-        <div className="segmented">
-          {YEARS.map((y) => <button key={y} aria-pressed={year === y} onClick={() => setYear(year === y ? null : y)}>{y}</button>)}
-        </div>
       </div>
       {index && index.quiz.length > 0 ? (
         <button className="pill-btn" onClick={() => setQuiz({ i: 0, score: {}, picked: null })}>Verifica con {index.quiz.length} domande · 2 min</button>

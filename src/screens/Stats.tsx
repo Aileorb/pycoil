@@ -100,7 +100,6 @@ export function Stats() {
         <div className="legend">
           <span><i style={{ background: 'var(--blue)' }} />Obbligatorie</span>
           <span><i style={{ background: 'var(--purple)' }} />Avanzate</span>
-          <span>Il pulcino vola nei giorni con avanzate</span>
         </div>
       </div>
 

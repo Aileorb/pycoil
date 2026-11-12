@@ -20,6 +20,8 @@ export interface TaskNav {
   onNext: () => void;
 }
 
+const isAdvTask = (t: Task) => t.type === 'kata' || t.type === 'step';
+
 /** Restituisce la bozza corrente della task (codice e suggerimenti) quando la si mette in pausa. */
 type DraftGetter = () => TaskDraft | undefined;
 
@@ -73,7 +75,9 @@ export function TaskSheet({ task, done, onClose, nav }: { task: Task; done: bool
   };
   const gain = lastCompletion?.id === task.id ? lastCompletion : null;
   const missing = nav.progress.filter((x) => !x).length;
-  const isAdv = task.type === 'kata' || task.type === 'step';
+  // completata la terza task del giorno, la X diventa una spunta verde: il minimo è raggiunto
+  const dayGoal = done && !isAdvTask(task) && nav.progress.length > 0 && missing === 0;
+  const isAdv = isAdvTask(task);
   const successTitle = gain?.dayCompleted ? 'Giornata completa!' : 'Completata!';
   const successSub = gain?.dayCompleted
     ? `Streak a ${state.streak.current} ${state.streak.current === 1 ? 'giorno' : 'giorni'}. A domani!`
@@ -97,9 +101,15 @@ export function TaskSheet({ task, done, onClose, nav }: { task: Task; done: bool
             <svg width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><rect x="1" y="1" width="3.4" height="12" rx="1.2" fill="currentColor" /><rect x="7.6" y="1" width="3.4" height="12" rx="1.2" fill="currentColor" /></svg>
           </button>
         )}
-        <button className="round-btn exit" onClick={done ? onClose : exit} aria-label={done ? 'Chiudi' : 'Esci senza completare'} title={done ? 'Chiudi' : 'Esci senza completare'}>
-          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
-        </button>
+        {dayGoal ? (
+          <button className="round-btn goal" onClick={onClose} aria-label="Chiudi: minimo di oggi raggiunto" title="Minimo di oggi raggiunto">
+            <svg width="16" height="13" viewBox="0 0 16 13" aria-hidden="true"><path d="M1.8 6.8l4.2 4.2L14.2 2" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>
+        ) : (
+          <button className="round-btn exit" onClick={done ? onClose : exit} aria-label={done ? 'Chiudi' : 'Esci senza completare'} title={done ? 'Chiudi' : 'Esci senza completare'}>
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
+          </button>
+        )}
       </header>
       {task.type !== 'kata' && task.type !== 'step' && (
         <div className="task-progress" aria-label={`${nav.progress.filter(Boolean).length} task di oggi su ${nav.progress.length} completate`}>

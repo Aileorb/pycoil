@@ -34,7 +34,13 @@ export const Search = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5L21 21" /></svg>
 );
 export const Gear = ({ size = 20 }: P) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3.2" /><path d="M12 2.5v2.6M12 18.9v2.6M4.4 4.4l1.9 1.9M17.7 17.7l1.9 1.9M2.5 12h2.6M18.9 12h2.6M4.4 19.6l1.9-1.9M17.7 6.3l1.9-1.9" strokeLinecap="round" /></svg>
+  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      fill="currentColor"
+      fillRule="evenodd"
+      d="M10.3 1.5h3.4l.5 2.6a8.3 8.3 0 012 .8l2.2-1.5 2.4 2.4-1.5 2.2c.4.6.6 1.3.8 2l2.6.5v3.4l-2.6.5a8.3 8.3 0 01-.8 2l1.5 2.2-2.4 2.4-2.2-1.5a8.3 8.3 0 01-2 .8l-.5 2.6h-3.4l-.5-2.6a8.3 8.3 0 01-2-.8l-2.2 1.5-2.4-2.4 1.5-2.2a8.3 8.3 0 01-.8-2l-2.6-.5v-3.4l2.6-.5c.2-.7.4-1.4.8-2L3.2 5.8l2.4-2.4 2.2 1.5c.6-.4 1.3-.6 2-.8zM12 8.4a3.6 3.6 0 100 7.2 3.6 3.6 0 000-7.2z"
+    />
+  </svg>
 );
 export const Laptop = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5" /><path d="M2 19h20" /></svg>
