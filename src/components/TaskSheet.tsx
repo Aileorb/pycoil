@@ -1,23 +1,119 @@
 import { useEffect, useRef, useState } from 'react';
 import type { AdvancedTask, ImparaTask, PrevediTask, ScriviTask, Task } from '../engine/types';
-import { Sheet } from './Sheet';
+import { createPortal } from 'react-dom';
 import { RichHtml } from './RichHtml';
 import { CodeEditor } from './CodeEditor';
 import { runPython, isPythonBooted, type RunResult } from '../py/runner';
 import { useStore } from '../store';
-import { Check } from './icons';
+import { Check, TASK_COLORS } from './icons';
+import type { TaskDraft } from '../engine/storage';
 import { MAX_ATTEMPTS } from '../engine/state';
 
-export function TaskSheet({ task, done, onClose }: { task: Task; done: boolean; onClose: () => void }) {
-  const title = { impara: 'Impara', prevedi: 'Prevedi', scrivi: 'Scrivi', kata: 'Avanzata · kata', step: `Passo ${(task as AdvancedTask).step ?? ''}` }[task.type];
-  return (
-    <Sheet title={title} onClose={onClose} full>
-      <h3 style={{ margin: '4px 0 0', fontSize: 22 }}>{task.title}</h3>
-      {task.type === 'impara' && <Impara task={task} done={done} onClose={onClose} />}
-      {task.type === 'prevedi' && <Prevedi task={task} done={done} />}
-      {task.type === 'scrivi' && <Scrivi task={task} done={done} />}
-      {(task.type === 'kata' || task.type === 'step') && <Advanced task={task as AdvancedTask} done={done} />}
-    </Sheet>
+export interface TaskNav {
+  /** Testo sotto il tipo di task, es. "Task 2 di 3 · 4 min". */
+  position: string;
+  /** Stato delle tre task obbligatorie, per la barra in alto. */
+  progress: boolean[];
+  /** La prossima task da fare, se c'è. */
+  next: Task | null;
+  onNext: () => void;
+}
+
+/** Restituisce la bozza corrente della task (codice e suggerimenti) quando la si mette in pausa. */
+type DraftGetter = () => TaskDraft | undefined;
+
+/** Task a schermo intero: pausa (arancio) e uscita senza completare (rosso) in alto. */
+export function TaskSheet({ task, done, onClose, nav }: { task: Task; done: boolean; onClose: () => void; nav: TaskNav }) {
+  const { saveDraft, todayRec } = useStore();
+  const draftOf = useRef<DraftGetter | null>(null);
+  const draft = todayRec?.drafts?.[task.id];
+  const label = { impara: 'Impara', prevedi: 'Prevedi', scrivi: 'Scrivi', kata: 'Avanzata · kata', step: `Avanzata · passo ${(task as AdvancedTask).step ?? ''}` }[task.type];
+
+  const pause = () => {
+    const d = draftOf.current?.();
+    saveDraft(task.id, !done && d ? d : null);
+    onClose();
+  };
+  const exit = () => {
+    saveDraft(task.id, null);
+    onClose();
+  };
+  // a task completata la bozza non serve più
+  useEffect(() => {
+    if (done && draft) saveDraft(task.id, null);
+  }, [done, draft, task.id, saveDraft]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && pause();
+    document.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+  });
+  const body = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    body.current?.scrollTo({ top: 0 }); // nei browser recenti scrollTo restituisce una Promise: non va restituita all'effetto
+  }, [task.id]);
+  // appena la task si completa, porta in vista l'esito (spiegazione, soluzione) sopra i bottoni
+  const wasDone = useRef(done);
+  useEffect(() => {
+    if (done && !wasDone.current) {
+      window.setTimeout(() => {
+        const el = body.current;
+        el?.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      }, 350);
+    }
+    wasDone.current = done;
+  }, [done]);
+
+  return createPortal(
+    <section className="task-screen" role="dialog" aria-modal="true" aria-label={`${label}: ${task.title}`}>
+      <header className="task-head">
+        <div className="task-kind">
+          <b style={{ color: TASK_COLORS[task.type] }}>{label}</b>
+          <span>{nav.position}</span>
+        </div>
+        {!done && (
+          <button className="round-btn pause" onClick={pause} aria-label="Metti in pausa" title="Pausa: riprendi più tardi da dove eri">
+            <svg width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><rect x="1" y="1" width="3.4" height="12" rx="1.2" fill="currentColor" /><rect x="7.6" y="1" width="3.4" height="12" rx="1.2" fill="currentColor" /></svg>
+          </button>
+        )}
+        <button className="round-btn exit" onClick={done ? onClose : exit} aria-label={done ? 'Chiudi' : 'Esci senza completare'} title={done ? 'Chiudi' : 'Esci senza completare'}>
+          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
+        </button>
+      </header>
+      {task.type !== 'kata' && task.type !== 'step' && (
+        <div className="task-progress" aria-label={`${nav.progress.filter(Boolean).length} task di oggi su ${nav.progress.length} completate`}>
+          {nav.progress.map((on, i) => <i key={i} className={on ? 'on' : ''} />)}
+        </div>
+      )}
+      <div className="task-body" ref={body}>
+        <div className="task-inner">
+          <h3 className="task-title">{task.title}</h3>
+          {draft && !done && <div className="paused-note">Ripresa da dove l'avevi lasciata.</div>}
+          {task.type === 'impara' && <Impara task={task} done={done} onClose={onClose} />}
+          {task.type === 'prevedi' && <Prevedi task={task} done={done} />}
+          {task.type === 'scrivi' && <Scrivi task={task} done={done} draft={draft} register={(g) => (draftOf.current = g)} />}
+          {(task.type === 'kata' || task.type === 'step') && <Advanced task={task as AdvancedTask} done={done} draft={draft} register={(g) => (draftOf.current = g)} />}
+        </div>
+      </div>
+      {done && (
+        <footer className="task-foot">
+          {nav.next ? (
+            <button className="big-btn" onClick={nav.onNext}>
+              Prossima task
+              <svg width="9" height="15" viewBox="0 0 9 15" aria-hidden="true"><path d="M1.5 1.5l6 6-6 6" stroke="currentColor" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+          ) : (
+            <button className="big-btn" onClick={onClose}>Torna a Oggi</button>
+          )}
+          {nav.next && <button className="later-btn" onClick={onClose}>Più tardi</button>}
+        </footer>
+      )}
+    </section>,
+    document.body
   );
 }
 
@@ -134,13 +230,14 @@ function ResultBox({ r }: { r: RunResult | null }) {
   );
 }
 
-function Scrivi({ task, done }: { task: ScriviTask; done: boolean }) {
+function Scrivi({ task, done, draft, register }: { task: ScriviTask; done: boolean; draft?: TaskDraft; register: (g: DraftGetter) => void }) {
   const { finishTask, recordAttempt, todayRec } = useStore();
   const failedRuns = (todayRec?.attempts?.[task.id] ?? []).length;
-  const [code, setCode] = useState(task.starter);
+  const [code, setCode] = useState(draft?.code ?? task.starter);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
-  const [hints, setHints] = useState(0);
+  const [hints, setHints] = useState(draft?.hints ?? 0);
+  register(() => (code !== task.starter || hints > 0 ? { code, hints } : undefined));
   const [solved, setSolved] = useState(done);
   const [firstTry, setFirstTry] = useState(false);
   const exhausted = failedRuns >= MAX_ATTEMPTS;
@@ -227,12 +324,13 @@ assert not _falliti, f"Test non superati: {', '.join(_falliti)}"
   return { setup, tests: `${task.testFile?.code ?? ''}\n${runner}` };
 }
 
-function Advanced({ task, done }: { task: AdvancedTask; done: boolean }) {
+function Advanced({ task, done, draft, register }: { task: AdvancedTask; done: boolean; draft?: TaskDraft; register: (g: DraftGetter) => void }) {
   const { finishAdvanced, recordAttempt, todayRec } = useStore();
   const failedRuns = (todayRec?.attempts?.[task.id] ?? []).length;
   const exhausted = failedRuns >= MAX_ATTEMPTS;
-  const [hints, setHints] = useState(0);
-  const [code, setCode] = useState('');
+  const [hints, setHints] = useState(draft?.hints ?? 0);
+  const [code, setCode] = useState(draft?.code ?? '');
+  register(() => (code.trim() || hints > 0 ? { code, hints } : undefined));
   const [result, setResult] = useState<RunResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [passed, setPassed] = useState(false);
@@ -273,7 +371,7 @@ function Advanced({ task, done }: { task: AdvancedTask; done: boolean }) {
       )}
       {task.hints.slice(0, hints).map((h, i) => <div key={i} className="hint"><strong>Suggerimento {i + 1}. </strong><span dangerouslySetInnerHTML={{ __html: h }} /></div>)}
       {!done && !exhausted && hints < task.hints.length && <button className="ghost-btn" onClick={() => setHints(hints + 1)}>Mostra un suggerimento</button>}
-      <details open={failedRuns > 0 || undefined}>
+      <details open={failedRuns > 0 || !!draft?.code || undefined}>
         <summary style={{ color: 'var(--blue)', fontSize: 17, padding: '8px 0', cursor: 'pointer' }}>
           {canVerify ? `Incolla tutto il file ${task.module} e verificalo qui` : 'Incolla il tuo codice e provalo qui'}
         </summary>

@@ -42,6 +42,13 @@ export interface TodayRecord {
   parts: PartSummary[];
   /** Tentativi sbagliati di oggi per task (Prevedi: indici scelti; Scrivi e avanzate: un elemento per prova). */
   attempts?: Record<string, number[]>;
+  /** Task messe in pausa: il codice scritto e i suggerimenti aperti, cancellati con il giorno. */
+  drafts?: Record<string, TaskDraft>;
+}
+
+export interface TaskDraft {
+  code?: string;
+  hints?: number;
 }
 
 export async function saveToday(rec: TodayRecord): Promise<void> {

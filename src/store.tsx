@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { AppState, ContentIndex, Favorite } from './engine/types';
 import { dayKey, weekStart } from './engine/dates';
 import { compactHistory, completeAdvanced, completeTask, markSectionRead, refreshStreak, emptyState } from './engine/state';
-import { ensureToday, loadState, saveState, saveToday, clearToday, type TodayRecord } from './engine/storage';
+import { ensureToday, loadState, saveState, saveToday, clearToday, type TaskDraft, type TodayRecord } from './engine/storage';
 import { loadIndex } from './engine/content';
 
 interface Store {
@@ -24,6 +24,8 @@ interface Store {
   reloadToday: () => void;
   /** Registra un tentativo sbagliato di oggi (resta salvato fino a domani). */
   recordAttempt: (id: string, pick?: number) => void;
+  /** Salva (o con null cancella) la bozza di una task messa in pausa. */
+  saveDraft: (id: string, draft: TaskDraft | null) => void;
   getIndex: () => Promise<ContentIndex>;
 }
 
@@ -170,6 +172,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     void saveToday(next);
   }, []);
 
+  const saveDraft = useCallback((id: string, draft: TaskDraft | null) => {
+    const rec = todayRef.current;
+    if (!rec) return;
+    const drafts = { ...rec.drafts };
+    if (draft) drafts[id] = draft;
+    else if (id in drafts) delete drafts[id];
+    else return;
+    const next: TodayRecord = { ...rec, drafts };
+    todayRef.current = next;
+    setTodayRec(next);
+    void saveToday(next);
+  }, []);
+
   const reloadToday = useCallback(() => {
     const kept = todayRef.current?.date === today ? todayRef.current.attempts : undefined;
     void clearToday().then(() => {
@@ -185,8 +200,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [today, getIndex]);
 
   const value = useMemo<Store>(
-    () => ({ ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, getIndex }),
-    [ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, getIndex]
+    () => ({ ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, saveDraft, getIndex }),
+    [ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, saveDraft, getIndex]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -50,6 +50,29 @@ export function Today() {
   const project = plan?.project ? index?.projects.find((p) => p.id === plan.project) : null;
   const projDone = project ? state.projects[project.id] ?? [] : [];
 
+  const isAdv = (t: Task) => t.type === 'kata' || t.type === 'step';
+  const isDone = (t: Task) => (isAdv(t) ? log.adv.includes(t.id) : log.done.includes(t.id));
+  const paused = (id: string) => !!todayRec?.drafts?.[id];
+  /** Prossima task: prima le obbligatorie non fatte (in ordine, dopo quella aperta), poi le avanzate. */
+  const nextAfter = (cur: Task): Task | null => {
+    if (!plan || !todayRec) return null;
+    const req = plan.required.map((id) => todayRec.tasks[id]).filter(Boolean);
+    const adv = plan.advanced.map((id) => todayRec.tasks[id]).filter(Boolean);
+    const i = req.findIndex((t) => t.id === cur.id);
+    const rotated = i >= 0 ? [...req.slice(i + 1), ...req.slice(0, i)] : req;
+    const ordine = [...rotated.filter((t) => t.id !== cur.id), ...adv.filter((t) => t.id !== cur.id)];
+    return ordine.find((t) => !isDone(t)) ?? null;
+  };
+  const navFor = (t: Task) => {
+    const pos = plan?.required.indexOf(t.id) ?? -1;
+    return {
+      position: pos >= 0 ? `Task ${pos + 1} di ${plan!.required.length} · ${t.minutes} min` : `Al computer · ${t.minutes} min · +40 XP`,
+      progress: plan ? plan.required.map((id) => log.done.includes(id)) : [],
+      next: nextAfter(t),
+      onNext: () => setOpen(nextAfter(t))
+    };
+  };
+
   return (
     <main className="screen">
       <div className="date-row">
@@ -108,7 +131,7 @@ export function Today() {
                   <span className="tile" style={{ background: TASK_COLORS[t.type] }}><TaskGlyph type={t.type} /></span>
                   <span className="grow">
                     <span className="t">{t.title}</span>
-                    <span className="st">{TASK_LABEL[t.type]} · {t.minutes} min{review ? ' · ripasso' : partOf(t.section) ? ` · Parte ${partOf(t.section)}` : ''}</span>
+                    <span className="st">{!isDone && paused(id) && <span className="paused-chip">In pausa</span>}{TASK_LABEL[t.type]} · {t.minutes} min{review ? ' · ripasso' : partOf(t.section) ? ` · Parte ${partOf(t.section)}` : ''}</span>
                   </span>
                   {isDone ? <span className="pop" style={{ display: 'flex' }}><Check /></span> : <Todo />}
                 </button>
@@ -149,7 +172,7 @@ export function Today() {
                   <span className="tile" style={{ background: TASK_COLORS[t.type], fontWeight: 700 }}>{step ?? <TaskGlyph type="kata" />}</span>
                   <span className="grow">
                     <span className="t">{t.title}</span>
-                    <span className="st">{step ? `Passo ${step}` : 'Kata'} · {t.minutes} min · +40 XP</span>
+                    <span className="st">{!isDone && paused(id) && <span className="paused-chip">In pausa</span>}{step ? `Passo ${step}` : 'Kata'} · {t.minutes} min · +40 XP</span>
                   </span>
                   {isDone ? <Check /> : <Chevron />}
                 </button>
@@ -159,7 +182,7 @@ export function Today() {
         </div>
       )}
 
-      {open && <TaskSheet task={open} done={open.type === 'kata' || open.type === 'step' ? log.adv.includes(open.id) : log.done.includes(open.id)} onClose={() => setOpen(null)} />}
+      {open && <TaskSheet key={open.id} task={open} done={isDone(open)} onClose={() => setOpen(null)} nav={navFor(open)} />}
     </main>
   );
 }
