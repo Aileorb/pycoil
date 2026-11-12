@@ -25,6 +25,12 @@ os.environ.setdefault("MPLBACKEND", "agg")
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
 errors: list[str] = []
+ONLY = [x for x in os.environ.get("PYCOIL_ONLY", "").split(",") if x]  # es. PYCOIL_ONLY=05-03-01,kata-eulero
+
+
+def wanted(name: str) -> bool:
+    return not ONLY or any(o in name for o in ONLY)
+
 checked = 0
 
 
@@ -90,6 +96,8 @@ def _why(code: str, tests: str) -> str:
 # ------------------------------------------------------------------ sezioni
 FENCE = re.compile(r"```(\w+)([^\n]*)\n(.*?)```", re.S)
 for md in sorted([*(CONTENT / "sections").glob("*.md"), *(CONTENT / "libraries").glob("*.md"), *(CONTENT / "appendix").glob("*.md")]):
+    if not wanted(md.name):
+        continue
     for i, m in enumerate(FENCE.finditer(md.read_text())):
         lang, flag, code = m.group(1), m.group(2).strip(), m.group(3)
         if lang in ("python", "py") and flag != "norun":
@@ -99,6 +107,8 @@ for md in sorted([*(CONTENT / "sections").glob("*.md"), *(CONTENT / "libraries")
 
 # ------------------------------------------------------------------ esercizi
 for tf in sorted((CONTENT / "tasks").glob("*.json")):
+    if not wanted(tf.name):
+        continue
     for j, t in enumerate(json.loads(tf.read_text())):
         label = f"{tf.stem} #{j + 1} {t['kind']} «{t['title']}»"
         if t["kind"] == "prevedi":
@@ -138,7 +148,7 @@ def run_pytest_file(solution_code: str, test_name: str, test_code: str, files: d
 
 
 # ------------------------------------------------------------------ test di livello
-for j, q in enumerate(json.loads((CONTENT / "quiz.json").read_text())):
+for j, q in enumerate(json.loads((CONTENT / "quiz.json").read_text()) if not ONLY else []):
     def f(q=q):
         _, out = run(q["code"])
         assert out.strip() == q["options"][q["answer"]], f"stampa {out.strip()!r}"
@@ -147,7 +157,7 @@ for j, q in enumerate(json.loads((CONTENT / "quiz.json").read_text())):
 # ------------------------------------------------------------------ kata
 katas_file = CONTENT / "katas.json"
 if katas_file.exists():
-    for k in json.loads(katas_file.read_text()):
+    for k in [k for k in json.loads(katas_file.read_text()) if wanted(k["id"])]:
         def f(k=k):
             tf = k.get("testFile")
             if tf:
@@ -158,7 +168,7 @@ if katas_file.exists():
         check(f"kata {k['id']}", f)
 
 # ------------------------------------------------------------------ progetti
-for pj in sorted((CONTENT / "projects").glob("*/project.json")):
+for pj in [pj for pj in sorted((CONTENT / "projects").glob("*/project.json")) if wanted(pj.parent.name + "/")]:
     p = json.loads(pj.read_text())
     module = p.get("module", "progetto.py")
     acc = ""  # il modulo cresce tappa dopo tappa

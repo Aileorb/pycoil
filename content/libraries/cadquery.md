@@ -17,7 +17,7 @@ cq.exporters.export(flangia, "flangia.step")
 
 > [!nota] CadQuery si installa solo sul computer (ha bisogno del kernel geometrico OpenCascade).
 
-**Nel percorso:** sezione 7.2.4.
+**Nel percorso:** Parte VII, «CAD parametrico con CadQuery».
 
 ```bash
 pip install cadquery

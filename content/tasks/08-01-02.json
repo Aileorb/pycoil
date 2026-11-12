@@ -23,5 +23,18 @@
       "`ws.append([...])` aggiunge una riga; `wb.save(nome)` salva.",
       "`iter_rows(min_row=2, values_only=True)` dà le tuple dei valori senza l'intestazione."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Righe e celle",
+    "code": "from openpyxl import Workbook\nwb = Workbook()\nws = wb.active\nws.append([\"d\", \"A\"])\nws.append([10, 78.5])\nprint(ws.max_row, ws[\"B2\"].value, ws.cell(row=1, column=1).value)",
+    "options": [
+      "2 78.5 d",
+      "1 78.5 d",
+      "2 A 10",
+      "2 78.5 A"
+    ],
+    "explain": "`append` scrive una riga alla volta. Le celle si leggono con la notazione di Excel (`\"B2\"`) o con `cell(row, column)`, numerati **da 1**.",
+    "answer": 0
   }
 ]

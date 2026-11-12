@@ -23,5 +23,18 @@
       "Un `case \"kN\":` per ogni unità.",
       "`case _:` cattura tutto il resto."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Più letterali in un caso",
+    "code": "def fattore(u):\n    match u:\n        case \"N\":\n            return 1\n        case \"kN\" | \"kn\":\n            return 1000\n        case _:\n            return None\n\nprint(fattore(\"kn\"), fattore(\"MN\"))",
+    "options": [
+      "1000 None",
+      "1000 1000",
+      "None None",
+      "1 None"
+    ],
+    "explain": "`|` unisce più pattern nello stesso caso: `\"kn\"` combacia con il secondo. `\"MN\"` non combacia con nessuno e finisce in `case _`.",
+    "answer": 0
   }
 ]

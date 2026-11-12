@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { FavoritesButton } from '../components/Favorites';
 import { Check, Chevron, ChevronDown, Doc, Laptop, Reading, Search, Skipped, Toolbox, Todo } from '../components/icons';
-import { isProjectUnlocked, skippedParts, pathSections } from '../engine/scheduler';
+import { isProjectUnlocked, skippedParts, pathSections, sectionNumber } from '../engine/scheduler';
 import type { ContentIndex } from '../engine/types';
 
 export function PathIndex() {
@@ -75,7 +75,7 @@ function PathBody({ index, read }: { index: ContentIndex; read: Set<string> }) {
               <span style={{ fontSize: 15, color: 'var(--text2)' }}>{total ? Math.round((readCount / total) * 100) : 0}% · livello {state.level}</span>
             </div>
             <div className="bar"><span style={{ width: `${total ? (readCount / total) * 100 : 0}%` }} /></div>
-            {resume && resumeTitle && <a href={`#/percorso/${resume}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', fontSize: 15 }}><span>Riprendi · {resume.replace(/^0/, '').replace(/-0?/g, '.')} {resumeTitle}</span><Chevron color="var(--blue)" /></a>}
+            {resume && resumeTitle && <a href={`#/percorso/${resume}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', fontSize: 15 }}><span>Riprendi · {sectionNumber(index, resume)} {resumeTitle}</span><Chevron color="var(--blue)" /></a>}
           </div>
 
           {index.parts.map((p) => {

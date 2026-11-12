@@ -2,7 +2,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { addDays } from '../src/engine/dates';
-import { activeProject, pathSections, planDay } from '../src/engine/scheduler';
+import { activeProject, pathSections, planDay, sectionNumber } from '../src/engine/scheduler';
 import { completeAdvanced, completeTask, emptyState, isDayComplete, learnSection } from '../src/engine/state';
 import type { AppState, ContentIndex, LevelId } from '../src/engine/types';
 
@@ -28,11 +28,19 @@ describe.skipIf(!index)('contenuti reali', () => {
         expect(allTasks.has(id) || isStep, `task inesistente ${id}`).toBe(true);
       }
       expect(plan.required.some((id) => id.startsWith('impara-'))).toBe(false);
-      // niente esercizi di argomenti lontani: al massimo due sezioni oltre il concetto di oggi
+      // nessun esercizio su argomenti non ancora introdotti: al massimo la sezione di oggi
       const here = plan.intro ? path.indexOf(plan.intro.replace('impara-', '')) : path.length;
       for (const id of plan.required) {
         const sec = idx.tasks.find((t) => t.id === id)!.section;
-        expect(path.indexOf(sec), `${id} troppo avanti (giorno ${i})`).toBeLessThanOrEqual(here + 2);
+        expect(path.indexOf(sec), `${id} troppo avanti (giorno ${i})`).toBeLessThanOrEqual(here);
+      }
+      // kata solo su sezioni già introdotte nei giorni precedenti (o in Parti saltate dal test di livello)
+      const reach = Math.max(-1, ...s.learned.map((x) => path.indexOf(x)));
+      for (const id of plan.advanced) {
+        const k = idx.katas.find((x) => x.id === id);
+        if (!k) continue;
+        const at = path.indexOf(k.section);
+        expect(at, `${id} troppo presto (giorno ${i}, livello ${level})`).toBeLessThanOrEqual(reach);
       }
       if (plan.intro) s = learnSection(s, plan.intro.replace('impara-', ''));
       for (const id of plan.required) s = completeTask(s, day, id, { firstTry: true }).state;
@@ -50,6 +58,26 @@ describe.skipIf(!index)('contenuti reali', () => {
   it('l\'avanzato trova subito un progetto', () => {
     const s: AppState = { ...emptyState(), level: 'avanzato' };
     expect(activeProject(index!, s)?.id).toBe('p1');
+  });
+
+  it('il primo giorno nessuna avanzata per chi parte da zero', () => {
+    const s: AppState = { ...emptyState(), level: 'principiante' };
+    expect(planDay(index!, s, '2026-11-12').advanced).toEqual([]);
+  });
+
+  it('i numeri delle sezioni seguono la posizione nel libro', () => {
+    expect(sectionNumber(index!, '00-01-01')).toBe('0.1.1');
+    expect(sectionNumber(index!, '06-02-01')).toBe('5.3.2'); // pint, spostata nella Parte V
+  });
+
+  it('ogni sezione ha almeno tre esercizi', () => {
+    for (const p of index!.parts)
+      for (const c of p.chapters)
+        for (const sec of c.sections) {
+          if (sec.stub) continue;
+          const n = index!.tasks.filter((t) => t.section === sec.id && t.type !== 'impara').length;
+          expect(n, `esercizi della sezione ${sec.id}`).toBeGreaterThanOrEqual(3);
+        }
   });
 
   it('il principiante non ha progetti finché non studia', () => {

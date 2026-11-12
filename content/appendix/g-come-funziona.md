@@ -7,9 +7,9 @@ sources:
 ---
 ## Ogni giorno
 
-Tre micro-task da circa dieci minuti, pensate per il telefono: **Impara** (una scheda della sezione del giorno), **Prevedi** (indovina l'output di un frammento di codice) e **Scrivi** (completa un esercizio verificato da test). Completarle tutte e tre mantiene viva la **streak**.
+La giornata si apre con l'**introduzione**: la scheda della sezione nuova, da leggere prima di cominciare. Poi tre micro-task da circa dieci minuti in tutto, pensate per il telefono: **Prevedi** (indovina l'output di un frammento di codice) e **Scrivi** (completa un esercizio verificato da test). Ogni sezione ha tre esercizi: di solito due sono sul concetto del giorno e il terzo è un **ripasso** di qualcosa che hai visto qualche giorno prima. Gli esercizi non anticipano mai argomenti che non hai ancora introdotto. Completarle tutte e tre mantiene viva la **streak**.
 
-Le due task **avanzate** sono facoltative e da fare al computer: prima esercizi più lunghi (*kata*), poi, quando hai padronanza di una Parte, le tappe di uno dei nove **progetti**. I loro test pytest si possono eseguire anche nell'app, incollando il file.
+Le due task **avanzate** sono facoltative e da fare al computer: prima esercizi più lunghi (*kata*), poi, quando hai padronanza di una Parte, le tappe di uno dei nove **progetti**. Arrivano solo quando hai visto gli argomenti che servono: il primo kata compare dopo `if`. Si verificano nell'app incollando il file; dalla fine della Parte II li lancerai anche al computer con pytest.
 
 ## Tre tentativi
 

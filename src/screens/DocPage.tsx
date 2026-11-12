@@ -6,6 +6,7 @@ import { Back, Check } from '../components/icons';
 import { loadAppendix, loadLibrary, loadProjectPage, loadSection } from '../engine/content';
 import { queryParam } from '../router';
 import type { SectionDoc } from '../engine/types';
+import { sectionNumber } from '../engine/scheduler';
 
 type Kind = 'percorso' | 'libreria' | 'doc' | 'progetto';
 
@@ -102,7 +103,7 @@ export function DocPage({ kind, id }: { kind: Kind; id: string }) {
   const next = kind === 'percorso' && pos >= 0 && pos < all.length - 1 ? all[pos + 1] : null;
   const part = index?.parts.find((p) => p.id === doc?.part);
   const chapter = part?.chapters.find((c) => c.id === doc?.chapter);
-  const label = kind === 'percorso' ? `${id.replace(/^0/, '').replace(/-0?/g, '.')} ${doc?.title ?? ''}` : doc?.title ?? '';
+  const label = kind === 'percorso' ? `${index ? sectionNumber(index, id) : ''} ${doc?.title ?? ''}`.trim() : doc?.title ?? '';
   const fav = {
     label,
     anchor: `#/${kind}/${id}`,

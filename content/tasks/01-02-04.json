@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Locale contro globale",
+    "code": "x = 10\n\ndef f():\n    x = 5\n    return x\n\nprint(f(), x)",
+    "options": [
+      "5 10",
+      "5 5",
+      "10 10",
+      "10 5"
+    ],
+    "answer": 0,
+    "explain": "Dentro `f` l'assegnamento crea una `x` **locale**: la funzione restituisce 5, mentre la `x` del modulo resta 10."
+  },
+  {
+    "kind": "prevedi",
+    "title": "La variabile del ciclo",
+    "code": "for i in range(3):\n    quadrato = i * i\nprint(i, quadrato)",
+    "options": [
+      "2 4",
+      "3 9",
+      "NameError",
+      "0 0"
+    ],
+    "answer": 0,
+    "explain": "Il ciclo non crea un ambito: dopo il `for` restano i valori dell'ultimo giro, `i = 2` e `quadrato = 4`."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Via la variabile globale",
+    "prompt": "Questa funzione conta i rapporti di utilizzo maggiori di 1 usando una variabile `global`: chiamata due volte sulla stessa lista dà risultati diversi. Riscrivila **senza** `global`, con un contatore locale, così che dia sempre lo stesso risultato.",
+    "starter": "non_verificati = 0\n\ndef conta_non_verificati(utilizzi):\n    global non_verificati\n    for u in utilizzi:\n        if u > 1:\n            non_verificati += 1\n    return non_verificati\n\nprint(conta_non_verificati([0.8, 1.2, 1.05]))\nprint(conta_non_verificati([0.8, 1.2, 1.05]))",
+    "tests": "assert conta_non_verificati([0.8, 1.2, 1.05]) == 2, \"nella lista [0.8, 1.2, 1.05] due valori superano 1\"\nassert conta_non_verificati([0.8, 1.2, 1.05]) == 2, \"chiamata di nuovo deve dare ancora 2: il contatore deve ripartire da zero\"\nassert conta_non_verificati([]) == 0, \"con una lista vuota il risultato è 0\"",
+    "solution": "def conta_non_verificati(utilizzi):\n    n = 0\n    for u in utilizzi:\n        if u > 1:\n            n += 1\n    return n\n\nprint(conta_non_verificati([0.8, 1.2, 1.05]))\nprint(conta_non_verificati([0.8, 1.2, 1.05]))",
+    "hints": [
+      "Crea il contatore **dentro** la funzione, prima del ciclo.",
+      "Togli la riga `global` e la variabile del modulo: non servono più."
+    ]
+  }
+]

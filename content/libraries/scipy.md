@@ -17,7 +17,7 @@ print(quad(lambda x: x**2, 0, 3))
 
 **Da sapere per primo:** `optimize.brentq`, `optimize.minimize`, `integrate.quad`, `integrate.solve_ivp`, `interpolate`, `linalg.eigh`.
 
-**Nel percorso:** Parte IV (radici, integrali, fit, ODE, ottimizzazione, FFT), già usata in Parte III per gli autovalori.
+**Nel percorso:** Parte IV (radici, integrali, fit, ODE, problemi ai limiti, ottimizzazione, FFT) e Parte V (`scipy.stats`); già usata nella Parte III per gli autovalori.
 
 ```bash
 pip install scipy

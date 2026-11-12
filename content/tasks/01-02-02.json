@@ -23,5 +23,18 @@
       "Un `*` nella firma rende per nome tutto quello che segue.",
       "Firma: `(fk, *, gamma_m=1.05)`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "La lista di default condivisa",
+    "code": "def aggiungi(x, lista=[]):\n    lista.append(x)\n    return lista\n\nprint(aggiungi(1), aggiungi(2))",
+    "options": [
+      "[1, 2] [1, 2]",
+      "[1] [2]",
+      "[1] [1, 2]",
+      "[2] [2]"
+    ],
+    "explain": "Il default `[]` viene creato **una volta sola**, quando si definisce la funzione: le due chiamate riempiono la stessa lista, e `print` mostra due volte lo stesso oggetto. Si scrive `lista=None`.",
+    "answer": 0
   }
 ]

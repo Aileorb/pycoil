@@ -23,5 +23,18 @@
       "`df.groupby(\"materiale\").agg(media=(\"Rm\", \"mean\"), std=(\"Rm\", \"std\"))`.",
       "Poi una nuova colonna: `stat[\"Rk\"] = ...`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Filtrare con loc",
+    "code": "import pandas as pd\ndf = pd.DataFrame({\"mat\": [\"S235\", \"S355\", \"S355\"], \"Rm\": [400, 520, 510]})\nprint(df.loc[df[\"Rm\"] > 450, \"mat\"].tolist(), df[\"Rm\"].idxmax())",
+    "options": [
+      "['S355', 'S355'] 1",
+      "['S355'] 1",
+      "['S355', 'S355'] 520",
+      "['S235'] 0"
+    ],
+    "explain": "`loc[condizione, colonna]` filtra le righe e sceglie la colonna. `idxmax` restituisce l'**etichetta** della riga col massimo, non il valore.",
+    "answer": 0
   }
 ]

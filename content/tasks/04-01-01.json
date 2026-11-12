@@ -23,5 +23,18 @@
       "`brentq(f, 1, 1000)`.",
       "Da rad/s a giri/min: moltiplica per 60/(2π)."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Il punto fisso del coseno",
+    "code": "import numpy as np\nfrom scipy.optimize import brentq\nr = brentq(lambda x: np.cos(x) - x, 0, 1)\nprint(round(r, 4))",
+    "options": [
+      "0.7391",
+      "1.0",
+      "0.5",
+      "ValueError"
+    ],
+    "explain": "In 0 la funzione vale 1, in 1 vale cos 1 − 1 < 0: c'è un cambio di segno e `brentq` trova la radice di cos x = x, circa 0,7391.",
+    "answer": 0
   }
 ]

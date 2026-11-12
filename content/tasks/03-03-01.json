@@ -23,5 +23,18 @@
       "`ax.plot(x, y, \"o-\")`.",
       "`ax.set(xlabel=..., ylabel=..., title=...)`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Stile di una linea",
+    "code": "import matplotlib.pyplot as plt\nfig, ax = plt.subplots()\nax.plot([0, 1, 2], [0, 1, 4], \"o--\")\nprint(len(ax.lines), ax.lines[0].get_linestyle(), ax.lines[0].get_marker())",
+    "options": [
+      "1 -- o",
+      "3 -- o",
+      "1 - o",
+      "1 o --"
+    ],
+    "explain": "La stringa di formato `\"o--\"` chiede marcatori tondi `o` e linea tratteggiata `--`. Una sola chiamata a `plot` con una serie crea **una** linea.",
+    "answer": 0
   }
 ]

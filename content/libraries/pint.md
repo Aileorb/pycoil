@@ -15,7 +15,7 @@ print((1 * ureg.bar).to("kPa"))
 
 > [!nota] Nell'app pint si scarica da PyPI la prima volta che lo usi: la prima esecuzione richiede qualche secondo in più.
 
-**Nel percorso:** sezione 6.2.1 e Progetto 6.
+**Nel percorso:** Parte V, «pint: calcoli a prova di unità», e Progetto 6.
 
 ```bash
 pip install pint

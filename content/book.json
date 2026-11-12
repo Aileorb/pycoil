@@ -36,6 +36,20 @@
           ]
         },
         {
+          "id": "00-04",
+          "title": "Riutilizzare e raccogliere",
+          "sections": [
+            {
+              "id": "00-04-01",
+              "title": "Funzioni"
+            },
+            {
+              "id": "00-04-02",
+              "title": "Liste"
+            }
+          ]
+        },
+        {
           "id": "00-03",
           "title": "Decidere e ripetere",
           "sections": [
@@ -54,16 +68,12 @@
           ]
         },
         {
-          "id": "00-04",
-          "title": "Riutilizzare",
+          "id": "00-05",
+          "title": "Quando qualcosa va storto",
           "sections": [
             {
-              "id": "00-04-01",
-              "title": "Funzioni"
-            },
-            {
-              "id": "00-04-02",
-              "title": "Liste"
+              "id": "00-05-01",
+              "title": "Leggere gli errori e fare debug"
             }
           ]
         }
@@ -106,6 +116,10 @@
               "title": "Argomenti di default e keyword"
             },
             {
+              "id": "01-02-04",
+              "title": "Variabili locali e globali"
+            },
+            {
               "id": "01-02-03",
               "title": "Funzioni come valori e lambda"
             }
@@ -138,23 +152,27 @@
       "short": "Idiomatico",
       "chapters": [
         {
-          "id": "02-01",
-          "title": "Il modello dei dati",
-          "sections": [
-            {
-              "id": "02-01-01",
-              "title": "Metodi speciali (dunder)"
-            }
-          ]
-        },
-        {
           "id": "02-02",
-          "title": "Classi e dataclass",
+          "title": "Classi",
           "sections": [
             {
               "id": "02-02-01",
               "title": "Classi, self e metodi"
             },
+            {
+              "id": "02-01-01",
+              "title": "Metodi speciali (dunder)"
+            },
+            {
+              "id": "02-02-04",
+              "title": "Ereditarietà e super()"
+            }
+          ]
+        },
+        {
+          "id": "02-01",
+          "title": "dataclass e ordinamento",
+          "sections": [
             {
               "id": "02-02-02",
               "title": "dataclass per i materiali"
@@ -251,20 +269,6 @@
           ]
         },
         {
-          "id": "03-02",
-          "title": "Algebra lineare",
-          "sections": [
-            {
-              "id": "03-02-01",
-              "title": "Sistemi lineari: una travatura reticolare"
-            },
-            {
-              "id": "03-02-02",
-              "title": "Autovalori: i modi propri"
-            }
-          ]
-        },
-        {
           "id": "03-03",
           "title": "Grafici",
           "sections": [
@@ -279,6 +283,20 @@
             {
               "id": "03-03-03",
               "title": "Subplot e annotazioni"
+            }
+          ]
+        },
+        {
+          "id": "03-02",
+          "title": "Algebra lineare",
+          "sections": [
+            {
+              "id": "03-02-01",
+              "title": "Sistemi lineari: una travatura reticolare"
+            },
+            {
+              "id": "03-02-02",
+              "title": "Autovalori: i modi propri"
             }
           ]
         }
@@ -321,6 +339,10 @@
               "title": "ODE con solve_ivp"
             },
             {
+              "id": "04-02-04",
+              "title": "Problemi ai limiti: differenze finite"
+            },
+            {
               "id": "04-02-02",
               "title": "Ottimizzazione con vincoli"
             },
@@ -335,7 +357,7 @@
     {
       "id": "p5",
       "roman": "V",
-      "title": "Dati sperimentali con pandas",
+      "title": "Dati sperimentali: pandas, statistica, incertezza",
       "short": "Dati sperimentali",
       "sources": [
         "pandas | https://pandas.pydata.org/docs/",
@@ -373,13 +395,31 @@
               "title": "Grafici e tabelle per la relazione"
             }
           ]
+        },
+        {
+          "id": "05-03",
+          "title": "Statistica, unità e incertezza",
+          "sections": [
+            {
+              "id": "05-03-01",
+              "title": "Statistica delle prove con scipy.stats"
+            },
+            {
+              "id": "06-02-01",
+              "title": "pint: calcoli a prova di unità"
+            },
+            {
+              "id": "06-02-02",
+              "title": "Propagazione dell'incertezza"
+            }
+          ]
         }
       ]
     },
     {
       "id": "p6",
       "roman": "VI",
-      "title": "Simbolico, unità e incertezza",
+      "title": "Calcolo simbolico con SymPy",
       "short": "Simbolico",
       "sources": [
         "SymPy | https://docs.sympy.org/",
@@ -402,20 +442,6 @@
             {
               "id": "06-01-03",
               "title": "Equazioni del moto con Lagrange"
-            }
-          ]
-        },
-        {
-          "id": "06-02",
-          "title": "Grandezze fisiche",
-          "sections": [
-            {
-              "id": "06-02-01",
-              "title": "pint: calcoli a prova di unità"
-            },
-            {
-              "id": "06-02-02",
-              "title": "Propagazione dell'incertezza"
             }
           ]
         }

@@ -23,5 +23,18 @@
       "`fig, (a1, a2) = plt.subplots(1, 2)`.",
       "`a1.annotate(testo, (x, y))`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "La griglia degli assi",
+    "code": "import matplotlib.pyplot as plt\nfig, axs = plt.subplots(2, 3)\nprint(axs.shape, axs[1, 2] is axs.flat[5])",
+    "options": [
+      "(2, 3) True",
+      "(3, 2) True",
+      "(6,) True",
+      "(2, 3) False"
+    ],
+    "explain": "`subplots(2, 3)` restituisce un array 2×3 di assi. `axs.flat` li scorre riga per riga: l'ultimo, il sesto, è `axs[1, 2]`.",
+    "answer": 0
   }
 ]

@@ -23,5 +23,18 @@
       "Ai 5 mm superiori: `5 * math.ceil(x / 5)`.",
       "La famiglia è una comprehension."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Massa di un perno",
+    "code": "V = 3.1416 * 10**2 / 4 * 50     # mm³, perno Ø10 × 50\nm = V * 7.85e-6                  # kg, acciaio 7850 kg/m³\nprint(round(m, 3))",
+    "options": [
+      "0.031",
+      "30.8",
+      "0.123",
+      "3.083"
+    ],
+    "explain": "V ≈ 3927 mm³; la densità dell'acciaio è 7,85·10⁻⁶ kg/mm³. Attenzione alle unità: è il controllo da fare sulla massa che dà il modello CAD.",
+    "answer": 0
   }
 ]

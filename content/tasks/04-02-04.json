@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "La derivata seconda di una parabola",
+    "code": "import numpy as np\nx = np.linspace(0, 1, 5)\ny = x**2\nh = x[1] - x[0]\nd2 = (y[:-2] - 2*y[1:-1] + y[2:]) / h**2\nprint(d2.round(6))",
+    "options": [
+      "[2. 2. 2.]",
+      "[0. 2. 4.]",
+      "[2. 2. 2. 2. 2.]",
+      "[1. 1. 1.]"
+    ],
+    "answer": 0,
+    "explain": "La differenza centrata è esatta per i polinomi di secondo grado: dà 2 = (x²)'' in ognuno dei **3 punti interni** (gli estremi non hanno un vicino da entrambi i lati)."
+  },
+  {
+    "kind": "prevedi",
+    "title": "La matrice tridiagonale",
+    "code": "import numpy as np\nn = 4\nA = np.diag(-2*np.ones(n)) + np.diag(np.ones(n-1), 1) + np.diag(np.ones(n-1), -1)\nprint(A[1])",
+    "options": [
+      "[ 1. -2.  1.  0.]",
+      "[-2.  1.  0.  0.]",
+      "[ 0.  1. -2.  1.]",
+      "[ 1.  1.  1.  0.]"
+    ],
+    "answer": 0,
+    "explain": "La riga 1 è l'equazione del secondo punto: coefficiente −2 su sé stesso e 1 sui due vicini, gli indici 0 e 2."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Parete con generazione di calore",
+    "prompt": "Risolvi con le differenze finite `−k T'' = q` su una parete di spessore `L`, con `T(0) = T(L) = T0`, usando `n = 49` punti interni. Costruisci la matrice tridiagonale `A` e il termine noto `b` (ricorda le condizioni agli estremi), risolvi e metti in `T_max` la temperatura massima.",
+    "starter": "import numpy as np\nk, q, L, T0 = 0.8, 5.0e4, 0.2, 15.0   # W/(m·K), W/m³, m, °C\nn = 49\nh = L / (n + 1)\nA = ...\nb = ...\nT = ...\nT_max = ...\nprint(T_max)",
+    "tests": "esatta = 15.0 + 5.0e4 * 0.2**2 / (8 * 0.8)\nassert abs(T_max - esatta) < 1e-6, f\"T max attesa {esatta:.3f} °C (soluzione esatta: parabola), ottenuta {T_max}\"\nassert len(T) == 49, \"T deve contenere i 49 punti interni\"",
+    "solution": "import numpy as np\nk, q, L, T0 = 0.8, 5.0e4, 0.2, 15.0   # W/(m·K), W/m³, m, °C\nn = 49\nh = L / (n + 1)\nA = (np.diag(-2 * np.ones(n)) + np.diag(np.ones(n - 1), 1) + np.diag(np.ones(n - 1), -1)) / h**2\nb = np.full(n, -q / k)\nb[0] -= T0 / h**2\nb[-1] -= T0 / h**2\nT = np.linalg.solve(A, b)\nT_max = T.max()\nprint(T_max)",
+    "hints": [
+      "`A` come nella scheda: −2 sulla diagonale, 1 sopra e sotto, tutto diviso per h². Il termine noto vale −q/k.",
+      "Le temperature note agli estremi passano a destra: togli `T0 / h**2` al primo e all'ultimo elemento di `b`."
+    ]
+  }
+]

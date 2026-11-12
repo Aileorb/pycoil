@@ -27,7 +27,7 @@ u = fem.solve(*fem.condense(K, f, D=m.boundary_nodes()))
 print(u.max())
 ```
 
-**Nel percorso:** sezione 7.2.3.
+**Nel percorso:** Parte VII, «FEM 2D: piastra forata con scikit-fem».
 
 ```bash
 pip install scikit-fem

@@ -23,5 +23,18 @@
       "Salva `b` e `h` su `self` in `__init__`.",
       "Ogni metodo riceve `self` come primo parametro."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Attributo di classe e di istanza",
+    "code": "class Bullone:\n    classe = \"8.8\"\n    def __init__(self, d):\n        self.d = d\n\na = Bullone(10)\nb = Bullone(12)\nb.classe = \"10.9\"\nprint(a.classe, b.classe)",
+    "options": [
+      "8.8 10.9",
+      "10.9 10.9",
+      "8.8 8.8",
+      "AttributeError"
+    ],
+    "explain": "`classe` è un attributo **di classe**, condiviso. `b.classe = ...` crea un attributo **solo su `b`** che nasconde quello della classe; `a` continua a leggere quello comune.",
+    "answer": 0
   }
 ]

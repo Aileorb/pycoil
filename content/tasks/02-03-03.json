@@ -23,5 +23,18 @@
       "`case [\"LOAD\", t, F]:` combacia solo con tre parole.",
       "Una tupla di un elemento si scrive `(\"pause\",)` con la virgola."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Righe di lunghezza diversa",
+    "code": "def leggi(riga):\n    match riga.split():\n        case [\"F\", valore]:\n            return float(valore)\n        case [\"F\", valore, \"kN\"]:\n            return float(valore) * 1000\n        case _:\n            return None\n\nprint(leggi(\"F 12\"), leggi(\"F 1.5 kN\"), leggi(\"T 20\"))",
+    "options": [
+      "12.0 1500.0 None",
+      "12.0 1.5 None",
+      "12 1500 None",
+      "12.0 None None"
+    ],
+    "explain": "Un pattern di sequenza combacia solo con la **lunghezza giusta**: due parole vanno nel primo caso, tre con `\"kN\"` nel secondo. `\"T 20\"` non comincia con `\"F\"`.",
+    "answer": 0
   }
 ]

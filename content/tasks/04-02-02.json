@@ -23,5 +23,18 @@
       "Ogni vincolo si scrive come `limite − valore ≥ 0`.",
       "Tre vincoli: tensione, spessore minimo, snellezza della parete."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Minimo di una parabola",
+    "code": "from scipy.optimize import minimize_scalar\nr = minimize_scalar(lambda x: (x - 3)**2 + 1)\nprint(round(r.x, 4), round(r.fun, 4))",
+    "options": [
+      "3.0 1.0",
+      "1.0 3.0",
+      "3.0 0.0",
+      "0.0 10.0"
+    ],
+    "explain": "`r.x` è **dove** sta il minimo, `r.fun` il **valore** della funzione lì: x = 3, f = 1.",
+    "answer": 0
   }
 ]

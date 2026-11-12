@@ -23,5 +23,18 @@
       "Sulla diagonale la somma delle rigidezze collegate al nodo.",
       "Fuori diagonale −k della molla che collega i due nodi."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Risolvere e controllare",
+    "code": "import numpy as np\nA = np.array([[2.0, 1.0], [1.0, 3.0]])\nb = np.array([3.0, 5.0])\nx = np.linalg.solve(A, b)\nprint(x, np.allclose(A @ x, b))",
+    "options": [
+      "[0.8 1.4] True",
+      "[1.4 0.8] True",
+      "[1.5 1.67] True",
+      "[0.8 1.4] False"
+    ],
+    "explain": "Da 2x + y = 3 e x + 3y = 5 si ottiene x = 0,8 e y = 1,4. `np.allclose(A @ x, b)` è il controllo da fare sempre: il residuo deve essere nullo.",
+    "answer": 0
   }
 ]

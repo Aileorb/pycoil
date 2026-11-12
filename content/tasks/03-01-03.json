@@ -23,5 +23,17 @@
       "Combina le condizioni con `&` e le parentesi.",
       "`np.mean(...)` fa la media."
     ]
+  },
+  {
+    "kind": "scrivi",
+    "title": "Quante tensioni oltre lo snervamento",
+    "prompt": "Con le maschere booleane, metti in `n_oltre` quante tensioni superano `fy` e in `media_ok` la media di quelle che **non** lo superano.",
+    "starter": "import numpy as np\nsigma = np.array([180, 250, 210, 300, 120, 236])   # MPa\nfy = 235\nn_oltre = ...\nmedia_ok = ...\nprint(n_oltre, media_ok)",
+    "tests": "assert int(n_oltre) == 3, f\"tre valori superano 235 MPa, ottenuto {n_oltre}\"\nassert abs(media_ok - 170.0) < 1e-9, f\"la media di 180, 210, 120 è 170, ottenuta {media_ok}\"",
+    "solution": "import numpy as np\nsigma = np.array([180, 250, 210, 300, 120, 236])   # MPa\nfy = 235\nn_oltre = (sigma > fy).sum()\nmedia_ok = sigma[sigma <= fy].mean()\nprint(n_oltre, media_ok)",
+    "hints": [
+      "`sigma > fy` è un array di True/False: `.sum()` conta i True.",
+      "`sigma[sigma <= fy]` tiene solo i valori che rispettano la condizione."
+    ]
   }
 ]

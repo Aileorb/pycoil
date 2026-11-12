@@ -23,5 +23,18 @@
       "`for i in range(1, passi + 1):`.",
       "Dentro il ciclo: `yield F_max * i / passi`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "next e poi sum",
+    "code": "def quadrati(n):\n    for i in range(n):\n        yield i * i\n\ng = quadrati(4)\nprint(next(g), next(g), sum(g))",
+    "options": [
+      "0 1 13",
+      "0 1 14",
+      "0 0 14",
+      "1 4 9"
+    ],
+    "explain": "I primi due `next` consumano 0 e 1; `sum` somma solo quello che **resta**: 4 + 9 = 13.",
+    "answer": 0
   }
 ]

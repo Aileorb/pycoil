@@ -23,5 +23,18 @@
       "`def __add__(self, altra): return Forza(...)`.",
       "`math.hypot(x, y)` è √(x² + y²)."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "== senza __eq__",
+    "code": "class Punto:\n    def __init__(self, x):\n        self.x = x\n\nprint(Punto(1) == Punto(1))",
+    "options": [
+      "False",
+      "True",
+      "TypeError",
+      "None"
+    ],
+    "explain": "Senza `__eq__`, `==` confronta l'**identità**: sono due oggetti distinti, quindi `False` anche se gli attributi coincidono. Le dataclass scrivono `__eq__` per te.",
+    "answer": 0
   }
 ]

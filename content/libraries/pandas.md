@@ -15,7 +15,7 @@ print(df.groupby("materiale")["Rm"].agg(["mean", "std"]).round(1))
 
 **Da sapere per primo:** `read_csv(sep=";", decimal=",")`, `df["colonna"]`, `df[df.x > 0]`, `groupby`, `describe`, `to_excel`.
 
-**Nel percorso:** Parte V, sezioni 5.1.1–5.2.2.
+**Nel percorso:** Parte V, dai capitoli DataFrame e «Dalla tabella al report» alla statistica delle prove.
 
 ```bash
 pip install pandas

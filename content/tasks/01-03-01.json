@@ -23,5 +23,18 @@
       "`csv.DictReader(f, delimiter=\";\")`.",
       "Converti con `float(r[\"forza_N\"])` prima di confrontare."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Pezzi di un percorso",
+    "code": "from pathlib import Path\np = Path(\"prove\") / \"trazione_01.csv\"\nprint(p.name, p.suffix, p.stem)",
+    "options": [
+      "trazione_01.csv .csv trazione_01",
+      "prove/trazione_01.csv csv trazione_01",
+      "trazione_01.csv csv trazione",
+      "trazione_01 .csv trazione_01.csv"
+    ],
+    "explain": "`/` unisce i pezzi del percorso. `name` è il nome del file, `suffix` l'estensione con il punto, `stem` il nome senza estensione.",
+    "answer": 0
   }
 ]

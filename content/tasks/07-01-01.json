@@ -23,5 +23,18 @@
       "Stato 1: liquido saturo (`Q = 0`); 2: stessa entropia a pressione di caldaia.",
       "Rendimento = (lavoro turbina − lavoro pompa) / calore in caldaia."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "L'acqua bolle a 100 °C",
+    "code": "from CoolProp.CoolProp import PropsSI\nT = PropsSI(\"T\", \"P\", 101325, \"Q\", 0, \"Water\")\nprint(round(T - 273.15, 1))",
+    "options": [
+      "100.0",
+      "373.1",
+      "99.6",
+      "0.0"
+    ],
+    "explain": "CoolProp lavora in unità SI: kelvin e pascal. A 101 325 Pa il liquido saturo (Q = 0) è a 373,12 K, cioè circa 100,0 °C.",
+    "answer": 0
   }
 ]

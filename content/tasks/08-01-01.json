@@ -23,5 +23,18 @@
       "`p.add_argument(\"lunghezze\", type=float, nargs=\"+\")`.",
       "`choices=[\"m\", \"cm\"]` rifiuta i valori non previsti (argparse esce con `SystemExit`)."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "type=float in argparse",
+    "code": "import argparse\np = argparse.ArgumentParser()\np.add_argument(\"file\")\np.add_argument(\"--soglia\", type=float, default=1.0)\na = p.parse_args([\"prova.csv\", \"--soglia\", \"0.8\"])\nprint(a.file, a.soglia * 2)",
+    "options": [
+      "prova.csv 1.6",
+      "prova.csv 0.80.8",
+      "prova.csv 2.0",
+      "file 1.6"
+    ],
+    "explain": "Gli argomenti arrivano come testo: `type=float` li converte. Senza, `a.soglia * 2` darebbe la stringa ripetuta `\"0.80.8\"`.",
+    "answer": 0
   }
 ]

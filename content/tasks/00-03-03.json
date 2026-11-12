@@ -23,5 +23,18 @@
       "La condizione del `while` è `abs(x * x - a) > 1e-10`.",
       "Dentro il ciclo aggiorna `x` e incrementa `n`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Dimezzare fino a 1",
+    "code": "x = 100\nn = 0\nwhile x > 1:\n    x = x / 2\n    n += 1\nprint(n)",
+    "options": [
+      "7",
+      "6",
+      "50",
+      "8"
+    ],
+    "explain": "100 → 50 → 25 → 12,5 → 6,25 → 3,125 → 1,5625 → 0,78: dopo 7 dimezzamenti `x` scende sotto 1 e il ciclo si ferma.",
+    "answer": 0
   }
 ]

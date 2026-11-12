@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Popolazione o campione",
+    "code": "import numpy as np\nimport pandas as pd\nx = [2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]\nprint(np.std(x), round(pd.Series(x).std(), 3))",
+    "options": [
+      "2.0 2.138",
+      "2.0 2.0",
+      "2.138 2.138",
+      "2.138 2.0"
+    ],
+    "answer": 0,
+    "explain": "NumPy divide per `n` (deviazione della popolazione), pandas per `n − 1` (campione): con 8 valori la differenza è già visibile."
+  },
+  {
+    "kind": "prevedi",
+    "title": "La vita B10",
+    "code": "import math\nbeta, eta = 1.5, 1000.0   # ore\nB10 = eta * (-math.log(0.9)) ** (1 / beta)\nprint(round(B10))",
+    "options": [
+      "223",
+      "900",
+      "100",
+      "105"
+    ],
+    "answer": 0,
+    "explain": "La B10 è il tempo entro cui si guasta il 10% dei pezzi: η·(−ln 0,9)^(1/β). Con β = 1,5 vale circa 223 h, molto meno di 0,9·η."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Intervallo di confidenza di un diametro",
+    "prompt": "Hai misurato 10 alberi. Calcola media `m`, deviazione standard campionaria `s` e l'intervallo di confidenza al 95% della media `(lo, hi)` con `stats.t.interval`.",
+    "starter": "import numpy as np\nfrom scipy import stats\nd = np.array([24.98, 25.02, 25.01, 24.97, 25.00, 25.03, 24.99, 25.01, 24.98, 25.02])   # mm\nm = ...\ns = ...\nlo, hi = ...\nprint(m, s, lo, hi)",
+    "tests": "import numpy as np\nfrom scipy import stats\nassert abs(m - d.mean()) < 1e-12, \"m è la media\"\nassert abs(s - d.std(ddof=1)) < 1e-12, \"s è la deviazione campionaria: ddof=1\"\nlo_ok, hi_ok = stats.t.interval(0.95, df=9, loc=d.mean(), scale=d.std(ddof=1) / np.sqrt(10))\nassert abs(lo - lo_ok) < 1e-9 and abs(hi - hi_ok) < 1e-9, f\"intervallo atteso ({lo_ok:.4f}, {hi_ok:.4f}): df = n − 1 e scale = s/√n\"",
+    "solution": "import numpy as np\nfrom scipy import stats\nd = np.array([24.98, 25.02, 25.01, 24.97, 25.00, 25.03, 24.99, 25.01, 24.98, 25.02])   # mm\nm = d.mean()\ns = d.std(ddof=1)\nlo, hi = stats.t.interval(0.95, df=len(d) - 1, loc=m, scale=s / np.sqrt(len(d)))\nprint(m, s, lo, hi)",
+    "hints": [
+      "Per il campione serve `d.std(ddof=1)`.",
+      "`stats.t.interval(0.95, df=n - 1, loc=m, scale=s / np.sqrt(n))`."
+    ]
+  }
+]

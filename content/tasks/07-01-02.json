@@ -23,5 +23,18 @@
       "Usa `np.cos`, `np.sin`, `np.sqrt` su tutto l'array.",
       "La corsa di un manovellismo centrato vale 2r."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Un vettore come numero complesso",
+    "code": "import numpy as np\nr = 2 * np.exp(1j * np.pi / 2)\nprint(round(r.real, 6), round(r.imag, 6))",
+    "options": [
+      "0.0 2.0",
+      "2.0 0.0",
+      "1.414 1.414",
+      "0.0 1.0"
+    ],
+    "explain": "`r e^(iθ)` è un vettore lungo r con angolo θ: a 90° punta tutto verso y. Parte reale = componente x, parte immaginaria = componente y.",
+    "answer": 0
   }
 ]

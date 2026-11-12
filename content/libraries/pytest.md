@@ -21,4 +21,4 @@ pytest -q
 
 **Da sapere per primo:** `assert`, `pytest.approx` per i float, `pytest.raises` per gli errori attesi.
 
-**Nel percorso:** sezione 2.7.1 e tutti i progetti.
+**Nel percorso:** Parte II, «Ambienti virtuali, Jupyter e pytest», e tutti i progetti. Prima di allora i kata si verificano direttamente nell'app con gli stessi test.

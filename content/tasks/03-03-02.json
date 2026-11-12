@@ -23,5 +23,18 @@
       "RB dall'equilibrio dei momenti in A, poi RA = F1 + F2 − RB.",
       "Trucco: `(x >= a1)` è un array di 0 e 1 da moltiplicare per F1."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Il salto del taglio",
+    "code": "import numpy as np\nL, F, a = 4.0, 10.0, 1.0      # m, kN, m\nRA = F * (L - a) / L\nx = np.array([0.5, 2.0, 3.5])\nT = np.where(x < a, RA, RA - F)\nprint(T)",
+    "options": [
+      "[ 7.5 -2.5 -2.5]",
+      "[ 7.5  7.5 -2.5]",
+      "[2.5 2.5 7.5]",
+      "[ 7.5 -7.5 -7.5]"
+    ],
+    "explain": "Prima del carico il taglio vale RA = 7,5 kN; dopo il carico concentrato salta di −F e vale −2,5 kN, cioè −RB.",
+    "answer": 0
   }
 ]

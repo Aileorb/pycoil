@@ -23,5 +23,18 @@
       "`Lag = T - V`.",
       "`sp.diff(Lag.diff(th.diff(t)), t) - Lag.diff(th)`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "∂T/∂ẋ",
+    "code": "import sympy as sp\nt = sp.symbols(\"t\")\nx = sp.Function(\"x\")(t)\nT = sp.Rational(1, 2) * 3 * x.diff(t)**2\nprint(sp.diff(T, x.diff(t)))",
+    "options": [
+      "3*Derivative(x(t), t)",
+      "3*x(t)",
+      "3*Derivative(x(t), t)**2/2",
+      "Derivative(x(t), t)"
+    ],
+    "explain": "Con T = ½ m ẋ² e m = 3, la derivata rispetto alla velocità è la quantità di moto m ẋ: il primo termine dell'equazione di Lagrange.",
+    "answer": 0
   }
 ]

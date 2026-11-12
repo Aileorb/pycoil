@@ -15,7 +15,7 @@ for nome, fy in [("S235", 235), ("S355", 355)]:
 wb.save("verifiche.xlsx")
 ```
 
-**Nel percorso:** sezione 8.1.2 e Progetto 9.
+**Nel percorso:** Parte VIII, «Excel con openpyxl», e Progetto 9.
 
 ```bash
 pip install openpyxl

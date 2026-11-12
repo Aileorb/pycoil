@@ -23,5 +23,18 @@
       "σm = (σmax + σmin)/2, σa = (σmax − σmin)/2.",
       "Con σm = 0 il risultato si riduce a Se/σa."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Sicurezza di Goodman",
+    "code": "sa, sm = 120, 200        # MPa, alternata e media\nSe, Su = 250, 600        # MPa\nn = 1 / (sa / Se + sm / Su)\nprint(round(n, 2))",
+    "options": [
+      "1.23",
+      "2.08",
+      "0.81",
+      "3.0"
+    ],
+    "explain": "Goodman: 1/n = σa/Se + σm/Su = 0,48 + 0,333 = 0,813, quindi n ≈ 1,23.",
+    "answer": 0
   }
 ]

@@ -30,6 +30,16 @@ export function pathSections(index: ContentIndex, level: LevelId | null): string
   return out;
 }
 
+/** Numero «Parte.capitolo.sezione» dalla posizione nel libro (non dall'ID, che resta stabile se si riordina). */
+export function sectionNumber(index: ContentIndex, sectionId: string): string {
+  for (const [pi, p] of index.parts.entries())
+    for (const [ci, c] of p.chapters.entries()) {
+      const si = c.sections.findIndex((s) => s.id === sectionId);
+      if (si >= 0) return `${pi}.${ci + 1}.${si + 1}`;
+    }
+  return '';
+}
+
 export function sectionPart(index: ContentIndex, sectionId: string): string | null {
   for (const p of index.parts) for (const c of p.chapters) if (c.sections.some((s) => s.id === sectionId)) return p.id;
   return null;
@@ -120,8 +130,20 @@ export function planDay(index: ContentIndex, state: AppState, day: string): DayP
     advanced = project.steps.filter((st) => !doneSteps.has(st.id)).slice(0, 2).map((st) => `${project.id}-${st.id}`);
   }
   if (advanced.length < 2) {
-    const katas = index.katas.filter((k) => !advDone.has(k.id) && (learned.has(k.section) || path.indexOf(k.section) <= path.indexOf(lastLearned ?? '')));
-    const pool = katas.length ? katas : index.katas.filter((k) => !advDone.has(k.id));
+    // Solo kata su argomenti già visti: sezione introdotta, oppure in una Parte saltata dal test di livello,
+    // oppure lungo il percorso non oltre l'ultima sezione introdotta. Se nessuno è adatto, niente avanzate.
+    const skipped = skippedParts(index, state.level);
+    const reach = lastLearned ? path.indexOf(lastLearned) : -1;
+    const known = (sec: string) => {
+      if (learned.has(sec)) return true;
+      const i = path.indexOf(sec);
+      if (i >= 0) return i <= reach;
+      const part = sectionPart(index, sec);
+      return !!part && skipped.has(part);
+    };
+    const pool = index.katas
+      .filter((k) => !advDone.has(k.id) && known(k.section))
+      .sort((a, b) => path.indexOf(a.section) - path.indexOf(b.section));
     for (const k of pool) {
       if (advanced.length >= 2) break;
       advanced.push(k.id);

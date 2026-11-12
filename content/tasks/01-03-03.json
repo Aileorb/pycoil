@@ -23,5 +23,18 @@
       "Dentro la stringa scrivi `return n / 1000`.",
       "Se hai già importato una versione vecchia, `importlib.reload(unita)` la ricarica."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Due modi di importare",
+    "code": "import math as m\nfrom math import sqrt\nprint(m.floor(2.7), sqrt(16))",
+    "options": [
+      "2 4.0",
+      "3 4.0",
+      "2 4",
+      "NameError"
+    ],
+    "explain": "`import math as m` dà al modulo il nome corto `m`; `from math import sqrt` porta direttamente il nome `sqrt`. `floor` arrotonda per difetto, `sqrt` restituisce sempre un float.",
+    "answer": 0
   }
 ]

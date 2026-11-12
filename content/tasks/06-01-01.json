@@ -23,5 +23,18 @@
       "`sp.solve(sp.diff(M, x), x)` restituisce una lista di radici.",
       "Con `positive=True` resta solo la radice positiva."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Le radici di un'equazione",
+    "code": "import sympy as sp\nx = sp.symbols(\"x\")\nprint(sp.solve(x**2 - 4, x))",
+    "options": [
+      "[-2, 2]",
+      "[2]",
+      "[-2.0, 2.0]",
+      "x = ±2"
+    ],
+    "explain": "`solve` restituisce la lista di **tutte** le soluzioni esatte, come numeri interi simbolici. Con `positive=True` sul simbolo resterebbe solo 2.",
+    "answer": 0
   }
 ]

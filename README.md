@@ -12,9 +12,9 @@ PyCoil è una web app installabile (PWA) che insegna Python a chi studia ingegne
 
 | Tab | Contenuto |
 |---|---|
-| **Oggi** | Streak con il pitone che festeggia sempre di più (dorato dai 30 giorni, scheletro se la perdi), frase di sfida, le 3 task del giorno (*Impara*, *Prevedi*, *Scrivi*) e le 2 avanzate (kata o tappe di progetto). Tre tentativi per esercizio prima che compaia la soluzione. |
+| **Oggi** | Streak con il pitone che festeggia sempre di più (dorato dai 30 giorni, scheletro se la perdi), frase di sfida, l'introduzione al concetto del giorno, le 3 task (*Prevedi* e *Scrivi*, sul concetto nuovo o di ripasso) e le 2 avanzate (kata o tappe di progetto), che arrivano solo sugli argomenti già visti. Tre tentativi per esercizio prima che compaia la soluzione. |
 | **Percorso** | Il libro: Parti → capitoli → sezioni, spunta verde quando arrivi in fondo, precedente/successiva, ricerca, preferiti con la stella, progetti, librerie da sapere, appendice. |
-| **Statistiche** | Lo stadio di crescita (uovo → uovo crepato → occhio nel buio → piccolo → pitone → pitone beato sul ramo) con un cielo che schiarisce verso l'alba, livello e XP, capacità raggiunte, grafico settimanale con il pulcino che vola nei giorni con le avanzate. |
+| **Statistiche** | Lo stadio di crescita (uovo → uovo crepato → occhio nel buio → piccolo → pitone → pitone beato sul ramo) con un cielo che schiarisce verso l'alba, livello e XP, capacità raggiunte, grafico settimanale. |
 
 Alla prima apertura un test di livello sceglie il punto di partenza: Principiante → Parte 0, Base → Parte I, Intermedio → Parte II, Avanzato → Parte III.
 
@@ -45,6 +45,7 @@ content/            sorgenti didattici (Markdown + JSON) → public/content/*.js
 scripts/
   build-content.mjs converte e valida i contenuti (Markdown → HTML evidenziato)
   verify_content.py ESEGUE con CPython tutti gli esempi, le soluzioni e i test
+  check_order.py    controlla che nulla usi costrutti spiegati più avanti
   check-budget.mjs  controlla il peso del bundle e che i contenuti non finiscano in cache
   build-icons.mjs   genera le icone dall'SVG dell'uroboro
 src/
@@ -107,17 +108,17 @@ Gli ID si generano da soli (`prevedi-03-01-01-a`, …). `verify_content.py` cont
 
 | Parte | Argomento | Sezioni |
 |---|---|---|
-| 0 | Primi passi | 9 |
-| I | Python solido | 9 |
-| II | Python idiomatico: dunder, dataclass, `match`, generatori, decoratori, type hint, strumenti | 11 |
+| 0 | Primi passi: variabili, funzioni, liste, if, cicli, leggere gli errori | 10 |
+| I | Python solido: collezioni, comprehension, ambito delle variabili, file, eccezioni, moduli | 10 |
+| II | Python idiomatico: classi, dunder, ereditarietà, dataclass, `match`, generatori, decoratori, type hint, strumenti | 12 |
 | III | NumPy e Matplotlib | 8 |
-| IV | Metodi numerici con SciPy: radici, integrali, fit, ODE, ottimizzazione, FFT | 6 |
-| V | Dati sperimentali con pandas | 5 |
-| VI | SymPy, Lagrange, pint, incertezza | 5 |
+| IV | Metodi numerici con SciPy: radici, integrali, fit, ODE, problemi ai limiti, ottimizzazione, FFT | 7 |
+| V | Dati sperimentali: pandas, statistica delle prove, unità con pint, incertezza | 8 |
+| VI | Calcolo simbolico con SymPy e Lagrange | 3 |
 | VII | CoolProp, meccanismi, fatica, FEM 1D/2D, CadQuery | 7 |
 | VIII | Script, Excel, Arduino, prestazioni, modelli predittivi | 5 |
 
-Più 131 esercizi *Prevedi*/*Scrivi*, 22 kata e 9 progetti (formulario delle sezioni, catalogo materiali, trave appoggiata, vibrazioni di un albero, prova di trazione, collegamento bullonato, ciclo Rankine, FEM 2D con elementi CST, collaudo automatico), tutti verificati eseguendo il codice.
+Più 210 esercizi *Prevedi*/*Scrivi* (tre per sezione), 22 kata e 9 progetti (formulario delle sezioni, catalogo materiali, trave appoggiata, vibrazioni di un albero, prova di trazione, collegamento bullonato, ciclo Rankine, FEM 2D con elementi CST, collaudo automatico), tutti verificati eseguendo il codice. Un'analisi automatica controlla anche che nessun esempio o esercizio usi costrutti spiegati più avanti.
 
 Nell'app, `pint`, `openpyxl` e `scikit-fem` (non inclusi in Pyodide) si installano da PyPI con micropip al primo uso.
 

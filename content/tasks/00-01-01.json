@@ -23,5 +23,18 @@
       "L'area del cerchio è π·d²/4.",
       "La potenza in Python si scrive `**`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "print con più valori",
+    "code": "print(\"Forza:\", 3 * 4, \"kN\")",
+    "options": [
+      "Forza: 12 kN",
+      "Forza:12kN",
+      "Forza: 3 * 4 kN",
+      "\"Forza:\" 12 \"kN\""
+    ],
+    "explain": "`print` scrive i valori separati da **uno spazio** e calcola prima le espressioni: `3 * 4` diventa 12. Le virgolette delimitano il testo ma non vengono stampate.",
+    "answer": 0
   }
 ]

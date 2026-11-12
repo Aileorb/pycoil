@@ -23,5 +23,18 @@
       "Prima filtra, poi `min(..., key=lambda p: p[1])`.",
       "`min([])` dà errore: gestisci la lista vuota."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Il più leggero",
+    "code": "profili = [(\"IPE 200\", 22.4), (\"IPE 160\", 15.8), (\"HEA 140\", 24.7)]   # kg/m\nprint(min(profili, key=lambda p: p[1])[0])",
+    "options": [
+      "IPE 160",
+      "HEA 140",
+      "IPE 200",
+      "15.8"
+    ],
+    "explain": "`key` dice **su cosa** confrontare: il secondo elemento, la massa al metro. `min` restituisce la tupla intera, `[0]` ne prende il nome.",
+    "answer": 0
   }
 ]

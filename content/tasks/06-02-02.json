@@ -23,5 +23,18 @@
       "Con `ufloat` scrivi la formula normalmente: `F / (A * eps)`.",
       "`.n` è il valore nominale, `.s` l'incertezza."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Correlazione perfetta",
+    "code": "from uncertainties import ufloat\nx = ufloat(10.0, 0.3)\nprint(x - x, 2 * x)",
+    "options": [
+      "0.0+/-0 20.0+/-0.6",
+      "0.0+/-0.4 20.0+/-0.4",
+      "0.0+/-0.6 20.0+/-0.6",
+      "0.0+/-0 20.0+/-0.3"
+    ],
+    "explain": "`uncertainties` ricorda che è la **stessa** grandezza: x − x non ha incertezza, e 2x ha incertezza doppia. Sommando in quadratura due misure indipendenti avresti 0,42.",
+    "answer": 0
   }
 ]

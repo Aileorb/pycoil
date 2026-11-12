@@ -23,5 +23,18 @@
       "`s.rolling(5, center=True).mean()`.",
       "`.max()` di pandas ignora già i NaN."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "I primi valori della media mobile",
+    "code": "import pandas as pd\ns = pd.Series([1, 2, 3, 4, 5])\nprint(s.rolling(3).mean().tolist())",
+    "options": [
+      "[nan, nan, 2.0, 3.0, 4.0]",
+      "[2.0, 3.0, 4.0]",
+      "[1.0, 1.5, 2.0, 3.0, 4.0]",
+      "[nan, 2.0, 3.0, 4.0, nan]"
+    ],
+    "explain": "Una finestra di 3 valori è completa solo dal terzo elemento: prima pandas mette `NaN`. Con `center=True` la finestra sarebbe centrata (ultima opzione).",
+    "answer": 0
   }
 ]

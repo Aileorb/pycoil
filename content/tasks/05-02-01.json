@@ -23,5 +23,18 @@
       "`q1, q3 = s.quantile([0.25, 0.75])`.",
       "Combina le due condizioni con `|` e le parentesi."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Riempire un buco",
+    "code": "import pandas as pd\ns = pd.Series([1.0, None, 3.0])\nprint(s.interpolate().tolist(), s.isna().sum())",
+    "options": [
+      "[1.0, 2.0, 3.0] 1",
+      "[1.0, 0.0, 3.0] 1",
+      "[1.0, 3.0] 0",
+      "[1.0, 2.0, 3.0] 0"
+    ],
+    "explain": "`interpolate` riempie il valore mancante a metà tra i vicini, ma restituisce una **nuova** serie: `s` ha ancora un `NaN`.",
+    "answer": 0
   }
 ]

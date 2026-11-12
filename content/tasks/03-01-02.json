@@ -23,5 +23,18 @@
       "Le operazioni aritmetiche lavorano elemento per elemento.",
       "`np.sqrt` agisce su tutto l'array."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Somme lungo gli assi",
+    "code": "import numpy as np\nM = np.array([[1, 2, 3], [4, 5, 6]])\nprint(M.sum(axis=0), M.max(axis=1))",
+    "options": [
+      "[5 7 9] [3 6]",
+      "[6 15] [4 5 6]",
+      "[5 7 9] [4 5 6]",
+      "21 6"
+    ],
+    "explain": "`axis=0` riduce **lungo le righe** (una somma per colonna); `axis=1` lungo le colonne (un massimo per riga).",
+    "answer": 0
   }
 ]

@@ -23,5 +23,18 @@
       "Avvolgi la conversione in `try/except ValueError`.",
       "Nell'except: `raise ValueError(f\"valore non numerico: {testo}\")`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Convertire o restituire None",
+    "code": "def leggi(s):\n    try:\n        return float(s)\n    except ValueError:\n        return None\n\nprint(leggi(\"3,5\"), leggi(\"3.5\"))",
+    "options": [
+      "None 3.5",
+      "3.5 3.5",
+      "ValueError",
+      "3,5 3.5"
+    ],
+    "explain": "`float(\"3,5\")` solleva `ValueError` (la virgola decimale non è valida in Python): l'`except` la intercetta e restituisce `None`.",
+    "answer": 0
   }
 ]

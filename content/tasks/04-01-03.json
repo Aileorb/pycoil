@@ -23,5 +23,18 @@
       "`np.polyfit(x, y, 1)` restituisce `[pendenza, intercetta]`.",
       "Inverti la retta: ε = (V − q)/k."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Una retta per tre punti",
+    "code": "import numpy as np\np = np.polyfit([0, 1, 2], [1, 3, 5], 1)\nprint(p.round(6))",
+    "options": [
+      "[2. 1.]",
+      "[1. 2.]",
+      "[0. 2. 1.]",
+      "[2. 0.]"
+    ],
+    "explain": "`polyfit` restituisce i coefficienti dal grado **più alto**: pendenza 2 e intercetta 1, perché y = 2x + 1.",
+    "answer": 0
   }
 ]

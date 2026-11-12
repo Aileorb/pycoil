@@ -23,5 +23,18 @@
       "Filtra con una maschera: `x[x > 0]`.",
       "Poi `np.sqrt(p**2 + 1).sum()`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Quanti valori salva una matrice sparsa",
+    "code": "from scipy.sparse import diags\nA = diags([1.0, -2.0, 1.0], [-1, 0, 1], shape=(1000, 1000))\nprint(A.nnz, A.shape)",
+    "options": [
+      "2998 (1000, 1000)",
+      "1000000 (1000, 1000)",
+      "3000 (1000, 1000)",
+      "3 (3, 3)"
+    ],
+    "explain": "Una tridiagonale 1000×1000 ha 1000 + 2·999 = 2998 valori non nulli, contro il milione della matrice densa.",
+    "answer": 0
   }
 ]

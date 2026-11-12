@@ -23,5 +23,18 @@
       "`s_tt = 1 - 2 * np.cos(2 * theta)`.",
       "`argmax` dà l'indice del massimo; converti con `np.degrees`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Tensione nominale e picco",
+    "code": "F, W, d, t = 20e3, 50.0, 10.0, 5.0   # N, mm, mm, mm\ns_nom = F / ((W - d) * t)\nKt = 2.51\nprint(round(s_nom, 1), round(Kt * s_nom))",
+    "options": [
+      "100.0 251",
+      "80.0 201",
+      "100.0 100",
+      "400.0 1004"
+    ],
+    "explain": "La tensione nominale si calcola sulla **sezione netta** (W − d)·t = 200 mm²; il picco al bordo del foro è Kt volte quella.",
+    "answer": 0
   }
 ]

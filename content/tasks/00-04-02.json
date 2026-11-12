@@ -23,5 +23,18 @@
       "`sorted(...)` crea una nuova lista, `.sort()` modifica l'originale.",
       "Poi prendi i primi tre con lo slicing."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Ordinare sul posto",
+    "code": "m = [3, 1, 2]\nm.sort()\nprint(m, m.index(3))",
+    "options": [
+      "[1, 2, 3] 2",
+      "[3, 1, 2] 0",
+      "[1, 2, 3] 3",
+      "None 2"
+    ],
+    "explain": "`.sort()` ordina **la lista stessa** (e restituisce `None`). Dopo l'ordinamento il 3 sta all'indice 2: gli indici partono da zero.",
+    "answer": 0
   }
 ]

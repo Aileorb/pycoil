@@ -183,7 +183,9 @@ describe('scheduler', () => {
   it('il progetto resta bloccato finché la Parte non è letta all’80%', () => {
     const s = { ...emptyState(), level: 'principiante' as const };
     expect(isProjectUnlocked(index, s, index.projects[0])).toBe(false);
-    expect(planDay(index, s, '2026-11-12').advanced).toEqual(['kata-1']);
+    // il kata della prima sezione arriva solo dopo averla introdotta
+    expect(planDay(index, s, '2026-11-12').advanced).toEqual([]);
+    expect(planDay(index, { ...s, learned: ['00-01'] }, '2026-11-12').advanced).toEqual(['kata-1']);
   });
 });
 

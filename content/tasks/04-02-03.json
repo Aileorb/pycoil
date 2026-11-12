@@ -23,5 +23,18 @@
       "`X = np.abs(rfft(x))`, `f = rfftfreq(len(x), 1/fs)`.",
       "Salta l'indice 0 (la media): `X[1:].argmax()`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Le frequenze della FFT",
+    "code": "import numpy as np\nprint(np.fft.rfftfreq(8, d=0.01))",
+    "options": [
+      "[ 0.  12.5 25.  37.5 50. ]",
+      "[0. 1. 2. 3. 4.]",
+      "[ 0.  12.5 25.  37.5 50.  62.5 75.  87.5]",
+      "[  0. 100. 200. 300. 400.]"
+    ],
+    "explain": "Con 8 campioni a 100 Hz la risoluzione è 100/8 = 12,5 Hz, e lo spettro reale arriva fino alla frequenza di Nyquist, 50 Hz.",
+    "answer": 0
   }
 ]

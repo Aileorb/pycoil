@@ -23,5 +23,17 @@
       "`for f in forze:` scorre gli elementi.",
       "Accumula con `totale += f`."
     ]
+  },
+  {
+    "kind": "scrivi",
+    "title": "Aree da una lista di diametri",
+    "prompt": "Con un ciclo `for` e `append`, crea la lista `aree` con l'area π d²/4 di ogni diametro della lista `diametri` (in mm²), nello stesso ordine.",
+    "starter": "import math\ndiametri = [8, 10, 12, 16]   # mm\naree = []\n...\nprint(aree)",
+    "tests": "import math\nassert len(aree) == 4, f\"servono 4 aree, ce ne sono {len(aree)}\"\nfor d, a in zip(diametri, aree):\n    assert abs(a - math.pi * d**2 / 4) < 1e-9, f\"per d = {d} l'area è {math.pi * d**2 / 4:.2f} mm², trovato {a}\"",
+    "solution": "import math\ndiametri = [8, 10, 12, 16]   # mm\naree = []\nfor d in diametri:\n    aree.append(math.pi * d**2 / 4)\nprint(aree)",
+    "hints": [
+      "`for d in diametri:` scorre i diametri uno alla volta.",
+      "Dentro il ciclo: `aree.append(math.pi * d**2 / 4)`."
+    ]
   }
 ]

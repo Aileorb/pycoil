@@ -23,5 +23,18 @@
       "Controlla prima il caso più restrittivo (`u <= 0.9`).",
       "Usa `return` in ogni ramo."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "and contro or",
+    "code": "T = 95    # °C\np = 4.5   # bar\nif T > 90 and p > 5:\n    print(\"allarme\")\nelif T > 90 or p > 5:\n    print(\"attenzione\")\nelse:\n    print(\"ok\")",
+    "options": [
+      "attenzione",
+      "allarme",
+      "ok",
+      "allarme\nattenzione"
+    ],
+    "explain": "La temperatura supera 90 ma la pressione non supera 5: la prima condizione (`and`, servono **entrambe**) è falsa, la seconda (`or`, ne basta **una**) è vera.",
+    "answer": 0
   }
 ]

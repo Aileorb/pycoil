@@ -23,5 +23,18 @@
       "La rigidezza dell'elemento e è `E·A[e]/L · [[1, −1], [−1, 1]]`.",
       "Il nodo 0 è incastrato: risolvi solo `K[1:, 1:]`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Vincolo e reazione",
+    "code": "import numpy as np\nk = 100.0      # N/mm\nK = np.array([[k, -k, 0], [-k, 2*k, -k], [0, -k, k]])\nf = np.array([0, 0, 50.0])\nu = np.zeros(3)\nu[1:] = np.linalg.solve(K[1:, 1:], f[1:])\nprint(u, K[0] @ u)",
+    "options": [
+      "[0.  0.5 1. ] -50.0",
+      "[0.  0.5 1. ] 50.0",
+      "[0.  1.  1.5] -50.0",
+      "[0.5 1.  1.5] 0.0"
+    ],
+    "explain": "Il nodo 0 è bloccato: si risolve solo il sottosistema dei nodi liberi. La riga 0 di K per gli spostamenti dà la **reazione** del vincolo, uguale e contraria al carico.",
+    "answer": 0
   }
 ]

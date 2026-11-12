@@ -23,5 +23,18 @@
       "`case Concentrato(F=F):` cattura il campo.",
       "Le dataclass supportano anche la forma posizionale `Distribuito(q, L)`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "L'ordine dei casi",
+    "code": "from dataclasses import dataclass\n\n@dataclass\nclass Molla:\n    k: float   # N/mm\n\ndef tipo(o):\n    match o:\n        case Molla(k=k) if k > 1000:\n            return \"rigida\"\n        case Molla():\n            return \"morbida\"\n        case _:\n            return \"altro\"\n\nprint(tipo(Molla(500)), tipo(Molla(5000)), tipo(3))",
+    "options": [
+      "morbida rigida altro",
+      "rigida rigida altro",
+      "morbida morbida altro",
+      "morbida rigida morbida"
+    ],
+    "explain": "I casi si provano dall'alto: la guardia `k > 1000` scatta solo per 5000. Le altre molle cadono nel caso generale `Molla()`, il numero 3 in `case _`.",
+    "answer": 0
   }
 ]

@@ -23,5 +23,18 @@
       "`np.linspace(0, L, 11)`.",
       "Il massimo con `M.max()`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "linspace include la fine",
+    "code": "import numpy as np\nx = np.linspace(0, 2, 5)\nprint(x, x.size)",
+    "options": [
+      "[0.  0.5 1.  1.5 2. ] 5",
+      "[0.  0.4 0.8 1.2 1.6] 5",
+      "[0 1 2] 3",
+      "[0.  0.5 1.  1.5] 4"
+    ],
+    "explain": "`linspace(inizio, fine, n)` crea `n` punti equidistanti **compresa** la fine: il passo è 2/4 = 0,5. Al contrario `arange` esclude la fine.",
+    "answer": 0
   }
 ]

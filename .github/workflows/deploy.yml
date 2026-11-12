@@ -38,6 +38,9 @@ jobs:
       - name: Esegue davvero esempi, esercizi, kata e progetti
         run: python scripts/verify_content.py
 
+      - name: Gradualità del percorso
+        run: python scripts/check_order.py
+
       - name: Genera i contenuti
         run: npm run content
 

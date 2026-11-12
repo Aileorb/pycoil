@@ -23,5 +23,18 @@
       "`assert area_cerchio(2) == approx(math.pi)`.",
       "Un buon test fallisce se la formula è sbagliata."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Il messaggio di un test che fallisce",
+    "code": "def test_somma():\n    assert 2 + 2 == 5, \"la somma non torna\"\n\ntry:\n    test_somma()\nexcept AssertionError as e:\n    print(\"test fallito:\", e)",
+    "options": [
+      "test fallito: la somma non torna",
+      "test fallito:",
+      "AssertionError",
+      "False"
+    ],
+    "explain": "Un `assert` falso solleva `AssertionError` con il messaggio scritto dopo la virgola. pytest fa la stessa cosa e te lo mostra nel resoconto: scrivi messaggi che spieghino che cosa ti aspettavi.",
+    "answer": 0
   }
 ]

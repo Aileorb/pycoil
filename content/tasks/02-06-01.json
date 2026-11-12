@@ -23,5 +23,18 @@
       "Sintassi: `def f(x: list[float]) -> float:`.",
       "La media pesata è Σ vᵢpᵢ / Σ pᵢ."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Un risultato che può mancare",
+    "code": "def diametro(nome: str) -> int | None:\n    if nome.startswith(\"M\"):\n        return int(nome[1:])\n    return None\n\nprint(diametro(\"M12\"), diametro(\"Ø12\"))",
+    "options": [
+      "12 None",
+      "M12 None",
+      "12 12",
+      "ValueError"
+    ],
+    "explain": "`int | None` avvisa chi legge che la funzione può restituire `None`. `\"M12\"[1:]` è `\"12\"`; il secondo nome non inizia con M.",
+    "answer": 0
   }
 ]

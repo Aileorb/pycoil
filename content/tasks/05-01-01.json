@@ -23,5 +23,18 @@
       "`pd.read_csv(io.StringIO(grezzo), sep=\";\", decimal=\",\", skiprows=2)`.",
       "Il massimo di una colonna: `df[\"forza_N\"].max()`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Separatore e decimale",
+    "code": "import io\nimport pandas as pd\ntesto = \"t;F\\n0;0,0\\n1;2,5\\n\"\ndf = pd.read_csv(io.StringIO(testo), sep=\";\", decimal=\",\")\nprint(df[\"F\"].sum(), df.shape)",
+    "options": [
+      "2.5 (2, 2)",
+      "2,5 (2, 2)",
+      "2.5 (3, 2)",
+      "0,02,5 (2, 2)"
+    ],
+    "explain": "Con `sep=\";\"` e `decimal=\",\"` le colonne sono numeri veri. L'intestazione non conta come riga: 2 righe, 2 colonne.",
+    "answer": 0
   }
 ]

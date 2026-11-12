@@ -23,5 +23,18 @@
       "I campi si scrivono `nome: tipo = default`.",
       "I campi con default vanno dopo quelli senza."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Una dataclass congelata",
+    "code": "from dataclasses import dataclass\n\n@dataclass(frozen=True)\nclass Materiale:\n    nome: str\n    fy: float\n\nm = Materiale(\"S355\", 355)\nm.fy = 400\nprint(m)",
+    "options": [
+      "FrozenInstanceError",
+      "Materiale(nome='S355', fy=400)",
+      "Materiale(nome='S355', fy=355)",
+      "TypeError"
+    ],
+    "explain": "Con `frozen=True` gli attributi non si possono riassegnare: Python solleva `FrozenInstanceError`. Per un valore diverso si crea un nuovo oggetto, per esempio con `dataclasses.replace(m, fy=400)`.",
+    "answer": 0
   }
 ]

@@ -23,5 +23,18 @@
       "`r.split(\";\")` e controlla che i pezzi siano due.",
       "`\"123\".isdigit()` è vero solo per stringhe di cifre."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Una riga chiave=valore",
+    "code": "riga = \"T=23.5;P=1.02\\n\"\nd = dict(c.split(\"=\") for c in riga.strip().split(\";\"))\nprint(float(d[\"T\"]) + 1, d[\"P\"])",
+    "options": [
+      "24.5 1.02",
+      "23.51 1.02",
+      "24.5 1.02\\n",
+      "TypeError"
+    ],
+    "explain": "`strip` toglie l'a capo, `split(\";\")` separa i campi e ogni campo diviso su `=` diventa una coppia chiave-valore. I valori sono **testo**: per fare conti serve `float`.",
+    "answer": 0
   }
 ]

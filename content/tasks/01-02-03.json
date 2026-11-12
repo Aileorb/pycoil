@@ -23,5 +23,18 @@
       "`sorted(lista, key=...)`.",
       "La lambda riceve una tupla e restituisce `p[1]`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Una funzione come argomento",
+    "code": "def applica(f, valori):\n    return [f(v) for v in valori]\n\nprint(applica(abs, [-2, 3, -1]))",
+    "options": [
+      "[2, 3, 1]",
+      "[-2, 3, -1]",
+      "abs",
+      "TypeError"
+    ],
+    "explain": "`abs` senza parentesi è la funzione stessa, passata come qualsiasi altro valore. Dentro `applica` viene chiamata su ogni elemento.",
+    "answer": 0
   }
 ]

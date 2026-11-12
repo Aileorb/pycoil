@@ -23,5 +23,18 @@
       "Potenza = coppia × velocità angolare: pint converte da solo i giri/min in rad/s.",
       "`.to(u.kW)` e poi `.magnitude`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Da km/h a m/s",
+    "code": "import pint\nu = pint.UnitRegistry()\nv = (72 * u.km / u.hour).to(u.m / u.s)\nprint(round(v.magnitude, 1), v.units)",
+    "options": [
+      "20.0 meter / second",
+      "72.0 meter / second",
+      "20.0 kilometer / hour",
+      "259.2 meter / second"
+    ],
+    "explain": "72 km/h = 72 000 m / 3600 s = 20 m/s. `.to()` converte e controlla che le dimensioni siano compatibili.",
+    "answer": 0
   }
 ]

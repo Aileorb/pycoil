@@ -23,5 +23,18 @@
       "Per ogni asta: `v = [−c, −s, c, s]`, contributo `EA/L · outer(v, v)` sui gradi `[2i, 2i+1, 2j, 2j+1]`.",
       "Liberi solo i gradi del nodo 2: indici 4 e 5."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Un'asta verticale",
+    "code": "import numpy as np\nth = np.radians(90)\nc, s = np.cos(th), np.sin(th)\nk = np.array([[c*c, c*s], [c*s, s*s]])\nprint(k.round(6))",
+    "options": [
+      "[[0. 0.]\n [0. 1.]]",
+      "[[1. 0.]\n [0. 0.]]",
+      "[[0. 1.]\n [1. 0.]]",
+      "[[1. 1.]\n [1. 1.]]"
+    ],
+    "explain": "Un'asta verticale ha rigidezza solo lungo y: c = cos 90° = 0 e s = 1, quindi resta il solo termine s².",
+    "answer": 0
   }
 ]

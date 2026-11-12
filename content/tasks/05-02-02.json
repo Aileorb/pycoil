@@ -23,5 +23,17 @@
       "Prima `groupby(\"materiale\")[\"Rm\"].mean()`, poi `.plot.bar()`.",
       "`ax.set_ylabel(...)`."
     ]
+  },
+  {
+    "kind": "scrivi",
+    "title": "Tabella riassuntiva per materiale",
+    "prompt": "Crea `tab` raggruppando per `mat` con `agg`: colonne `Rm_medio` (media di `Rm`), `Rm_min` (minimo) e `n` (numero di provini), arrotondate a 1 decimale.",
+    "starter": "import pandas as pd\ndf = pd.DataFrame({\"mat\": [\"S235\", \"S235\", \"S355\", \"S355\", \"S355\"],\n                   \"Rm\": [412, 398, 521, 509, 515]})\ntab = ...\nprint(tab)",
+    "tests": "assert list(tab.columns) == [\"Rm_medio\", \"Rm_min\", \"n\"], f\"colonne attese Rm_medio, Rm_min, n; trovate {list(tab.columns)}\"\nassert tab.loc[\"S235\", \"Rm_medio\"] == 405.0 and tab.loc[\"S355\", \"Rm_medio\"] == 515.0, \"medie attese 405 e 515\"\nassert tab.loc[\"S355\", \"Rm_min\"] == 509 and tab.loc[\"S355\", \"n\"] == 3, \"per S355: minimo 509, 3 provini\"",
+    "solution": "import pandas as pd\ndf = pd.DataFrame({\"mat\": [\"S235\", \"S235\", \"S355\", \"S355\", \"S355\"],\n                   \"Rm\": [412, 398, 521, 509, 515]})\ntab = df.groupby(\"mat\").agg(Rm_medio=(\"Rm\", \"mean\"), Rm_min=(\"Rm\", \"min\"), n=(\"Rm\", \"count\")).round(1)\nprint(tab)",
+    "hints": [
+      "`df.groupby(\"mat\").agg(nome=(\"colonna\", \"funzione\"), ...)` crea una colonna per ogni coppia.",
+      "Le funzioni sono `\"mean\"`, `\"min\"` e `\"count\"`; poi `.round(1)`."
+    ]
   }
 ]

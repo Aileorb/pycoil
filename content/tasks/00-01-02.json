@@ -23,5 +23,18 @@
       "Volume = A·L.",
       "m = rho·V, P = m·g."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Intero per decimale",
+    "code": "n = 8\nn = n + 2\nprint(n * 1.5)",
+    "options": [
+      "15.0",
+      "15",
+      "12.0",
+      "8 + 2 * 1.5"
+    ],
+    "explain": "`n = n + 2` riassegna il nome: ora vale 10. Un intero per un float dà un **float**, quindi `15.0`.",
+    "answer": 0
   }
 ]

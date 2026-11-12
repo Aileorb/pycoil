@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Debug con la f-string",
+    "code": "F = 1200   # N\nA = 40     # mm²\nsigma = F / A\nprint(f\"{sigma=}\")",
+    "options": [
+      "sigma=30.0",
+      "30.0",
+      "sigma = 30.0",
+      "F / A=30.0"
+    ],
+    "answer": 0,
+    "explain": "Con `=` dopo il nome, la f-string stampa `nome=valore`. È il modo più rapido per controllare un valore intermedio. La divisione `/` dà sempre un float, quindi `30.0`."
+  },
+  {
+    "kind": "prevedi",
+    "title": "Un errore senza traceback",
+    "code": "misure = [10.2, 10.4, 10.3]\ntotale = 0\nfor m in misure:\n    totale = m\nprint(totale)",
+    "options": [
+      "10.3",
+      "30.9",
+      "10.2",
+      "NameError"
+    ],
+    "answer": 0,
+    "explain": "Il programma non si ferma ma sbaglia: `totale = m` **sostituisce** il valore a ogni giro invece di sommarlo (`totale += m`). Alla fine resta l'ultima misura. Stampare `totale` dentro il ciclo l'avrebbe mostrato subito."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Due errori in una funzione",
+    "prompt": "La funzione `area_tubo(D, d)` deve restituire l'area della corona circolare di un tubo con diametro esterno `D` e interno `d`: π (D² − d²) / 4. Così com'è dà un errore e, una volta sistemato quello, anche un risultato sbagliato. Correggi **tutti e due** i problemi.",
+    "starter": "def area_tubo(D, d):\n    return math.pi * (D - d)**2 / 4\n\nprint(area_tubo(60, 50))",
+    "tests": "import math\nassert abs(area_tubo(60, 50) - math.pi * (60**2 - 50**2) / 4) < 1e-9, f\"area_tubo(60, 50) deve valere {math.pi * (60**2 - 50**2) / 4:.2f} mm², ottenuto {area_tubo(60, 50):.2f}\"\nassert abs(area_tubo(20, 0) - math.pi * 100) < 1e-9, \"con d = 0 è l'area del cerchio pieno\"",
+    "solution": "import math\n\ndef area_tubo(D, d):\n    return math.pi * (D**2 - d**2) / 4\n\nprint(area_tubo(60, 50))",
+    "hints": [
+      "Il primo errore è un `NameError`: a `math` manca qualcosa in cima al file.",
+      "Prova un caso noto: con `d = 0` devi ottenere l'area del cerchio pieno π D²/4. Lo ottieni con (D − d)²? E con D² − d²?"
+    ]
+  }
+]

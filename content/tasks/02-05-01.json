@@ -23,5 +23,18 @@
       "Le funzioni possono avere attributi: `interna.chiamate = 0`.",
       "Dentro `interna` incrementa `interna.chiamate` prima di chiamare `f`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Quante volte calcola davvero",
+    "code": "import functools\n\nchiamate = 0\n\n@functools.lru_cache\ndef f(x):\n    global chiamate\n    chiamate += 1\n    return x * 2\n\nf(3)\nf(3)\nf(4)\nprint(chiamate)",
+    "options": [
+      "2",
+      "3",
+      "1",
+      "0"
+    ],
+    "explain": "La seconda chiamata con 3 trova il risultato in cache e non esegue il corpo. Il calcolo vero avviene solo per 3 e per 4.",
+    "answer": 0
   }
 ]

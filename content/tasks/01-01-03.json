@@ -23,5 +23,18 @@
       "`conteggio.get(p, 0)` vale 0 la prima volta.",
       "Esiste anche `collections.Counter`, ma provaci a mano."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Operazioni sugli insiemi",
+    "code": "A = {\"M8\", \"M10\", \"M12\"}\nB = {\"M10\", \"M16\"}\nprint(sorted(A & B), len(A | B))",
+    "options": [
+      "['M10'] 4",
+      "['M10'] 5",
+      "['M8', 'M12', 'M16'] 4",
+      "['M10'] 3"
+    ],
+    "explain": "`A & B` è l'intersezione (solo M10); `A | B` l'unione senza doppioni: M8, M10, M12, M16, cioè 4 elementi.",
+    "answer": 0
   }
 ]

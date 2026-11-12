@@ -23,5 +23,18 @@
       "m v' = m g − c v², quindi v' = g − c v²/m.",
       "La soluzione è in `sol.y[0]`; l'ultimo valore è `sol.y[0, -1]`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "La forma di sol.y",
+    "code": "import numpy as np\nfrom scipy.integrate import solve_ivp\nsol = solve_ivp(lambda t, y: [-y[0]], (0, 1), [1.0], t_eval=np.linspace(0, 1, 11), rtol=1e-8)\nprint(sol.y.shape, round(sol.y[0, -1], 2))",
+    "options": [
+      "(1, 11) 0.37",
+      "(11, 1) 0.37",
+      "(1, 11) 0.0",
+      "(11,) 0.37"
+    ],
+    "explain": "`sol.y` ha **una riga per variabile di stato** e una colonna per istante. y' = −y con y(0) = 1 dà y(1) = e⁻¹ ≈ 0,37.",
+    "answer": 0
   }
 ]

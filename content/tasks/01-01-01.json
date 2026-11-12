@@ -18,10 +18,23 @@
     "prompt": "Scrivi `scala(carichi, k)` che restituisce una **nuova** lista con ogni carico moltiplicato per `k`, senza modificare la lista ricevuta.",
     "starter": "def scala(carichi, k):\n    ...\n\noriginali = [10, 20, 30]\nprint(scala(originali, 1.5), originali)",
     "tests": "o = [10, 20, 30]\nr = scala(o, 1.5)\nassert r == [15.0, 30.0, 45.0], f\"atteso [15.0, 30.0, 45.0], ottenuto {r}\"\nassert o == [10, 20, 30], \"la lista originale è stata modificata\"\nassert r is not o, \"devi restituire una lista nuova\"",
-    "solution": "def scala(carichi, k):\n    return [c * k for c in carichi]\n\noriginali = [10, 20, 30]\nprint(scala(originali, 1.5), originali)",
+    "solution": "def scala(carichi, k):\n    nuova = []\n    for c in carichi:\n        nuova.append(c * k)\n    return nuova\n\noriginali = [10, 20, 30]\nprint(scala(originali, 1.5), originali)",
     "hints": [
       "Crea una lista vuota e aggiungi con `append`, oppure usa una comprehension.",
       "Non modificare `carichi[i]`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Copia vera",
+    "code": "a = [1, 2]\nb = a.copy()\nb.append(3)\nprint(a, a is b)",
+    "options": [
+      "[1, 2] False",
+      "[1, 2, 3] True",
+      "[1, 2, 3] False",
+      "[1, 2] True"
+    ],
+    "explain": "`.copy()` crea una **nuova** lista: modificare `b` non tocca `a`, e i due nomi indicano oggetti diversi (`is` è falso).",
+    "answer": 0
   }
 ]

@@ -23,5 +23,18 @@
       "Il formato è `{valore:.2f}`.",
       "Attento agli spazi intorno a `=`."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Notazione scientifica",
+    "code": "eps = 0.000021\nprint(f\"ε = {eps:.1e}\", f\"{1234.5678:.2f} N\")",
+    "options": [
+      "ε = 2.1e-05 1234.57 N",
+      "ε = 0.000021 1234.57 N",
+      "ε = 2.1e-05 1234.5678 N",
+      "ε = 2e-05 1234.6 N"
+    ],
+    "explain": "`.1e` scrive il numero in notazione scientifica con una cifra decimale; `.2f` arrotonda a due decimali. Utile per deformazioni e moduli molto piccoli o molto grandi.",
+    "answer": 0
   }
 ]

@@ -23,5 +23,18 @@
       "Forma: `[espressione for s in sigma if condizione]`.",
       "`round(s, 1)` arrotonda a un decimale."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Comprehension di dizionario",
+    "code": "d = {n: n**2 for n in range(1, 4)}\nprint(d)",
+    "options": [
+      "{1: 1, 2: 4, 3: 9}",
+      "{1: 1, 2: 4, 3: 9, 4: 16}",
+      "[1, 4, 9]",
+      "{0: 0, 1: 1, 2: 4}"
+    ],
+    "explain": "La comprehension con `chiave: valore` costruisce un dizionario; `range(1, 4)` dà 1, 2, 3.",
+    "answer": 0
   }
 ]

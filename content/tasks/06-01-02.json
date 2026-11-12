@@ -23,5 +23,18 @@
       "`sp.integrate(espressione, (x, 0, L))`.",
       "Deriva rispetto a F **prima** di porre F = 0."
     ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Integrale con un simbolo",
+    "code": "import sympy as sp\nx, L = sp.symbols(\"x L\", positive=True)\nprint(sp.integrate(x, (x, 0, L)))",
+    "options": [
+      "L**2/2",
+      "x**2/2",
+      "L/2",
+      "0.5*L**2"
+    ],
+    "explain": "L'integrale definito da 0 a L di x vale L²/2. SymPy scrive le potenze con `**` e tiene le frazioni esatte.",
+    "answer": 0
   }
 ]

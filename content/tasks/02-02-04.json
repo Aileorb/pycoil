@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Ridefinire e chiamare la madre",
+    "code": "class Carico:\n    def descr(self):\n        return \"carico\"\n\nclass Neve(Carico):\n    def descr(self):\n        return \"neve, \" + super().descr()\n\nprint(Neve().descr())",
+    "options": [
+      "neve, carico",
+      "carico",
+      "neve, ",
+      "carico, neve"
+    ],
+    "answer": 0,
+    "explain": "`Neve` ridefinisce `descr` e dentro chiama la versione della madre con `super().descr()`, che restituisce `\"carico\"`."
+  },
+  {
+    "kind": "prevedi",
+    "title": "isinstance e gerarchie",
+    "code": "class Sezione:\n    pass\n\nclass Cerchio(Sezione):\n    pass\n\nc = Cerchio()\nprint(isinstance(c, Sezione), isinstance(Sezione(), Cerchio))",
+    "options": [
+      "True False",
+      "True True",
+      "False False",
+      "False True"
+    ],
+    "answer": 0,
+    "explain": "Un `Cerchio` **è una** `Sezione`, quindi il primo è vero. Una `Sezione` qualsiasi invece non è necessariamente un cerchio."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Il tubo eredita dal cerchio",
+    "prompt": "Completa la classe `Tubo(D, s)` figlia di `Cerchio`: nel suo `__init__` chiama `super().__init__(D)` e salva lo spessore `s`. Ridefinisci `area()` e `inerzia()` togliendo quelle del cerchio interno di diametro `D − 2s`.",
+    "starter": "import math\n\nclass Cerchio:\n    def __init__(self, d):\n        self.d = d\n    def area(self):\n        return math.pi * self.d**2 / 4\n    def inerzia(self):\n        return math.pi * self.d**4 / 64\n\nclass Tubo(Cerchio):\n    ...\n\nt = Tubo(60, 5)\nprint(t.area(), t.inerzia())",
+    "tests": "import math\nt = Tubo(60, 5)\nassert isinstance(t, Cerchio), \"Tubo deve essere figlia di Cerchio\"\nassert t.d == 60 and t.s == 5, \"servono gli attributi d (impostato da super) e s\"\nassert abs(t.area() - math.pi * (60**2 - 50**2) / 4) < 1e-9, \"area del tubo: π(D² − d²)/4 con d = D − 2s\"\nassert abs(t.inerzia() - math.pi * (60**4 - 50**4) / 64) < 1e-6, \"inerzia del tubo: π(D⁴ − d⁴)/64\"\nassert abs(Tubo(20, 10).area() - math.pi * 20**2 / 4) < 1e-9, \"con s = D/2 il foro sparisce: area del cerchio pieno\"",
+    "solution": "import math\n\nclass Cerchio:\n    def __init__(self, d):\n        self.d = d\n    def area(self):\n        return math.pi * self.d**2 / 4\n    def inerzia(self):\n        return math.pi * self.d**4 / 64\n\nclass Tubo(Cerchio):\n    def __init__(self, D, s):\n        super().__init__(D)\n        self.s = s\n\n    def area(self):\n        interno = Cerchio(self.d - 2 * self.s)\n        return super().area() - interno.area()\n\n    def inerzia(self):\n        interno = Cerchio(self.d - 2 * self.s)\n        return super().inerzia() - interno.inerzia()\n\nt = Tubo(60, 5)\nprint(t.area(), t.inerzia())",
+    "hints": [
+      "`super().__init__(D)` imposta `self.d`; poi aggiungi `self.s = s`.",
+      "Crea il cerchio interno con `Cerchio(self.d - 2 * self.s)` e sottrai la sua area da `super().area()`."
+    ]
+  }
+]
