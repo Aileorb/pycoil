@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Trapezi su una retta",
+    "code": "import numpy as np\nfrom scipy.integrate import trapezoid\nx = np.array([0, 1, 2, 3])\nprint(trapezoid(2 * x, x))",
+    "options": [
+      "9.0",
+      "12.0",
+      "6.0",
+      "18.0"
+    ],
+    "answer": 0,
+    "explain": "Su una funzione lineare la regola dei trapezi è esatta: ∫₀³ 2x dx = 9."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Energia assorbita da una prova",
+    "prompt": "Dagli array `x` (mm) e `F` (kN) di una prova di compressione di un assorbitore, calcola l'energia assorbita `E_J` in **joule** con `scipy.integrate.trapezoid`. (Attenzione: kN·mm = J.)",
+    "starter": "import numpy as np\nfrom scipy.integrate import trapezoid\nx = np.array([0, 5, 10, 20, 30, 40, 50.0])\nF = np.array([0, 18, 22, 21, 23, 26, 40.0])\nE_J = ...\nprint(E_J)",
+    "tests": "assert abs(E_J - 1155.0) < 1e-9, f\"energia attesa 1155 J, ottenuta {E_J}\"",
+    "solution": "import numpy as np\nfrom scipy.integrate import trapezoid\nx = np.array([0, 5, 10, 20, 30, 40, 50.0])\nF = np.array([0, 18, 22, 21, 23, 26, 40.0])\nE_J = trapezoid(F, x)\nprint(E_J)",
+    "hints": [
+      "`trapezoid(y, x)`: prima i valori, poi le ascisse.",
+      "kN × mm = 1000 N × 0.001 m = 1 J: nessuna conversione."
+    ]
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Conversione ADC",
+    "code": "adc, vref, bit = 512, 5.0, 10\nprint(round(adc * vref / (2**bit - 1), 2))",
+    "options": [
+      "2.5",
+      "2.56",
+      "5.0",
+      "0.5"
+    ],
+    "answer": 0,
+    "explain": "Un ADC a 10 bit va da 0 a 1023: 512 corrisponde a circa metà di 5 V, cioè 2.50 V."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Righe dalla seriale",
+    "prompt": "Scrivi `leggi(righe)` che riceve righe di testo del tipo `\"t_ms;adc\"` e restituisce la lista di tuple `(t_s, volt)` con `t_s = t_ms/1000` e `volt = adc·5/1023`, **ignorando** le righe malformate (campi mancanti o non numerici).",
+    "starter": "def leggi(righe):\n    ...\n\nprint(leggi([\"Avvio...\", \"0;0\", \"10;1023\", \"20;51\", \"3\", \"30;abc\"]))",
+    "tests": "r = leggi([\"Avvio...\", \"0;0\", \"10;1023\", \"20;51\", \"3\", \"30;abc\", \"\"])\nassert len(r) == 3, f\"attese 3 misure valide, ottenute {len(r)}\"\nassert r[1] == (0.01, 5.0), f\"la riga '10;1023' deve dare (0.01, 5.0), ottenuto {r[1]}\"\nassert abs(r[2][1] - 51 * 5 / 1023) < 1e-12, \"conversione in volt sbagliata\"",
+    "solution": "def leggi(righe):\n    out = []\n    for r in righe:\n        parti = r.strip().split(\";\")\n        if len(parti) != 2 or not all(p.isdigit() for p in parti):\n            continue\n        out.append((int(parti[0]) / 1000, int(parti[1]) * 5 / 1023))\n    return out\n\nprint(leggi([\"Avvio...\", \"0;0\", \"10;1023\", \"20;51\", \"3\", \"30;abc\"]))",
+    "hints": [
+      "`r.split(\";\")` e controlla che i pezzi siano due.",
+      "`\"123\".isdigit()` è vero solo per stringhe di cifre."
+    ]
+  }
+]

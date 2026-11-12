@@ -4,6 +4,8 @@ import { XP, streakMultiplier } from './levels';
 
 export const REVIEW_STEPS = [1, 3, 7, 14, 30];
 export const DAY_TASKS = 3;
+/** Tentativi sbagliati prima che la soluzione venga mostrata. */
+export const MAX_ATTEMPTS = 3;
 
 export function emptyState(): AppState {
   return {

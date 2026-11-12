@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Derivata simbolica",
+    "code": "import sympy as sp\nx = sp.symbols(\"x\")\nprint(sp.diff(x**3 + 2 * x, x))",
+    "options": [
+      "3*x**2 + 2",
+      "x**4/4 + x**2",
+      "3*x + 2",
+      "3*x**2"
+    ],
+    "answer": 0,
+    "explain": "SymPy deriva termine per termine: 3x² + 2."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Il massimo del momento",
+    "prompt": "Per una trave appoggiata con carico triangolare il momento è `M = q0*x*(L**2 - x**2)/(6*L)`. Con SymPy trova la posizione del massimo `x_max` (la radice positiva di `dM/dx = 0`) e il valore `M_max` semplificato.",
+    "starter": "import sympy as sp\nx, L, q0 = sp.symbols(\"x L q0\", positive=True)\nM = q0 * x * (L**2 - x**2) / (6 * L)\nx_max = ...\nM_max = ...\nprint(x_max, M_max)",
+    "tests": "import sympy as sp\nx_, L_, q_ = sp.symbols(\"x L q0\", positive=True)\nassert sp.simplify(x_max - L_ / sp.sqrt(3)) == 0, f\"x_max deve essere L/√3, ottenuto {x_max}\"\nassert sp.simplify(M_max - sp.sqrt(3) * q_ * L_**2 / 27) == 0, f\"M_max deve essere √3·q0·L²/27, ottenuto {M_max}\"",
+    "solution": "import sympy as sp\nx, L, q0 = sp.symbols(\"x L q0\", positive=True)\nM = q0 * x * (L**2 - x**2) / (6 * L)\nx_max = sp.solve(sp.diff(M, x), x)[0]\nM_max = sp.simplify(M.subs(x, x_max))\nprint(x_max, M_max)",
+    "hints": [
+      "`sp.solve(sp.diff(M, x), x)` restituisce una lista di radici.",
+      "Con `positive=True` resta solo la radice positiva."
+    ]
+  }
+]

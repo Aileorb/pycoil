@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { AppState, ContentIndex, Favorite } from './engine/types';
 import { dayKey, weekStart } from './engine/dates';
 import { compactHistory, completeAdvanced, completeTask, markSectionRead, refreshStreak, emptyState } from './engine/state';
-import { ensureToday, loadState, saveState, clearToday, type TodayRecord } from './engine/storage';
+import { ensureToday, loadState, saveState, saveToday, clearToday, type TodayRecord } from './engine/storage';
 import { loadIndex } from './engine/content';
 
 interface Store {
@@ -22,6 +22,8 @@ interface Store {
   removeFavorite: (id: string) => void;
   showToast: (t: string) => void;
   reloadToday: () => void;
+  /** Registra un tentativo sbagliato di oggi (resta salvato fino a domani). */
+  recordAttempt: (id: string, pick?: number) => void;
   getIndex: () => Promise<ContentIndex>;
 }
 
@@ -156,19 +158,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const removeFavorite = useCallback((id: string) => update((s) => ({ ...s, favorites: s.favorites.filter((f) => f.id !== id) })), [update]);
 
+  const todayRef = useRef(todayRec);
+  todayRef.current = todayRec;
+
+  const recordAttempt = useCallback((id: string, pick = -1) => {
+    const rec = todayRef.current;
+    if (!rec) return;
+    const next: TodayRecord = { ...rec, attempts: { ...rec.attempts, [id]: [...(rec.attempts?.[id] ?? []), pick] } };
+    todayRef.current = next;
+    setTodayRec(next);
+    void saveToday(next);
+  }, []);
+
   const reloadToday = useCallback(() => {
+    const kept = todayRef.current?.date === today ? todayRef.current.attempts : undefined;
     void clearToday().then(() => {
       setTodayRec(null);
       ensureToday(today, stateRef.current, getIndex).then((rec) => {
-        setTodayRec(rec);
-        setTodayError(!rec);
+        // i tentativi già fatti oggi restano: ricaricare non regala nuove prove
+        const merged = rec && kept ? { ...rec, attempts: kept } : rec;
+        if (merged && kept) void saveToday(merged);
+        setTodayRec(merged);
+        setTodayError(!merged);
       });
     });
   }, [today, getIndex]);
 
   const value = useMemo<Store>(
-    () => ({ ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, getIndex }),
-    [ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, getIndex]
+    () => ({ ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, getIndex }),
+    [ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, getIndex]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

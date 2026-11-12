@@ -14,7 +14,7 @@ print(f"T_sat a 1 atm = {T_sat:.2f} °C, h(10 bar, 300 °C) = {h:.1f} kJ/kg")
 
 **Da sapere per primo:** `PropsSI(uscita, nome1, valore1, nome2, valore2, fluido)` sempre in unità SI (K, Pa, J/kg).
 
-**Nel percorso:** Parte VII (in arrivo).
+**Nel percorso:** sezione 7.1.1 e Progetto 7.
 
 ```bash
 pip install CoolProp

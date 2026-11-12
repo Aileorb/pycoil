@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "dropna",
+    "code": "import numpy as np\nimport pandas as pd\ndf = pd.DataFrame({\"a\": [1, np.nan, 3], \"b\": [4, 5, np.nan]})\nprint(len(df.dropna()))",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "0"
+    ],
+    "answer": 0,
+    "explain": "`dropna()` toglie ogni riga con almeno un valore mancante: resta solo la prima."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Outlier con l'IQR",
+    "prompt": "Scrivi `outlier_iqr(s)` che restituisce una **maschera booleana** (una Series di `True`/`False`) dei valori fuori da `[Q1 − 1.5·IQR, Q3 + 1.5·IQR]`.",
+    "starter": "import pandas as pd\n\ndef outlier_iqr(s):\n    ...\n\nhb = pd.Series([212, 208, 215, 210, 211, 290, 209, 213, 150, 212])\nprint(hb[outlier_iqr(hb)].tolist())",
+    "tests": "import pandas as pd\nhb = pd.Series([212, 208, 215, 210, 211, 290, 209, 213, 150, 212])\nm = outlier_iqr(hb)\nassert m.dtype == bool and len(m) == len(hb), \"restituisci una maschera booleana della stessa lunghezza\"\nassert hb[m].tolist() == [290, 150], f\"outlier attesi [290, 150], ottenuti {hb[m].tolist()}\"\nassert not outlier_iqr(pd.Series([1, 2, 3, 4, 5])).any(), \"una serie regolare non ha outlier\"",
+    "solution": "import pandas as pd\n\ndef outlier_iqr(s):\n    q1, q3 = s.quantile([0.25, 0.75])\n    iqr = q3 - q1\n    return (s < q1 - 1.5 * iqr) | (s > q3 + 1.5 * iqr)\n\nhb = pd.Series([212, 208, 215, 210, 211, 290, 209, 213, 150, 212])\nprint(hb[outlier_iqr(hb)].tolist())",
+    "hints": [
+      "`q1, q3 = s.quantile([0.25, 0.75])`.",
+      "Combina le due condizioni con `|` e le parentesi."
+    ]
+  }
+]

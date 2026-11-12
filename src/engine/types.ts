@@ -118,6 +118,8 @@ export interface AdvancedTask extends TaskBase {
   hints: string[];
   solution: string;
   testFile?: { name: string; code: string };
+  /** Nome del file .py che lo studente scrive (per verificare i test anche nell'app). */
+  module?: string;
 }
 
 export type Task = ImparaTask | PrevediTask | ScriviTask | AdvancedTask;

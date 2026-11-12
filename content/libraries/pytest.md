@@ -21,4 +21,4 @@ pytest -q
 
 **Da sapere per primo:** `assert`, `pytest.approx` per i float, `pytest.raises` per gli errori attesi.
 
-**Nel percorso:** Parte II, capitolo Strumenti (in arrivo), e tutti i progetti.
+**Nel percorso:** sezione 2.7.1 e tutti i progetti.

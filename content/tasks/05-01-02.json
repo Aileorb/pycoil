@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "groupby e media",
+    "code": "import pandas as pd\ndf = pd.DataFrame({\"m\": [\"A\", \"B\", \"A\"], \"Rm\": [400, 500, 420]})\nprint(df.groupby(\"m\")[\"Rm\"].mean()[\"A\"])",
+    "options": [
+      "410.0",
+      "440.0",
+      "400",
+      "420"
+    ],
+    "answer": 0,
+    "explain": "Il gruppo A contiene 400 e 420: la media è 410."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Valore caratteristico per materiale",
+    "prompt": "Dal DataFrame `df` calcola per ogni materiale media e deviazione standard di `Rm` con `groupby` e `agg`, in un DataFrame `stat` con colonne `media` e `std`. Aggiungi la colonna `Rk = media − 1.645·std`.",
+    "starter": "import pandas as pd\ndf = pd.DataFrame({\n    \"materiale\": [\"S235\"] * 4 + [\"S355\"] * 4,\n    \"Rm\": [418, 431, 425, 409, 532, 548, 541, 526],\n})\nstat = ...\nprint(stat.round(1))",
+    "tests": "import pandas as pd\nassert set(stat.index) == {\"S235\", \"S355\"}, \"l'indice deve essere il materiale\"\nassert {\"media\", \"std\", \"Rk\"} <= set(stat.columns), \"servono le colonne media, std, Rk\"\ns = df[df.materiale == \"S355\"][\"Rm\"]\nassert abs(stat.loc[\"S355\", \"media\"] - s.mean()) < 1e-9, \"media sbagliata\"\nassert abs(stat.loc[\"S355\", \"Rk\"] - (s.mean() - 1.645 * s.std())) < 1e-9, \"Rk = media − 1.645·std\"",
+    "solution": "import pandas as pd\ndf = pd.DataFrame({\n    \"materiale\": [\"S235\"] * 4 + [\"S355\"] * 4,\n    \"Rm\": [418, 431, 425, 409, 532, 548, 541, 526],\n})\nstat = df.groupby(\"materiale\").agg(media=(\"Rm\", \"mean\"), std=(\"Rm\", \"std\"))\nstat[\"Rk\"] = stat[\"media\"] - 1.645 * stat[\"std\"]\nprint(stat.round(1))",
+    "hints": [
+      "`df.groupby(\"materiale\").agg(media=(\"Rm\", \"mean\"), std=(\"Rm\", \"std\"))`.",
+      "Poi una nuova colonna: `stat[\"Rk\"] = ...`."
+    ]
+  }
+]

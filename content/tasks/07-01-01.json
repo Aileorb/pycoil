@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Unità di CoolProp",
+    "code": "from CoolProp.CoolProp import PropsSI\nT = PropsSI(\"T\", \"P\", 101325, \"Q\", 0, \"Water\")\nprint(round(T - 273.15))",
+    "options": [
+      "100",
+      "373",
+      "0",
+      "212"
+    ],
+    "answer": 0,
+    "explain": "CoolProp restituisce kelvin: 373.12 K − 273.15 = 99.97 °C, cioè 100 arrotondato."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Rendimento del ciclo Rankine",
+    "prompt": "Calcola il rendimento `eta` del ciclo Rankine con condensatore a `0.08` bar, caldaia a `100` bar e turbina che entra a `500` °C, con pompa e turbina isentropiche (vedi la sezione). Metti anche il titolo allo scarico della turbina in `x4`.",
+    "starter": "from CoolProp.CoolProp import PropsSI\nf = \"Water\"\np_cond, p_cald, T3 = 0.08e5, 100e5, 500 + 273.15\n...\neta = ...\nx4 = ...\nprint(eta, x4)",
+    "tests": "from CoolProp.CoolProp import PropsSI as P\nh1 = P(\"H\", \"P\", 0.08e5, \"Q\", 0, \"Water\"); s1 = P(\"S\", \"P\", 0.08e5, \"Q\", 0, \"Water\")\nh2 = P(\"H\", \"P\", 100e5, \"S\", s1, \"Water\")\nh3 = P(\"H\", \"P\", 100e5, \"T\", 773.15, \"Water\"); s3 = P(\"S\", \"P\", 100e5, \"T\", 773.15, \"Water\")\nh4 = P(\"H\", \"P\", 0.08e5, \"S\", s3, \"Water\")\natt = ((h3 - h4) - (h2 - h1)) / (h3 - h2)\nassert abs(eta - att) < 1e-6, f\"rendimento atteso {att:.4f}, ottenuto {eta}\"\nassert abs(x4 - P(\"Q\", \"P\", 0.08e5, \"S\", s3, \"Water\")) < 1e-6, \"titolo allo scarico sbagliato\"",
+    "solution": "from CoolProp.CoolProp import PropsSI\nf = \"Water\"\np_cond, p_cald, T3 = 0.08e5, 100e5, 500 + 273.15\nh1 = PropsSI(\"H\", \"P\", p_cond, \"Q\", 0, f); s1 = PropsSI(\"S\", \"P\", p_cond, \"Q\", 0, f)\nh2 = PropsSI(\"H\", \"P\", p_cald, \"S\", s1, f)\nh3 = PropsSI(\"H\", \"P\", p_cald, \"T\", T3, f); s3 = PropsSI(\"S\", \"P\", p_cald, \"T\", T3, f)\nh4 = PropsSI(\"H\", \"P\", p_cond, \"S\", s3, f)\neta = ((h3 - h4) - (h2 - h1)) / (h3 - h2)\nx4 = PropsSI(\"Q\", \"P\", p_cond, \"S\", s3, f)\nprint(eta, x4)",
+    "hints": [
+      "Stato 1: liquido saturo (`Q = 0`); 2: stessa entropia a pressione di caldaia.",
+      "Rendimento = (lavoro turbina − lavoro pompa) / calore in caldaia."
+    ]
+  }
+]

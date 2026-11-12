@@ -7,3 +7,7 @@ pytest
 sympy
 uncertainties
 CoolProp
+pint
+openpyxl
+scikit-fem
+scikit-learn

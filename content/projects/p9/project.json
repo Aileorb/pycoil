@@ -1,0 +1,82 @@
+{
+  "id": "p9",
+  "title": "Collaudo automatico: dal file al report Excel",
+  "stars": 4,
+  "unlockAfter": "p8",
+  "module": "collaudo.py",
+  "summary": "Uno script a riga di comando che legge le misure dei pezzi, verifica le tolleranze, calcola Cp e Cpk e scrive un report Excel formattato.",
+  "intro": "In un reparto di produzione ogni pezzo viene misurato e i dati finiscono in un file CSV per pezzo. Costruisci **`collaudo.py`**, lo strumento che ogni mattina legge la cartella delle misure, controlla le tolleranze, calcola gli indici di capacità del processo (**Cp**, **Cpk**) e consegna un file Excel pronto per il responsabile qualità.\n\nOgni file CSV ha le colonne `quota;valore` (separatore `;`), e il nome del file è il codice del pezzo.\n\n**Come si lavora.** Crea una cartella con il file **`collaudo.py`**. A ogni tappa aggiungi le funzioni richieste, scarica il test della tappa nella stessa cartella e lancia `pytest -q`. Puoi anche incollare tutto il file nell'app e premere *Esegui i test*.",
+  "final": "## Cosa hai costruito\n\nUno strumento di lavoro vero: script con argomenti, analisi con pandas, report Excel formattato, codice di uscita per l'automazione. È il genere di programma che fa risparmiare ore ogni settimana a un reparto.",
+  "sources": [
+    "pandas | https://pandas.pydata.org/docs/",
+    "openpyxl | https://openpyxl.readthedocs.io/",
+    "NIST: indici di capacità di processo | https://www.itl.nist.gov/div898/handbook/pmc/section1/pmc16.htm"
+  ],
+  "steps": [
+    {
+      "id": "leggi",
+      "title": "Leggere la cartella delle misure",
+      "minutes": 20,
+      "prompt": "Scrivi `leggi_misure(cartella)` che legge tutti i file `*.csv` di una cartella (in ordine di nome) e restituisce un unico DataFrame con colonne `pezzo` (nome del file senza estensione), `quota`, `valore`.",
+      "hints": [
+        "`Path(cartella).glob(\"*.csv\")` trova i file; `f.stem` è il nome senza estensione.",
+        "`pd.concat(lista, ignore_index=True)` unisce i DataFrame."
+      ],
+      "solution": "from pathlib import Path\nimport pandas as pd\n\n\ndef leggi_misure(cartella):\n    parti = []\n    for f in sorted(Path(cartella).glob(\"*.csv\")):\n        df = pd.read_csv(f, sep=\";\")\n        df.insert(0, \"pezzo\", f.stem)\n        parti.append(df)\n    return pd.concat(parti, ignore_index=True)",
+      "testName": "test_leggi.py",
+      "test": "from pathlib import Path\nfrom collaudo import leggi_misure\n\n\ndef test_cartella(tmp_path=None):\n    d = Path(tmp_path or \"misure_test\")\n    d.mkdir(exist_ok=True)\n    (d / \"A001.csv\").write_text(\"quota;valore\\nD1;20.01\\nL1;50.10\\n\")\n    (d / \"A002.csv\").write_text(\"quota;valore\\nD1;19.97\\nL1;49.95\\n\")\n    df = leggi_misure(d)\n    assert list(df.columns) == [\"pezzo\", \"quota\", \"valore\"]\n    assert df[\"pezzo\"].tolist() == [\"A001\", \"A001\", \"A002\", \"A002\"]\n    assert df[\"valore\"].sum() == 140.03\n"
+    },
+    {
+      "id": "tolleranze",
+      "title": "Verificare le tolleranze",
+      "minutes": 15,
+      "prompt": "Scrivi `verifica(df, specifiche)`: `specifiche` è un dizionario `quota → (nominale, toll_inf, toll_sup)` con tolleranze come scostamenti (es. `(20.0, -0.05, 0.05)`). Restituisci una copia del DataFrame con le colonne `scostamento` (valore − nominale) e `ok` (booleano).",
+      "hints": [
+        "`df[\"quota\"].map(...)` trasforma ogni quota nel suo valore di specifica.",
+        "Attenzione ai confronti tra float al limite: una piccola tolleranza numerica evita falsi scarti."
+      ],
+      "solution": "def verifica(df, specifiche):\n    out = df.copy()\n    nom = out[\"quota\"].map(lambda q: specifiche[q][0])\n    inf = out[\"quota\"].map(lambda q: specifiche[q][1])\n    sup = out[\"quota\"].map(lambda q: specifiche[q][2])\n    out[\"scostamento\"] = out[\"valore\"] - nom\n    out[\"ok\"] = (out[\"scostamento\"] >= inf - 1e-12) & (out[\"scostamento\"] <= sup + 1e-12)\n    return out",
+      "testName": "test_tolleranze.py",
+      "test": "import pandas as pd\nfrom collaudo import verifica\n\nSPEC = {\"D1\": (20.0, -0.05, 0.05), \"L1\": (50.0, -0.1, 0.2)}\n\n\ndef test_esiti():\n    df = pd.DataFrame({\"pezzo\": [\"A\", \"A\", \"B\", \"B\"], \"quota\": [\"D1\", \"L1\", \"D1\", \"L1\"], \"valore\": [20.04, 50.20, 19.93, 49.95]})\n    out = verifica(df, SPEC)\n    assert out[\"ok\"].tolist() == [True, True, False, True]\n    assert round(out[\"scostamento\"].iloc[2], 3) == -0.07\n    assert \"ok\" not in df.columns\n"
+    },
+    {
+      "id": "capacita",
+      "title": "Cp e Cpk",
+      "minutes": 20,
+      "prompt": "Scrivi `capacita(df, specifiche)` che per ogni quota calcola media, deviazione standard campionaria, `Cp = (USL − LSL)/(6σ)` e `Cpk = min(USL − media, media − LSL)/(3σ)`, dove `USL` e `LSL` sono i limiti assoluti. Restituisci un DataFrame con indice `quota` e colonne `media`, `std`, `Cp`, `Cpk`.",
+      "hints": [
+        "`df.groupby(\"quota\")` scorre le quote con i loro valori.",
+        "Cpk usa il limite più vicino alla media: `min(USL − m, m − LSL)`."
+      ],
+      "solution": "def capacita(df, specifiche):\n    righe = []\n    for q, g in df.groupby(\"quota\"):\n        nom, ti, ts = specifiche[q]\n        lsl, usl = nom + ti, nom + ts\n        m, s = g[\"valore\"].mean(), g[\"valore\"].std()\n        righe.append({\"quota\": q, \"media\": m, \"std\": s, \"Cp\": (usl - lsl) / (6 * s), \"Cpk\": min(usl - m, m - lsl) / (3 * s)})\n    return pd.DataFrame(righe).set_index(\"quota\")",
+      "testName": "test_capacita.py",
+      "test": "import numpy as np\nimport pandas as pd\nfrom pytest import approx\nfrom collaudo import capacita\n\n\ndef test_indici():\n    v = np.array([19.99, 20.00, 20.01, 20.02, 20.03])\n    df = pd.DataFrame({\"pezzo\": list(\"abcde\"), \"quota\": \"D1\", \"valore\": v})\n    c = capacita(df, {\"D1\": (20.0, -0.05, 0.05)})\n    s = v.std(ddof=1)\n    assert c.loc[\"D1\", \"Cp\"] == approx(0.1 / (6 * s))\n    assert c.loc[\"D1\", \"Cpk\"] == approx((20.05 - v.mean()) / (3 * s))\n"
+    },
+    {
+      "id": "excel",
+      "title": "Il report Excel",
+      "minutes": 25,
+      "prompt": "Scrivi `scrivi_report(dettaglio, cap, file)` che con openpyxl crea un file con due fogli: `Misure` (le colonne di `dettaglio`, con le righe non conformi evidenziate da un riempimento rosso `FFC7CE`) e `Capacità` (la tabella `cap` con la quota come prima colonna). Intestazioni in grassetto.",
+      "hints": [
+        "`dettaglio.itertuples(index=False)` dà una tupla per riga con attributi per nome (`riga.ok`).",
+        "I numeri di NumPy vanno convertiti in tipi Python (`.item()`) prima di scriverli."
+      ],
+      "solution": "from openpyxl import Workbook\nfrom openpyxl.styles import Font, PatternFill\n\n\ndef scrivi_report(dettaglio, cap, file):\n    wb = Workbook()\n    ws = wb.active\n    ws.title = \"Misure\"\n    ws.append(list(dettaglio.columns))\n    rosso = PatternFill(\"solid\", fgColor=\"FFC7CE\")\n    for riga in dettaglio.itertuples(index=False):\n        ws.append([v.item() if hasattr(v, \"item\") else v for v in riga])\n        if not riga.ok:\n            for c in ws[ws.max_row]:\n                c.fill = rosso\n    ws2 = wb.create_sheet(\"Capacità\")\n    ws2.append([\"quota\", *cap.columns])\n    for q, r in cap.iterrows():\n        ws2.append([q, *[round(float(x), 4) for x in r]])\n    for foglio in (ws, ws2):\n        for c in foglio[1]:\n            c.font = Font(bold=True)\n    wb.save(file)",
+      "testName": "test_excel.py",
+      "test": "import pandas as pd\nfrom openpyxl import load_workbook\nfrom collaudo import scrivi_report\n\n\ndef test_report():\n    det = pd.DataFrame({\"pezzo\": [\"A\", \"B\"], \"quota\": [\"D1\", \"D1\"], \"valore\": [20.01, 20.09], \"scostamento\": [0.01, 0.09], \"ok\": [True, False]})\n    cap = pd.DataFrame({\"media\": [20.05], \"std\": [0.05], \"Cp\": [0.33], \"Cpk\": [0.0]}, index=pd.Index([\"D1\"], name=\"quota\"))\n    scrivi_report(det, cap, \"report_test.xlsx\")\n    wb = load_workbook(\"report_test.xlsx\")\n    assert wb.sheetnames == [\"Misure\", \"Capacità\"]\n    ws = wb[\"Misure\"]\n    assert ws[\"A1\"].font.bold\n    assert ws[\"A3\"].fill.fgColor.rgb.endswith(\"FFC7CE\")\n    assert ws[\"A2\"].fill.fgColor.rgb in (None, \"00000000\")\n    assert wb[\"Capacità\"][\"A2\"].value == \"D1\"\n"
+    },
+    {
+      "id": "main",
+      "title": "Lo script completo",
+      "minutes": 20,
+      "prompt": "Scrivi `main(argv=None)`: argomenti `cartella` e `specifiche` (un file JSON con il dizionario delle specifiche, liste di tre numeri), opzione `--out` (default `collaudo.xlsx`). Esegue tutte le tappe, scrive il report, stampa quanti pezzi sono conformi e restituisce `0` se tutte le misure sono conformi, `1` altrimenti.",
+      "hints": [
+        "Il file JSON contiene liste: convertile in tuple con una dict comprehension.",
+        "Un pezzo è conforme se tutte le sue quote lo sono: `groupby(\"pezzo\")[\"ok\"].all()`."
+      ],
+      "solution": "import argparse\nimport json\n\n\ndef main(argv=None):\n    p = argparse.ArgumentParser(description=\"Collaudo dimensionale\")\n    p.add_argument(\"cartella\")\n    p.add_argument(\"specifiche\")\n    p.add_argument(\"--out\", default=\"collaudo.xlsx\")\n    a = p.parse_args(argv)\n    spec = {k: tuple(v) for k, v in json.loads(Path(a.specifiche).read_text()).items()}\n    det = verifica(leggi_misure(a.cartella), spec)\n    cap = capacita(det, spec)\n    scrivi_report(det, cap, a.out)\n    pezzi_ok = det.groupby(\"pezzo\")[\"ok\"].all()\n    print(f\"{pezzi_ok.sum()} pezzi conformi su {len(pezzi_ok)}\")\n    return 0 if pezzi_ok.all() else 1\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())",
+      "testName": "test_main.py",
+      "test": "import json\nfrom pathlib import Path\nfrom openpyxl import load_workbook\nfrom collaudo import main\n\n\ndef prepara(nome, valori):\n    d = Path(nome)\n    d.mkdir(exist_ok=True)\n    for i, (d1, l1) in enumerate(valori):\n        (d / f\"P{i:03d}.csv\").write_text(f\"quota;valore\\nD1;{d1}\\nL1;{l1}\\n\")\n    Path(\"spec.json\").write_text(json.dumps({\"D1\": [20.0, -0.05, 0.05], \"L1\": [50.0, -0.1, 0.2]}))\n    return d\n\n\ndef test_tutto_conforme():\n    d = prepara(\"lotto_ok\", [(20.01, 50.0), (19.98, 50.1), (20.02, 49.95)])\n    assert main([str(d), \"spec.json\", \"--out\", \"ok.xlsx\"]) == 0\n    assert load_workbook(\"ok.xlsx\").sheetnames == [\"Misure\", \"Capacità\"]\n\n\ndef test_uno_scarto():\n    d = prepara(\"lotto_ko\", [(20.01, 50.0), (20.09, 50.1)])\n    assert main([str(d), \"spec.json\", \"--out\", \"ko.xlsx\"]) == 1\n"
+    }
+  ]
+}

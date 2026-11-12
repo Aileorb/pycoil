@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "len chiama __len__",
+    "code": "class Serie:\n    def __init__(self, v):\n        self.v = v\n    def __len__(self):\n        return len(self.v) * 10\n\nprint(len(Serie([1, 2, 3])))",
+    "options": [
+      "30",
+      "3",
+      "TypeError",
+      "[1, 2, 3]"
+    ],
+    "answer": 0,
+    "explain": "`len(x)` chiama `x.__len__()`: qui restituisce 3 × 10."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Somma e modulo di forze",
+    "prompt": "Completa la classe `Forza` con `__add__` (somma componente per componente, restituisce una nuova `Forza`) e `__abs__` (modulo, con `math.hypot`).",
+    "starter": "import math\n\nclass Forza:\n    def __init__(self, fx, fy):\n        self.fx, self.fy = fx, fy\n\n    def __repr__(self):\n        return f\"Forza({self.fx}, {self.fy})\"\n\n    ...\n\nprint(abs(Forza(3, 0) + Forza(0, 4)))",
+    "tests": "r = Forza(1, 2) + Forza(3, -5)\nassert isinstance(r, Forza), \"__add__ deve restituire una Forza\"\nassert (r.fx, r.fy) == (4, -3), f\"attesa Forza(4, -3), ottenuta {r}\"\nassert abs(Forza(3, 4)) == 5, \"abs(Forza(3, 4)) deve valere 5\"",
+    "solution": "import math\n\nclass Forza:\n    def __init__(self, fx, fy):\n        self.fx, self.fy = fx, fy\n\n    def __repr__(self):\n        return f\"Forza({self.fx}, {self.fy})\"\n\n    def __add__(self, altra):\n        return Forza(self.fx + altra.fx, self.fy + altra.fy)\n\n    def __abs__(self):\n        return math.hypot(self.fx, self.fy)\n\nprint(abs(Forza(3, 0) + Forza(0, 4)))",
+    "hints": [
+      "`def __add__(self, altra): return Forza(...)`.",
+      "`math.hypot(x, y)` è √(x² + y²)."
+    ]
+  }
+]

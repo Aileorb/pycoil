@@ -1,12 +1,68 @@
 {
   "id": "p7",
-  "title": "FEM 2D di una lastra forata",
-  "stars": 5,
+  "title": "Impianto a vapore: il ciclo Rankine",
+  "stars": 4,
   "unlockAfter": "p7",
-  "summary": "Un solutore agli elementi finiti triangolari (CST) scritto da te per una lastra con foro, confrontato con il fattore di concentrazione delle tensioni di Kirsch e con scikit-fem.",
-  "intro": "Un solutore agli elementi finiti triangolari (CST) scritto da te per una lastra con foro, confrontato con il fattore di concentrazione delle tensioni di Kirsch e con scikit-fem.\n\n> [!nota] Questo progetto arriva con i prossimi aggiornamenti dei contenuti, insieme alla Parte che lo sblocca.\n\n## Le tappe previste\n\n1. Mesh triangolare della lastra\n2. Matrice di rigidezza dell'elemento CST\n3. Assemblaggio e vincoli\n4. Soluzione e tensioni di von Mises\n5. Confronto con Kirsch (Kt ≈ 3)\n6. Lo stesso problema con scikit-fem",
+  "module": "rankine.py",
+  "summary": "Stati termodinamici con CoolProp, ciclo ideale e reale, risurriscaldamento e studio di sensibilità con grafico.",
+  "intro": "Costruisci **`rankine.py`**, un piccolo strumento per progettare un impianto a vapore: calcola gli stati del fluido con CoolProp, il rendimento del ciclo ideale e di quello con turbina e pompa reali, l'effetto del risurriscaldamento e una curva di sensibilità del rendimento rispetto alla pressione di caldaia.\n\nTutte le funzioni lavorano in unità SI (Pa, K, J/kg).\n\n**Come si lavora.** Crea una cartella con il file **`rankine.py`**. A ogni tappa aggiungi le funzioni richieste, scarica il test della tappa nella stessa cartella e lancia `pytest -q`. Puoi anche incollare tutto il file nell'app e premere *Esegui i test*.",
+  "final": "## Cosa hai costruito\n\nUno strumento di studio dei cicli che risponde in un istante alle domande tipiche d'esame e di progetto: quanto guadagno alzando la pressione? quanto mi costa una turbina meno efficiente? conviene risurriscaldare?",
   "sources": [
-    "scikit-fem | https://scikit-fem.readthedocs.io/"
+    "CoolProp | http://www.coolprop.org/",
+    "Çengel, Boles: Termodinamica, cap. 10 | https://www.mheducation.com/"
   ],
-  "steps": []
+  "steps": [
+    {
+      "id": "stato",
+      "title": "Lo stato del fluido",
+      "minutes": 15,
+      "prompt": "Scrivi `stato(p, **kw)`: data la pressione `p` e **una** tra `T`, `s`, `x` (titolo) o `h` passata per nome, restituisce un dizionario con `p`, `T`, `h`, `s` dell'acqua calcolati con CoolProp. (Mappa `T`→`\"T\"`, `s`→`\"S\"`, `x`→`\"Q\"`, `h`→`\"H\"`.)",
+      "hints": [
+        "`(nome, valore), = kw.items()` estrae l'unica coppia passata per nome.",
+        "Chiama `PropsSI` tre volte con la stessa coppia di proprietà di ingresso."
+      ],
+      "solution": "from CoolProp.CoolProp import PropsSI\n\nFLUIDO = \"Water\"\n_NOMI = {\"T\": \"T\", \"s\": \"S\", \"x\": \"Q\", \"h\": \"H\"}\n\n\ndef stato(p, **kw):\n    (nome, valore), = kw.items()\n    k = _NOMI[nome]\n    return {\n        \"p\": p,\n        \"T\": PropsSI(\"T\", \"P\", p, k, valore, FLUIDO),\n        \"h\": PropsSI(\"H\", \"P\", p, k, valore, FLUIDO),\n        \"s\": PropsSI(\"S\", \"P\", p, k, valore, FLUIDO),\n    }",
+      "testName": "test_stato.py",
+      "test": "from pytest import approx\nfrom rankine import stato\n\n\ndef test_saturo():\n    st = stato(101325, x=0)\n    assert st[\"T\"] == approx(373.12, abs=0.05)\n\n\ndef test_coerente():\n    a = stato(80e5, T=753.15)\n    b = stato(80e5, s=a[\"s\"])\n    assert b[\"h\"] == approx(a[\"h\"], rel=1e-6)\n"
+    },
+    {
+      "id": "ideale",
+      "title": "Il ciclo ideale",
+      "minutes": 20,
+      "prompt": "Scrivi `ciclo(p_cond, p_cald, T3, eta_t=1.0, eta_p=1.0)` che restituisce un dizionario con `eta` (rendimento), `L_netto` (J/kg) e `x4` (titolo allo scarico). Con `eta_t` ed `eta_p` uguali a 1 il ciclo è ideale; altrimenti `h2 = h1 + (h2s − h1)/eta_p` e `h4 = h3 − eta_t·(h3 − h4s)`. Il titolo `x4` si ottiene da `p_cond` e `h4`.",
+      "hints": [
+        "Riusa `stato`: stato 1 = liquido saturo, 3 = vapore surriscaldato.",
+        "Il titolo si calcola con `PropsSI(\"Q\", \"P\", p_cond, \"H\", h4, \"Water\")`."
+      ],
+      "solution": "def ciclo(p_cond, p_cald, T3, eta_t=1.0, eta_p=1.0):\n    s1 = stato(p_cond, x=0)\n    h2s = stato(p_cald, s=s1[\"s\"])[\"h\"]\n    h2 = s1[\"h\"] + (h2s - s1[\"h\"]) / eta_p\n    s3 = stato(p_cald, T=T3)\n    h4s = stato(p_cond, s=s3[\"s\"])[\"h\"]\n    h4 = s3[\"h\"] - eta_t * (s3[\"h\"] - h4s)\n    L_netto = (s3[\"h\"] - h4) - (h2 - s1[\"h\"])\n    return {\"eta\": L_netto / (s3[\"h\"] - h2), \"L_netto\": L_netto, \"x4\": PropsSI(\"Q\", \"P\", p_cond, \"H\", h4, FLUIDO)}",
+      "testName": "test_ideale.py",
+      "test": "from pytest import approx\nfrom rankine import ciclo\n\n\ndef test_ideale():\n    c = ciclo(0.1e5, 80e5, 753.15)\n    assert c[\"eta\"] == approx(0.391, abs=0.002)\n    assert c[\"x4\"] == approx(0.802, abs=0.002)\n\n\ndef test_reale_peggiore():\n    i = ciclo(0.1e5, 80e5, 753.15)\n    r = ciclo(0.1e5, 80e5, 753.15, eta_t=0.85, eta_p=0.8)\n    assert r[\"eta\"] < i[\"eta\"]\n    assert r[\"x4\"] > i[\"x4\"]\n"
+    },
+    {
+      "id": "risurriscaldamento",
+      "title": "Il risurriscaldamento",
+      "minutes": 25,
+      "prompt": "Scrivi `ciclo_ris(p_cond, p_cald, p_ris, T3, T5)`: dopo una prima espansione isentropica fino a `p_ris`, il vapore torna in caldaia e viene riscaldato a `T5`, poi si espande fino a `p_cond`. Restituisci lo stesso dizionario di `ciclo` (turbina e pompa ideali).",
+      "hints": [
+        "Il calore entra due volte: in caldaia (2→3) e nel risurriscaldatore (4→5).",
+        "Il lavoro di turbina è la somma delle due espansioni."
+      ],
+      "solution": "def ciclo_ris(p_cond, p_cald, p_ris, T3, T5):\n    s1 = stato(p_cond, x=0)\n    h2 = stato(p_cald, s=s1[\"s\"])[\"h\"]\n    s3 = stato(p_cald, T=T3)\n    h4 = stato(p_ris, s=s3[\"s\"])[\"h\"]\n    s5 = stato(p_ris, T=T5)\n    h6 = stato(p_cond, s=s5[\"s\"])[\"h\"]\n    L_t = (s3[\"h\"] - h4) + (s5[\"h\"] - h6)\n    L_p = h2 - s1[\"h\"]\n    Q = (s3[\"h\"] - h2) + (s5[\"h\"] - h4)\n    return {\"eta\": (L_t - L_p) / Q, \"L_netto\": L_t - L_p, \"x4\": PropsSI(\"Q\", \"P\", p_cond, \"H\", h6, FLUIDO)}",
+      "testName": "test_risurriscaldamento.py",
+      "test": "from rankine import ciclo, ciclo_ris\n\n\ndef test_migliora_il_titolo():\n    semplice = ciclo(0.1e5, 150e5, 773.15)\n    ris = ciclo_ris(0.1e5, 150e5, 30e5, 773.15, 773.15)\n    assert ris[\"x4\"] > semplice[\"x4\"]\n    assert ris[\"L_netto\"] > semplice[\"L_netto\"]\n    assert 0.38 < ris[\"eta\"] < 0.46\n"
+    },
+    {
+      "id": "sensibilita",
+      "title": "Studio di sensibilità",
+      "minutes": 20,
+      "prompt": "Scrivi `sensibilita(p_cond, T3, pressioni)` che restituisce gli array `eta` e `x4` del ciclo ideale per ogni pressione di caldaia, e `grafico_sensibilita(pressioni, eta, x4)` che disegna il rendimento e il titolo (asse y secondario con `twinx`) in funzione della pressione in **bar**, restituendo la figura.",
+      "hints": [
+        "Una comprehension di `ciclo(...)` per ogni pressione.",
+        "`ax.twinx()` crea un secondo asse y che condivide l'asse x."
+      ],
+      "solution": "import numpy as np\nimport matplotlib.pyplot as plt\n\n\ndef sensibilita(p_cond, T3, pressioni):\n    risultati = [ciclo(p_cond, p, T3) for p in pressioni]\n    return np.array([r[\"eta\"] for r in risultati]), np.array([r[\"x4\"] for r in risultati])\n\n\ndef grafico_sensibilita(pressioni, eta, x4):\n    fig, ax = plt.subplots(figsize=(5.5, 3.2))\n    p_bar = np.asarray(pressioni) / 1e5\n    ax.plot(p_bar, eta, \"o-\", color=\"tab:blue\")\n    ax.set(xlabel=\"pressione di caldaia [bar]\", ylabel=\"rendimento [-]\")\n    ax2 = ax.twinx()\n    ax2.plot(p_bar, x4, \"s--\", color=\"tab:red\")\n    ax2.set_ylabel(\"titolo allo scarico [-]\")\n    return fig",
+      "testName": "test_sensibilita.py",
+      "test": "import matplotlib\n\nmatplotlib.use(\"agg\")\nimport numpy as np\nfrom rankine import grafico_sensibilita, sensibilita\n\n\ndef test_tendenze():\n    p = np.array([20e5, 60e5, 120e5])\n    eta, x4 = sensibilita(0.1e5, 773.15, p)\n    assert np.all(np.diff(eta) > 0)\n    assert np.all(np.diff(x4) < 0)\n    fig = grafico_sensibilita(p, eta, x4)\n    assert len(fig.axes) == 2\n"
+    }
+  ]
 }

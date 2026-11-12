@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Il segno dei vincoli ineq",
+    "code": "vincolo = {\"type\": \"ineq\", \"fun\": lambda x: 10 - x}\nprint(vincolo[\"fun\"](12) >= 0)",
+    "options": [
+      "False",
+      "True",
+      "-2",
+      "TypeError"
+    ],
+    "answer": 0,
+    "explain": "Un vincolo `ineq` è rispettato quando la funzione è **≥ 0**: `10 − 12 = −2`, quindi è violato."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Il tubo più leggero",
+    "prompt": "Un tubo a parete sottile (diametro medio `D`, spessore `t`, mm) deve portare `N = 200` kN in trazione con `σ ≤ 150` MPa, con `t ≥ 2` mm e `D ≥ 10·t`. Minimizza l'area `π·D·t` con `minimize(..., method=\"SLSQP\")` partendo da `[60, 5]`. Metti il risultato ottimo in `D`, `t`, `A`.",
+    "starter": "import numpy as np\nfrom scipy.optimize import minimize\nN, s_amm = 200e3, 150.0\narea = lambda x: np.pi * x[0] * x[1]\nvincoli = [\n    ...\n]\nr = ...\nD, t = r.x\nA = r.fun\nprint(D, t, A)",
+    "tests": "import numpy as np\nassert abs(A - 200e3 / 150) < 1, f\"l'area minima è N/σ = 1333.3 mm², ottenuta {A:.1f}\"\nassert t >= 2 - 1e-6 and D >= 10 * t - 1e-6, \"rispetta t ≥ 2 e D ≥ 10 t\"\nassert 200e3 / (np.pi * D * t) <= 150 + 1e-3, \"la tensione deve restare entro 150 MPa\"",
+    "solution": "import numpy as np\nfrom scipy.optimize import minimize\nN, s_amm = 200e3, 150.0\narea = lambda x: np.pi * x[0] * x[1]\nvincoli = [\n    {\"type\": \"ineq\", \"fun\": lambda x: s_amm - N / (np.pi * x[0] * x[1])},\n    {\"type\": \"ineq\", \"fun\": lambda x: x[1] - 2},\n    {\"type\": \"ineq\", \"fun\": lambda x: x[0] - 10 * x[1]},\n]\nr = minimize(area, [60, 5], method=\"SLSQP\", constraints=vincoli)\nD, t = r.x\nA = r.fun\nprint(D, t, A)",
+    "hints": [
+      "Ogni vincolo si scrive come `limite − valore ≥ 0`.",
+      "Tre vincoli: tensione, spessore minimo, snellezza della parete."
+    ]
+  }
+]

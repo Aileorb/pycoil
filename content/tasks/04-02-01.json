@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Lo stato di un sistema del secondo ordine",
+    "code": "def f(t, y):\n    x, v = y\n    return [v, -4 * x]\n\nprint(f(0, [1, 0]))",
+    "options": [
+      "[0, -4]",
+      "[1, 0]",
+      "[-4, 0]",
+      "[0, 4]"
+    ],
+    "answer": 0,
+    "explain": "La funzione restituisce `[x', v'] = [v, −4x]`: con `x = 1, v = 0` dà `[0, −4]`."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Caduta con resistenza dell'aria",
+    "prompt": "Un corpo di massa `m = 80` kg cade con resistenza `c·v²` (`c = 0.25` kg/m). Scrivi `f(t, y)` con `y = [v]` (velocità verso il basso) e integra con `solve_ivp` da 0 a 60 s partendo da fermo. Metti in `v_fin` la velocità finale.",
+    "starter": "from scipy.integrate import solve_ivp\nm, c, g = 80.0, 0.25, 9.81\n\ndef f(t, y):\n    ...\n\nsol = ...\nv_fin = ...\nprint(v_fin)",
+    "tests": "import math\nassert abs(f(0, [0])[0] - 9.81) < 1e-9, \"a velocità nulla l'accelerazione è g\"\nv_lim = math.sqrt(80 * 9.81 / 0.25)\nassert abs(v_fin - v_lim) < 0.05, f\"dopo 60 s la velocità tende al limite {v_lim:.2f} m/s, ottenuta {v_fin}\"",
+    "solution": "from scipy.integrate import solve_ivp\nm, c, g = 80.0, 0.25, 9.81\n\ndef f(t, y):\n    v = y[0]\n    return [g - c * v**2 / m]\n\nsol = solve_ivp(f, (0, 60), [0.0], rtol=1e-8)\nv_fin = sol.y[0, -1]\nprint(v_fin)",
+    "hints": [
+      "m v' = m g − c v², quindi v' = g − c v²/m.",
+      "La soluzione è in `sol.y[0]`; l'ultimo valore è `sol.y[0, -1]`."
+    ]
+  }
+]

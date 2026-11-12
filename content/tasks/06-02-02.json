@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Incertezza di una somma",
+    "code": "from uncertainties import ufloat\na = ufloat(10, 0.3)\nb = ufloat(5, 0.4)\nprint(f\"{(a + b).s:.1f}\")",
+    "options": [
+      "0.5",
+      "0.7",
+      "0.1",
+      "0.4"
+    ],
+    "answer": 0,
+    "explain": "Per grandezze indipendenti le incertezze si sommano in quadratura: √(0.3² + 0.4²) = 0.5."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Modulo elastico con incertezza",
+    "prompt": "Da una prova: forza `F = 5000 ± 20` N, area `A = 78.5 ± 0.4` mm², deformazione `eps = 0.000305 ± 0.000003`. Calcola `E = F/(A·eps)` con `uncertainties` e metti in `rel` l'incertezza relativa (`E.s / E.n`).",
+    "starter": "from uncertainties import ufloat\nF = ufloat(5000, 20)\nA = ufloat(78.5, 0.4)\neps = ufloat(0.000305, 0.000003)\nE = ...\nrel = ...\nprint(E, rel)",
+    "tests": "import math\natt = math.sqrt((20 / 5000) ** 2 + (0.4 / 78.5) ** 2 + (0.000003 / 0.000305) ** 2)\nassert abs(E.n - 5000 / (78.5 * 0.000305)) < 1e-6, \"valore nominale di E sbagliato\"\nassert abs(rel - att) < 1e-9, f\"incertezza relativa attesa {att:.5f}, ottenuta {rel}\"",
+    "solution": "from uncertainties import ufloat\nF = ufloat(5000, 20)\nA = ufloat(78.5, 0.4)\neps = ufloat(0.000305, 0.000003)\nE = F / (A * eps)\nrel = E.s / E.n\nprint(E, rel)",
+    "hints": [
+      "Con `ufloat` scrivi la formula normalmente: `F / (A * eps)`.",
+      "`.n` è il valore nominale, `.s` l'incertezza."
+    ]
+  }
+]

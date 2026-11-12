@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Risoluzione in frequenza",
+    "code": "from scipy.fft import rfftfreq\nf = rfftfreq(1000, 1 / 500)\nprint(f[1], f[-1])",
+    "options": [
+      "0.5 250.0",
+      "1.0 500.0",
+      "0.5 500.0",
+      "2.0 250.0"
+    ],
+    "answer": 0,
+    "explain": "1000 campioni a 500 Hz = 2 s: risoluzione 1/2 s = 0.5 Hz; massimo `fs/2` = 250 Hz (Nyquist)."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Trova la frequenza dominante",
+    "prompt": "Il segnale `x` (campionato a `fs = 800` Hz per 2 s) contiene una vibrazione e del rumore. Usa `rfft` e `rfftfreq` per trovare la frequenza del picco più alto (escludendo la componente a 0 Hz) e mettila in `f_picco`.",
+    "starter": "import numpy as np\nfrom scipy.fft import rfft, rfftfreq\nrng = np.random.default_rng(4)\nfs = 800\nt = np.arange(0, 2, 1 / fs)\nx = 0.3 + np.sin(2 * np.pi * 37.5 * t) + 0.8 * rng.standard_normal(t.size)\nf_picco = ...\nprint(f_picco)",
+    "tests": "assert abs(f_picco - 37.5) < 0.01, f\"il picco è a 37.5 Hz, ottenuto {f_picco}\"",
+    "solution": "import numpy as np\nfrom scipy.fft import rfft, rfftfreq\nrng = np.random.default_rng(4)\nfs = 800\nt = np.arange(0, 2, 1 / fs)\nx = 0.3 + np.sin(2 * np.pi * 37.5 * t) + 0.8 * rng.standard_normal(t.size)\nX = np.abs(rfft(x))\nf = rfftfreq(t.size, 1 / fs)\nf_picco = f[1:][X[1:].argmax()]\nprint(f_picco)",
+    "hints": [
+      "`X = np.abs(rfft(x))`, `f = rfftfreq(len(x), 1/fs)`.",
+      "Salta l'indice 0 (la media): `X[1:].argmax()`."
+    ]
+  }
+]

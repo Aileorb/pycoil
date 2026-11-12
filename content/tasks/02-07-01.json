@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Confronto tra float",
+    "code": "print(0.1 + 0.2 == 0.3, abs(0.1 + 0.2 - 0.3) < 1e-12)",
+    "options": [
+      "False True",
+      "True True",
+      "True False",
+      "False False"
+    ],
+    "answer": 0,
+    "explain": "I float binari non rappresentano esattamente 0.1: nei test si confronta con una tolleranza (`pytest.approx`)."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Scrivere un test",
+    "prompt": "La funzione `area_cerchio(d)` è già scritta. Scrivi la funzione di test `test_area_cerchio()` con **almeno due** `assert` che usino `approx` di pytest (per esempio d = 2 → π e d = 10 → 25π).",
+    "starter": "import math\nfrom pytest import approx\n\ndef area_cerchio(d):\n    return math.pi * d**2 / 4\n\ndef test_area_cerchio():\n    ...\n\ntest_area_cerchio()\nprint(\"ok\")",
+    "tests": "import math\nassert \"approx\" in test_area_cerchio.__code__.co_names, \"confronta i float con approx\"\ntest_area_cerchio()\n_vera = area_cerchio\nfor _sbagliata in (lambda d: math.pi * d**2 / 2, lambda d: math.pi * d / 2):\n    area_cerchio = _sbagliata\n    try:\n        test_area_cerchio()\n        _passato = True\n    except AssertionError:\n        _passato = False\n    area_cerchio = _vera\n    assert not _passato, \"il tuo test non si accorge di una formula sbagliata: controlla almeno due diametri diversi\"",
+    "solution": "import math\nfrom pytest import approx\n\ndef area_cerchio(d):\n    return math.pi * d**2 / 4\n\ndef test_area_cerchio():\n    assert area_cerchio(2) == approx(math.pi)\n    assert area_cerchio(10) == approx(25 * math.pi)\n\ntest_area_cerchio()\nprint(\"ok\")",
+    "hints": [
+      "`assert area_cerchio(2) == approx(math.pi)`.",
+      "Un buon test fallisce se la formula è sbagliata."
+    ]
+  }
+]

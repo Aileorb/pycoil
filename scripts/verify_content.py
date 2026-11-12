@@ -33,7 +33,7 @@ def run(code: str, ns: dict | None = None) -> tuple[dict, str]:
     ns = {} if ns is None else ns
     out = io.StringIO()
     with contextlib.redirect_stdout(out):
-        exec(compile(code, "<exec>", "exec"), ns)
+        exec(compile(code, "<exec>", "exec", dont_inherit=True), ns)
     return ns, out.getvalue()
 
 
@@ -128,7 +128,7 @@ def run_pytest_file(solution_code: str, test_name: str, test_code: str, files: d
     try:
         ns, _ = run(solution_code) if solution_code.strip() else ({}, "")
         tns: dict = {"__name__": "test"}
-        exec(compile(test_code, test_name, "exec"), tns)
+        exec(compile(test_code, test_name, "exec", dont_inherit=True), tns)
         tests = [v for k, v in tns.items() if k.startswith("test_") and callable(v)]
         assert tests, f"{test_name} non contiene funzioni test_*"
         for tfun in tests:

@@ -5,7 +5,7 @@ title: scikit-fem
 
 **Perché ti serve.** Dopo aver scritto un piccolo FEM da te (Progetto 7), scikit-fem ti mostra come si struttura un codice FEM vero, restando leggibile.
 
-```python norun
+```python
 import skfem as fem
 from skfem.helpers import dot, grad
 
@@ -27,7 +27,7 @@ u = fem.solve(*fem.condense(K, f, D=m.boundary_nodes()))
 print(u.max())
 ```
 
-**Nel percorso:** Parte VII (in arrivo).
+**Nel percorso:** sezione 7.2.3.
 
 ```bash
 pip install scikit-fem

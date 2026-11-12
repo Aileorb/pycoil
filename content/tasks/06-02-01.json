@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Unità incompatibili",
+    "code": "import pint\nu = pint.UnitRegistry()\ntry:\n    print(2 * u.m + 3 * u.s)\nexcept pint.DimensionalityError:\n    print(\"errore dimensionale\")",
+    "options": [
+      "errore dimensionale",
+      "5 meter",
+      "5",
+      "2 meter + 3 second"
+    ],
+    "answer": 0,
+    "explain": "Metri e secondi non si sommano: pint solleva `DimensionalityError` invece di dare un risultato senza senso."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Potenza all'albero",
+    "prompt": "Con pint, calcola la potenza `P` trasmessa da un albero con coppia `C = 350 N·m` a `n = 2900` giri/min (`u.rpm`), convertita in **kW**. Metti in `P_kW` il solo numero (`.magnitude`).",
+    "starter": "import pint\nu = pint.UnitRegistry()\nC = 350 * u.N * u.m\nn = 2900 * u.rpm\nP = ...\nP_kW = ...\nprint(P, P_kW)",
+    "tests": "import math\nassert str(P.units) == \"kilowatt\", f\"converti P in kW, unità attuali: {P.units}\"\nassert abs(P_kW - 350 * 2900 * 2 * math.pi / 60 / 1000) < 1e-6, f\"P attesa ≈ 106.3 kW, ottenuta {P_kW}\"",
+    "solution": "import pint\nu = pint.UnitRegistry()\nC = 350 * u.N * u.m\nn = 2900 * u.rpm\nP = (C * n).to(u.kW)\nP_kW = P.magnitude\nprint(P, P_kW)",
+    "hints": [
+      "Potenza = coppia × velocità angolare: pint converte da solo i giri/min in rad/s.",
+      "`.to(u.kW)` e poi `.magnitude`."
+    ]
+  }
+]

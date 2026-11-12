@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Virgola decimale non dichiarata",
+    "code": "import io\nimport pandas as pd\ndf = pd.read_csv(io.StringIO(\"F\\n1,5\\n2,5\\n\"), sep=\";\")\nprint(df[\"F\"][0] + df[\"F\"][1])",
+    "options": [
+      "1,52,5",
+      "4.0",
+      "4",
+      "TypeError"
+    ],
+    "answer": 0,
+    "explain": "Senza `decimal=\",\"` pandas non riconosce `1,5` come numero: la colonna resta di testo e `+` concatena le stringhe."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Leggere l'export della macchina",
+    "prompt": "Il testo `grezzo` è l'export di una macchina di prova: due righe di intestazione da saltare, separatore `;`, virgola decimale. Leggilo in `df` con `pd.read_csv` e metti la forza massima (colonna `forza_N`) in `Fmax`.",
+    "starter": "import io\nimport pandas as pd\ngrezzo = \"\"\"Macchina: Z100\\nProvino: P7\\ntempo_s;forza_N\\n0,0;0\\n0,5;812,5\\n1,0;1630,2\\n1,5;1597,0\\n\"\"\"\ndf = ...\nFmax = ...\nprint(Fmax)",
+    "tests": "assert list(df.columns) == [\"tempo_s\", \"forza_N\"], f\"colonne lette: {list(df.columns)}\"\nassert str(df[\"forza_N\"].dtype) == \"float64\", \"la forza deve essere numerica: usa decimal=\\\",\\\"\"\nassert abs(Fmax - 1630.2) < 1e-9, f\"Fmax atteso 1630.2, ottenuto {Fmax}\"",
+    "solution": "import io\nimport pandas as pd\ngrezzo = \"\"\"Macchina: Z100\\nProvino: P7\\ntempo_s;forza_N\\n0,0;0\\n0,5;812,5\\n1,0;1630,2\\n1,5;1597,0\\n\"\"\"\ndf = pd.read_csv(io.StringIO(grezzo), sep=\";\", decimal=\",\", skiprows=2)\nFmax = df[\"forza_N\"].max()\nprint(Fmax)",
+    "hints": [
+      "`pd.read_csv(io.StringIO(grezzo), sep=\";\", decimal=\",\", skiprows=2)`.",
+      "Il massimo di una colonna: `df[\"forza_N\"].max()`."
+    ]
+  }
+]

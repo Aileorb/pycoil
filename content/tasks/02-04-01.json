@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Un generatore si consuma",
+    "code": "g = (x * 2 for x in range(3))\nprint(sum(g), sum(g))",
+    "options": [
+      "6 0",
+      "6 6",
+      "0 6",
+      "TypeError"
+    ],
+    "answer": 0,
+    "explain": "Il primo `sum` consuma il generatore; il secondo non trova più valori e restituisce 0."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Rampa di carico con yield",
+    "prompt": "Scrivi il generatore `rampa(F_max, passi)` che produce `passi` valori equispaziati da `F_max/passi` fino a `F_max` (inclusi), usando `yield`.",
+    "starter": "def rampa(F_max, passi):\n    ...\n\nprint(list(rampa(100, 4)))",
+    "tests": "import types\nassert isinstance(rampa(10, 2), types.GeneratorType), \"usa yield: rampa deve essere un generatore\"\nassert list(rampa(100, 4)) == [25.0, 50.0, 75.0, 100.0], f\"ottenuto {list(rampa(100, 4))}\"\nassert list(rampa(9, 3)) == [3.0, 6.0, 9.0], \"rampa(9, 3) deve dare [3, 6, 9]\"",
+    "solution": "def rampa(F_max, passi):\n    for i in range(1, passi + 1):\n        yield F_max * i / passi\n\nprint(list(rampa(100, 4)))",
+    "hints": [
+      "`for i in range(1, passi + 1):`.",
+      "Dentro il ciclo: `yield F_max * i / passi`."
+    ]
+  }
+]

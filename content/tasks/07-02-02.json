@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Matrice di un'asta orizzontale",
+    "code": "import numpy as np\nc, s = 1.0, 0.0\nv = np.array([-c, -s, c, s])\nprint(np.outer(v, v)[1, 1], np.outer(v, v)[0, 2])",
+    "options": [
+      "0.0 -1.0",
+      "1.0 -1.0",
+      "0.0 1.0",
+      "1.0 0.0"
+    ],
+    "answer": 0,
+    "explain": "Un'asta orizzontale non ha rigidezza verticale (termine [1,1] nullo) e lega le traslazioni orizzontali dei due nodi con −1."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Due aste a V",
+    "prompt": "Due aste uguali (`EA = 1e6` N) collegano il nodo libero 2 in `(0, -1)` ai nodi incernierati 0 in `(-1, 0)` e 1 in `(1, 0)`. Sul nodo 2 agisce una forza verticale di −1000 N. Assembla la matrice 6×6, risolvi per i gradi di libertà del nodo 2 e metti in `uy` lo spostamento verticale del nodo 2.",
+    "starter": "import numpy as np\nnodi = np.array([[-1, 0], [1, 0], [0, -1.0]])\naste = [(0, 2), (1, 2)]\nEA = 1e6\nK = np.zeros((6, 6))\n...\nF = np.zeros(6); F[5] = -1000.0\nuy = ...\nprint(uy)",
+    "tests": "import numpy as np\nL = np.sqrt(2)\natt = -1000 / (2 * EA / L * 0.5)\nassert abs(uy - att) < 1e-9, f\"uy atteso {att:.6f} m, ottenuto {uy}\"",
+    "solution": "import numpy as np\nnodi = np.array([[-1, 0], [1, 0], [0, -1.0]])\naste = [(0, 2), (1, 2)]\nEA = 1e6\nK = np.zeros((6, 6))\nfor i, j in aste:\n    d = nodi[j] - nodi[i]\n    L = np.linalg.norm(d)\n    c, s = d / L\n    v = np.array([-c, -s, c, s])\n    dofs = [2 * i, 2 * i + 1, 2 * j, 2 * j + 1]\n    K[np.ix_(dofs, dofs)] += EA / L * np.outer(v, v)\nF = np.zeros(6); F[5] = -1000.0\nlib = [4, 5]\nu = np.linalg.solve(K[np.ix_(lib, lib)], F[lib])\nuy = u[1]\nprint(uy)",
+    "hints": [
+      "Per ogni asta: `v = [−c, −s, c, s]`, contributo `EA/L · outer(v, v)` sui gradi `[2i, 2i+1, 2j, 2j+1]`.",
+      "Liberi solo i gradi del nodo 2: indici 4 e 5."
+    ]
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Numero di nodi di una mesh raffinata",
+    "code": "import skfem as fem\nm = fem.MeshTri().refined(1)\nprint(m.p.shape[1], m.t.shape[1])",
+    "options": [
+      "9 8",
+      "4 2",
+      "16 18",
+      "9 4"
+    ],
+    "answer": 0,
+    "explain": "Il quadrato base ha 4 nodi e 2 triangoli; un raffinamento divide ogni triangolo in 4: 8 triangoli e 9 nodi."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Kt dalle formule di Kirsch",
+    "prompt": "Per una lastra infinita con foro di raggio `a` e trazione `σ` lungo x, sul bordo del foro la tensione circonferenziale vale `σθθ = σ·(1 − 2·cos 2θ)` (θ misurato dall'asse x). Calcola con NumPy l'array `s_tt` per `theta = np.linspace(0, π, 181)`, il massimo `Kt` (con σ = 1) e l'angolo in gradi `th_max` in cui si raggiunge.",
+    "starter": "import numpy as np\ntheta = np.linspace(0, np.pi, 181)\ns_tt = ...\nKt = ...\nth_max = ...\nprint(Kt, th_max)",
+    "tests": "import numpy as np\nassert np.isclose(Kt, 3.0), f\"Kt deve valere 3, ottenuto {Kt}\"\nassert np.isclose(th_max, 90.0), f\"il massimo è a 90°, ottenuto {th_max}\"\nassert np.isclose(s_tt[0], -1.0), \"a θ = 0 la tensione vale −σ (compressione)\"",
+    "solution": "import numpy as np\ntheta = np.linspace(0, np.pi, 181)\ns_tt = 1 - 2 * np.cos(2 * theta)\nKt = s_tt.max()\nth_max = np.degrees(theta[s_tt.argmax()])\nprint(Kt, th_max)",
+    "hints": [
+      "`s_tt = 1 - 2 * np.cos(2 * theta)`.",
+      "`argmax` dà l'indice del massimo; converti con `np.degrees`."
+    ]
+  }
+]

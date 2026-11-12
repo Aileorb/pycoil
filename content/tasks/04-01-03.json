@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "np.interp fuori dall'intervallo",
+    "code": "import numpy as np\nprint(np.interp(150, [0, 100], [10, 20]))",
+    "options": [
+      "20.0",
+      "25.0",
+      "nan",
+      "15.0"
+    ],
+    "answer": 0,
+    "explain": "Fuori dall'intervallo `np.interp` restituisce il valore all'estremo: non estrapola."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Taratura di un estensimetro",
+    "prompt": "Fai il fit lineare con `np.polyfit` dei dati di taratura (`eps` in µε, `V` in mV) e metti la sensibilità in `k` (mV/µε) e l'offset in `q`. Poi converti la lettura `V_lett = 2.4` mV in deformazione `eps_lett`.",
+    "starter": "import numpy as np\neps = np.array([0, 250, 500, 750, 1000.0])\nV = np.array([0.05, 0.66, 1.29, 1.90, 2.53])\nk, q = ...\nV_lett = 2.4\neps_lett = ...\nprint(k, q, eps_lett)",
+    "tests": "import numpy as np\nka, qa = np.polyfit(eps, V, 1)\nassert abs(k - ka) < 1e-12 and abs(q - qa) < 1e-12, \"usa np.polyfit(eps, V, 1)\"\nassert abs(eps_lett - (2.4 - qa) / ka) < 1e-6, \"eps = (V − q) / k\"",
+    "solution": "import numpy as np\neps = np.array([0, 250, 500, 750, 1000.0])\nV = np.array([0.05, 0.66, 1.29, 1.90, 2.53])\nk, q = np.polyfit(eps, V, 1)\nV_lett = 2.4\neps_lett = (V_lett - q) / k\nprint(k, q, eps_lett)",
+    "hints": [
+      "`np.polyfit(x, y, 1)` restituisce `[pendenza, intercetta]`.",
+      "Inverti la retta: ε = (V − q)/k."
+    ]
+  }
+]

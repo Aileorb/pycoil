@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Energia cinetica di una molla-massa",
+    "code": "import sympy as sp\nt, m = sp.symbols(\"t m\")\nx = sp.Function(\"x\")(t)\nT = m * x.diff(t)**2 / 2\nprint(sp.diff(T, x.diff(t)))",
+    "options": [
+      "m*Derivative(x(t), t)",
+      "m*x(t)",
+      "m*Derivative(x(t), (t, 2))",
+      "0"
+    ],
+    "answer": 0,
+    "explain": "∂T/∂ẋ = m ẋ: la quantità di moto. Nell'equazione di Lagrange poi si deriva nel tempo."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Equazione del pendolo",
+    "prompt": "Per il pendolo semplice `T = m*l**2*th'**2/2` e `V = -m*g*l*cos(th)`. Calcola con SymPy l'espressione di Lagrange `eq = d/dt(∂L/∂θ̇) − ∂L/∂θ` (con `L = T − V`) e mettila semplificata in `eq`.",
+    "starter": "import sympy as sp\nt = sp.symbols(\"t\")\nm, l, g = sp.symbols(\"m l g\", positive=True)\nth = sp.Function(\"theta\")(t)\nT = m * l**2 * th.diff(t)**2 / 2\nV = -m * g * l * sp.cos(th)\neq = ...\nprint(eq)",
+    "tests": "import sympy as sp\nt_ = sp.symbols(\"t\")\nm_, l_, g_ = sp.symbols(\"m l g\", positive=True)\nth_ = sp.Function(\"theta\")(t_)\natteso = m_ * l_**2 * th_.diff(t_, 2) + m_ * g_ * l_ * sp.sin(th_)\nassert sp.simplify(eq - atteso) == 0, f\"atteso m·l²·θ'' + m·g·l·sin θ, ottenuto {eq}\"",
+    "solution": "import sympy as sp\nt = sp.symbols(\"t\")\nm, l, g = sp.symbols(\"m l g\", positive=True)\nth = sp.Function(\"theta\")(t)\nT = m * l**2 * th.diff(t)**2 / 2\nV = -m * g * l * sp.cos(th)\nLag = T - V\neq = sp.simplify(sp.diff(Lag.diff(th.diff(t)), t) - Lag.diff(th))\nprint(eq)",
+    "hints": [
+      "`Lag = T - V`.",
+      "`sp.diff(Lag.diff(th.diff(t)), t) - Lag.diff(th)`."
+    ]
+  }
+]

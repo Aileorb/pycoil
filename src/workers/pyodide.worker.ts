@@ -26,6 +26,20 @@ async function boot(): Promise<Py> {
   return py;
 }
 
+// Librerie in puro Python non incluse in Pyodide: si installano da PyPI con micropip al primo uso.
+const FROM_PYPI: Record<string, string> = { pint: 'pint', openpyxl: 'openpyxl', skfem: 'scikit-fem' };
+
+async function installFromPypi(py: Py, src: string): Promise<void> {
+  const wanted = Object.keys(FROM_PYPI).filter((m) => new RegExp(`^\\s*(from|import)\\s+${m}\\b`, 'm').test(src));
+  if (!wanted.length) return;
+  py.globals.set('_pycoil_wanted', py.toPy(wanted));
+  const missing: string[] = py.runPython('import importlib.util as _u\n[m for m in _pycoil_wanted if _u.find_spec(m) is None]').toJs();
+  if (!missing.length) return;
+  await py.loadPackage('micropip', { messageCallback: () => undefined });
+  py.globals.set('_pycoil_missing', py.toPy(missing.map((m) => FROM_PYPI[m])));
+  await py.runPythonAsync('import micropip\nawait micropip.install(_pycoil_missing)');
+}
+
 const COLLECT_FIGS = `
 import sys as _sys
 _imgs = []
@@ -59,9 +73,21 @@ self.onmessage = async (e: MessageEvent<RunRequest>) => {
     if (!ready) ready = boot();
     const py = await ready;
     res.python = py.version;
+    // durante il caricamento delle librerie i messaggi di servizio non finiscono nell'output
+    py.setStdout({ batched: () => undefined });
+    py.setStderr({ batched: () => undefined });
+    await py.loadPackagesFromImports(`${code}\n${tests ?? ''}`, { messageCallback: () => undefined });
+    try {
+      await installFromPypi(py, `${code}\n${tests ?? ''}`);
+    } catch {
+      res.ok = false;
+      res.error = 'Libreria non disponibile: non riesco a scaricarla da PyPI. Serve la connessione la prima volta.';
+      res.out = out;
+      self.postMessage(res);
+      return;
+    }
     py.setStdout({ batched: (s: string) => (out += s + '\n') });
     py.setStderr({ batched: (s: string) => (out += s + '\n') });
-    await py.loadPackagesFromImports(`${code}\n${tests ?? ''}`);
     const ns = py.globals.get('dict')();
     try {
       await py.runPythonAsync(code, { globals: ns });

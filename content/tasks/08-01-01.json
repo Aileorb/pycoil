@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "argparse e valori di default",
+    "code": "import argparse\np = argparse.ArgumentParser()\np.add_argument(\"F\", type=float)\np.add_argument(\"--n\", type=int, default=3)\na = p.parse_args([\"2.5\"])\nprint(a.F * a.n)",
+    "options": [
+      "7.5",
+      "2.52.52.5",
+      "TypeError",
+      "2.5"
+    ],
+    "answer": 0,
+    "explain": "`F` viene convertito in float (2.5), `n` prende il default 3: 2.5 × 3 = 7.5."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Uno script con argomenti",
+    "prompt": "Scrivi `main(argv)` che con argparse legge una o più lunghezze in mm (`nargs=\"+\"`, float) e l'opzione `--unita` con scelta tra `\"m\"` e `\"cm\"` (default `\"m\"`), e **restituisce** la lista delle lunghezze convertite.",
+    "starter": "import argparse\n\ndef main(argv=None):\n    ...\n\nprint(main([\"1500\", \"250\", \"--unita\", \"cm\"]))",
+    "tests": "assert main([\"1500\", \"250\"]) == [1.5, 0.25], \"di default si converte in metri\"\nassert main([\"1500\", \"250\", \"--unita\", \"cm\"]) == [150.0, 25.0], \"con --unita cm si converte in centimetri\"\ntry:\n    main([\"10\", \"--unita\", \"km\"])\n    raise AssertionError(\"un'unità non prevista deve essere rifiutata (choices)\")\nexcept SystemExit:\n    pass",
+    "solution": "import argparse\n\ndef main(argv=None):\n    p = argparse.ArgumentParser()\n    p.add_argument(\"lunghezze\", type=float, nargs=\"+\")\n    p.add_argument(\"--unita\", choices=[\"m\", \"cm\"], default=\"m\")\n    a = p.parse_args(argv)\n    fattore = 1000 if a.unita == \"m\" else 10\n    return [x / fattore for x in a.lunghezze]\n\nprint(main([\"1500\", \"250\", \"--unita\", \"cm\"]))",
+    "hints": [
+      "`p.add_argument(\"lunghezze\", type=float, nargs=\"+\")`.",
+      "`choices=[\"m\", \"cm\"]` rifiuta i valori non previsti (argparse esce con `SystemExit`)."
+    ]
+  }
+]

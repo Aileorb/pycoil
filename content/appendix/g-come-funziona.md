@@ -9,7 +9,11 @@ sources:
 
 Tre micro-task da circa dieci minuti, pensate per il telefono: **Impara** (una scheda della sezione del giorno), **Prevedi** (indovina l'output di un frammento di codice) e **Scrivi** (completa un esercizio verificato da test). Completarle tutte e tre mantiene viva la **streak**.
 
-Le due task **avanzate** sono facoltative e da fare al computer: prima esercizi più lunghi (*kata*), poi, quando hai padronanza di una Parte, le tappe di un **progetto**.
+Le due task **avanzate** sono facoltative e da fare al computer: prima esercizi più lunghi (*kata*), poi, quando hai padronanza di una Parte, le tappe di uno dei nove **progetti**. I loro test pytest si possono eseguire anche nell'app, incollando il file.
+
+## Tre tentativi
+
+Negli esercizi *Prevedi* e *Scrivi*, e nelle verifiche delle task avanzate, una risposta sbagliata **non** mostra la soluzione: hai **tre tentativi**. Dopo il terzo errore la soluzione compare da sola, con la spiegazione. I tentativi restano contati fino a fine giornata, anche se chiudi e riapri la task. Puoi chiedere i suggerimenti quando vuoi, ma la task non conterà più come "giusta al primo colpo".
 
 ## Ripasso
 

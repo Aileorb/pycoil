@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "fit e predict",
+    "code": "import numpy as np\nfrom sklearn.linear_model import LinearRegression\nm = LinearRegression().fit(np.array([[1], [2], [3]]), np.array([3, 5, 7]))\nprint(round(float(m.predict([[10]])[0]), 1))",
+    "options": [
+      "21.0",
+      "20.0",
+      "7.0",
+      "23.0"
+    ],
+    "answer": 0,
+    "explain": "I dati stanno sulla retta y = 2x + 1: per x = 10 il modello prevede 21."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Esponente di Taylor",
+    "prompt": "Dai dati `v` (m/min) e `T` (vita utensile in min) stima l'esponente della legge di Taylor `T = C·v^k`: fai una `LinearRegression` di `log T` su `log v` e metti il coefficiente in `k` (un numero, non un array) e il valore di `C` in `C`.",
+    "starter": "import numpy as np\nfrom sklearn.linear_model import LinearRegression\nv = np.array([100, 150, 200, 250, 300.0])\nT = np.array([60.1, 31.5, 19.8, 13.9, 10.4])\nk = ...\nC = ...\nprint(k, C)",
+    "tests": "import numpy as np\nka, lnC = np.polyfit(np.log(v), np.log(T), 1)\nassert isinstance(k, float), \"k deve essere un float: prendi coef_[0] e convertilo\"\nassert abs(k - ka) < 1e-9, f\"esponente atteso {ka:.4f}, ottenuto {k}\"\nassert abs(C - np.exp(lnC)) / np.exp(lnC) < 1e-9, \"C = exp(intercetta)\"",
+    "solution": "import numpy as np\nfrom sklearn.linear_model import LinearRegression\nv = np.array([100, 150, 200, 250, 300.0])\nT = np.array([60.1, 31.5, 19.8, 13.9, 10.4])\nm = LinearRegression().fit(np.log(v).reshape(-1, 1), np.log(T))\nk = float(m.coef_[0])\nC = float(np.exp(m.intercept_))\nprint(k, C)",
+    "hints": [
+      "scikit-learn vuole X in due dimensioni: `np.log(v).reshape(-1, 1)`.",
+      "`k = float(m.coef_[0])`, `C = float(np.exp(m.intercept_))`."
+    ]
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Cercare in un set",
+    "code": "codici = set(range(1000))\nprint(999 in codici, 1000 in codici)",
+    "options": [
+      "True False",
+      "True True",
+      "False False",
+      "False True"
+    ],
+    "answer": 0,
+    "explain": "`range(1000)` va da 0 a 999. La ricerca in un `set` costa sempre uguale, qualunque sia la dimensione."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Vettorizzare un ciclo",
+    "prompt": "La funzione `lenta(x)` calcola con un ciclo la somma di `sqrt(x_i² + 1)` sui valori positivi. Scrivi `veloce(x)` che fa lo stesso con NumPy, senza cicli.",
+    "starter": "import numpy as np\n\ndef lenta(x):\n    tot = 0.0\n    for v in x:\n        if v > 0:\n            tot += (v * v + 1) ** 0.5\n    return tot\n\ndef veloce(x):\n    ...\n\nx = np.random.default_rng(0).normal(size=10_000)\nprint(lenta(x), veloce(x))",
+    "tests": "import numpy as np, dis\nx = np.random.default_rng(1).normal(size=5000)\nassert abs(veloce(x) - lenta(x)) < 1e-8, \"veloce e lenta devono dare lo stesso risultato\"\ndef _cicli(c):\n    return any(i.opname == \"FOR_ITER\" for i in dis.get_instructions(c)) or any(_cicli(k) for k in c.co_consts if hasattr(k, \"co_code\"))\nassert not _cicli(veloce.__code__), \"niente cicli in veloce: usa maschere e funzioni NumPy\"",
+    "solution": "import numpy as np\n\ndef lenta(x):\n    tot = 0.0\n    for v in x:\n        if v > 0:\n            tot += (v * v + 1) ** 0.5\n    return tot\n\ndef veloce(x):\n    p = x[x > 0]\n    return np.sqrt(p**2 + 1).sum()\n\nx = np.random.default_rng(0).normal(size=10_000)\nprint(lenta(x), veloce(x))",
+    "hints": [
+      "Filtra con una maschera: `x[x > 0]`.",
+      "Poi `np.sqrt(p**2 + 1).sum()`."
+    ]
+  }
+]

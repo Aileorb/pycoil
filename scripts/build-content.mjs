@@ -117,6 +117,22 @@ const sources = (list = []) =>
   });
 
 const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'));
+
+/**
+ * Mescola le opzioni in modo deterministico (stesso ID → stesso ordine) e ricalcola
+ * l'indice della risposta: negli autori la giusta è spesso la prima, nell'app no.
+ */
+function shuffleOptions(id, options, answer) {
+  let h = 2166136261;
+  for (const ch of id) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
+  const order = options.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0;
+    const j = h % (i + 1);
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return { options: order.map((i) => options[i]), answer: order.indexOf(answer) };
+}
 const files = [];
 const emit = (path, data) => files.push([path, data]);
 
@@ -171,9 +187,10 @@ for (const f of readdirSync(taskDir).filter((f) => f.endsWith('.json'))) {
     const id = `${t.kind}-${section}-${String.fromCharCode(96 + counters[t.kind])}`;
     if (t.kind === 'prevedi') {
       if (!(t.answer >= 0 && t.answer < t.options.length)) fail(`${id}: risposta fuori range`);
+      const mixed = shuffleOptions(id, t.options, t.answer);
       emit(`tasks/${id}.json`, {
         id, type: 'prevedi', section, title: t.title, minutes: t.minutes ?? 2,
-        code: t.code, codeHtml: highlightPython(t.code), options: t.options, answer: t.answer, explain: mdInline(t.explain)
+        code: t.code, codeHtml: highlightPython(t.code), options: mixed.options, answer: mixed.answer, explain: mdInline(t.explain)
       });
     } else if (t.kind === 'scrivi') {
       if (!t.tests || !t.solution) fail(`${id}: servono tests e solution`);
@@ -192,7 +209,7 @@ const katasIndex = katas.map((k) => {
   if (!sectionIds.has(k.section)) fail(`kata ${k.id}: sezione ${k.section} inesistente`);
   emit(`tasks/${k.id}.json`, {
     id: k.id, type: 'kata', section: k.section, title: k.title, minutes: k.minutes,
-    promptHtml: mdBlock(k.prompt), hints: (k.hints ?? []).map(mdInline), solution: k.solution, testFile: k.testFile
+    promptHtml: mdBlock(k.prompt), hints: (k.hints ?? []).map(mdInline), solution: k.solution, testFile: k.testFile, module: k.module
   });
   return { id: k.id, type: 'kata', section: k.section, title: k.title, minutes: k.minutes };
 });
@@ -205,7 +222,7 @@ for (const pid of readdirSync(join(SRC, 'projects'))) {
   p.steps.forEach((s, i) => {
     emit(`tasks/${p.id}-${s.id}.json`, {
       id: `${p.id}-${s.id}`, type: 'step', section: p.unlockAfter, project: p.id, step: i + 1, title: s.title, minutes: s.minutes,
-      promptHtml: mdBlock(s.prompt), hints: (s.hints ?? []).map(mdInline), solution: s.solution, testFile: s.test ? { name: s.testName, code: s.test } : undefined
+      promptHtml: mdBlock(s.prompt), hints: (s.hints ?? []).map(mdInline), solution: s.solution, testFile: s.test ? { name: s.testName, code: s.test } : undefined, module: p.module
     });
   });
   emit(`projects/${p.id}.json`, {
@@ -232,7 +249,7 @@ for (const f of readdirSync(join(SRC, 'appendix')).filter((f) => f.endsWith('.md
   emit(`appendix/${id}.json`, { id, title: meta.title, part: 'appendice', chapter: '', minutes: 5, html: mdBlock(body), sources: sources(meta.sources) });
 }
 
-const quiz = readJson(join(SRC, 'quiz.json'));
+const quiz = readJson(join(SRC, 'quiz.json')).map((q, i) => ({ ...q, ...shuffleOptions(`quiz-${i}`, q.options, q.answer) }));
 
 // ---------------------------------------------------------------- indice
 const index = {

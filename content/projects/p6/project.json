@@ -1,13 +1,81 @@
 {
   "id": "p6",
-  "title": "Verifiche con unità e incertezze",
+  "title": "Collegamento bullonato: formule, unità e incertezze",
   "stars": 4,
   "unlockAfter": "p6",
-  "summary": "Un calcolo di collegamento bullonato con SymPy per le formule, controllo delle unità e propagazione dell'incertezza delle misure con `uncertainties`.",
-  "intro": "Un calcolo di collegamento bullonato con SymPy per le formule, controllo delle unità e propagazione dell'incertezza delle misure con `uncertainties`.\n\n> [!nota] Questo progetto arriva con i prossimi aggiornamenti dei contenuti, insieme alla Parte che lo sblocca.\n\n## Le tappe previste\n\n1. Formule simboliche e derivazione\n2. Dalla formula alla funzione con `lambdify`\n3. Propagazione dell'incertezza\n4. Report del collegamento",
+  "module": "bullone.py",
+  "summary": "Precarico da coppia di serraggio, fattore di carico ricavato con SymPy, verifica con pint e dispersione del precarico con uncertainties e Monte Carlo.",
+  "intro": "Un collegamento bullonato precaricato porta un carico esterno di trazione `P`. Il bullone sente solo una frazione `C·P` del carico (`C = kb/(kb + km)`, rigidezze di bullone e piastre); il collegamento si **separa** quando il carico supera un certo valore. Costruisci **`bullone.py`** unendo SymPy (formule), pint (unità) e uncertainties (dispersione del precarico, che con la chiave dinamometrica è grande).\n\n**Come si lavora.** Crea una cartella con il file **`bullone.py`**. A ogni tappa aggiungi le funzioni richieste, scarica il test della tappa nella stessa cartella e lancia `pytest -q`. Puoi anche incollare tutto il file nell'app e premere *Esegui i test*.",
+  "final": "## Cosa hai costruito\n\nUn calcolo di collegamento come si fa in un ufficio tecnico serio: formule ricavate e verificate, unità esplicite e una stima realistica della dispersione. Con lo stesso schema si trattano la fatica del bullone e il serraggio angolare.",
   "sources": [
-    "SymPy | https://docs.sympy.org/latest/tutorials/intro-tutorial/index.html",
-    "uncertainties | https://uncertainties.readthedocs.io/"
+    "Shigley's Mechanical Engineering Design, cap. 8 | https://www.mheducation.com/",
+    "VDI 2230, calcolo dei collegamenti bullonati | https://www.vdi.de/"
   ],
-  "steps": []
+  "steps": [
+    {
+      "id": "precarico",
+      "title": "Area resistente e precarico",
+      "minutes": 15,
+      "prompt": "Scrivi `area_resistente(d, p)` (filettatura metrica ISO: `As = π/4·(d − 0.9382·p)²`, mm²) e `precarico(T, d, K=0.2)` che dalla coppia di serraggio `T` (N·mm) dà il precarico `Fi = T/(K·d)` (N).",
+      "hints": [
+        "`math.pi / 4 * (d - 0.9382 * p) ** 2`.",
+        "Il coefficiente di serraggio K vale circa 0.2 per bulloni non lubrificati."
+      ],
+      "solution": "import math\n\n\ndef area_resistente(d, p):\n    return math.pi / 4 * (d - 0.9382 * p) ** 2\n\n\ndef precarico(T, d, K=0.2):\n    return T / (K * d)",
+      "testName": "test_precarico.py",
+      "test": "from pytest import approx\nfrom bullone import area_resistente, precarico\n\n\ndef test_m12():\n    assert area_resistente(12, 1.75) == approx(84.27, abs=0.01)\n\n\ndef test_precarico():\n    assert precarico(80e3, 10) == approx(40_000)\n    assert precarico(80e3, 10, K=0.16) == approx(50_000)\n"
+    },
+    {
+      "id": "separazione",
+      "title": "Il carico di separazione con SymPy",
+      "minutes": 20,
+      "prompt": "Con SymPy, scrivi `carico_separazione()` che restituisce l'espressione simbolica del carico `P` che separa le piastre: la forza sulle piastre è `Fm = Fi − (1 − C)·P` e la separazione avviene quando `Fm = 0`. Usa i simboli `Fi`, `C`, `P` (positivi) e `sympy.solve`.",
+      "hints": [
+        "Simboli: `Fi, C, P = sp.symbols(\"Fi C P\", positive=True)`.",
+        "`sp.solve(sp.Eq(..., 0), P)[0]`."
+      ],
+      "solution": "import sympy as sp\n\n\ndef carico_separazione():\n    Fi, C, P = sp.symbols(\"Fi C P\", positive=True)\n    return sp.solve(sp.Eq(Fi - (1 - C) * P, 0), P)[0]",
+      "testName": "test_separazione.py",
+      "test": "import sympy as sp\nfrom bullone import carico_separazione\n\n\ndef test_formula():\n    Fi, C = sp.symbols(\"Fi C\", positive=True)\n    assert sp.simplify(carico_separazione() - Fi / (1 - C)) == 0\n"
+    },
+    {
+      "id": "unita",
+      "title": "Verifica con le unità",
+      "minutes": 20,
+      "prompt": "Con pint, scrivi `tensione_bullone(Fi, P, C, As)` che accetta grandezze con unità (forze in qualsiasi unità di forza, area in qualsiasi unità di superficie) e restituisce la tensione nel bullone `(Fi + C·P)/As` convertita in **MPa**. Crea il registro a livello di modulo: `u = pint.UnitRegistry()`.",
+      "hints": [
+        "Pint fa le conversioni da solo: scrivi la formula e chiama `.to(u.MPa)`.",
+        "Il registro `u` deve essere lo stesso usato dai test: definiscilo nel modulo."
+      ],
+      "solution": "import pint\n\nu = pint.UnitRegistry()\n\n\ndef tensione_bullone(Fi, P, C, As):\n    return ((Fi + C * P) / As).to(u.MPa)",
+      "testName": "test_unita.py",
+      "test": "from pytest import approx\nfrom bullone import tensione_bullone, u\n\n\ndef test_unita_miste():\n    s = tensione_bullone(40 * u.kN, 10_000 * u.N, 0.25, 84.3 * u.mm**2)\n    assert str(s.units) == \"megapascal\"\n    assert s.magnitude == approx((40_000 + 2_500) / 84.3)\n\n\ndef test_cm2():\n    s = tensione_bullone(42.5 * u.kN, 0 * u.N, 0.3, 0.843 * u.cm**2)\n    assert s.magnitude == approx(42_500 / 84.3)\n"
+    },
+    {
+      "id": "dispersione",
+      "title": "Dispersione del precarico",
+      "minutes": 20,
+      "prompt": "Il coefficiente `K` è incerto (tipicamente ±25 % come intervallo, cioè un'incertezza tipo di circa il 15 %). Scrivi `precarico_incerto(T, d, K, uK)` che restituisce il precarico come `ufloat` (libreria uncertainties), con `K = ufloat(K, uK)`.",
+      "hints": [
+        "`from uncertainties import ufloat`.",
+        "Scrivi la stessa formula di `precarico` con K incerto."
+      ],
+      "solution": "from uncertainties import ufloat\n\n\ndef precarico_incerto(T, d, K, uK):\n    return T / (ufloat(K, uK) * d)",
+      "testName": "test_dispersione.py",
+      "test": "from pytest import approx\nfrom bullone import precarico_incerto\n\n\ndef test_incertezza_relativa():\n    Fi = precarico_incerto(80e3, 10, 0.2, 0.03)\n    assert Fi.n == approx(40_000)\n    assert Fi.s / Fi.n == approx(0.03 / 0.2, rel=1e-9)\n"
+    },
+    {
+      "id": "montecarlo",
+      "title": "Probabilità di superare lo snervamento",
+      "minutes": 25,
+      "prompt": "Scrivi `prob_snervamento(T, d, As, Sp, P, C, K=0.2, cv=0.15, n=200_000, seed=0)`: estrai `n` valori di `K` da una normale con media `K` e coefficiente di variazione `cv` (scarta i valori ≤ 0), calcola la tensione nel bullone `(T/(K·d) + C·P)/As` e restituisci la frazione di casi in cui supera `Sp`. Usa `np.random.default_rng(seed)`.",
+      "hints": [
+        "`rng.normal(K, cv * K, n)` estrae i coefficienti.",
+        "La probabilità è la media di un array booleano: `np.mean(sigma > Sp)`."
+      ],
+      "solution": "import numpy as np\n\n\ndef prob_snervamento(T, d, As, Sp, P, C, K=0.2, cv=0.15, n=200_000, seed=0):\n    rng = np.random.default_rng(seed)\n    Kc = rng.normal(K, cv * K, n)\n    Kc = Kc[Kc > 0]\n    sigma = (T / (Kc * d) + C * P) / As\n    return float(np.mean(sigma > Sp))",
+      "testName": "test_montecarlo.py",
+      "test": "import math\nfrom bullone import prob_snervamento\n\n\ndef test_confronto_con_la_normale():\n    # senza carico esterno: σ > Sp  <=>  K < T / (d·As·Sp)\n    T, d, As, Sp = 100e3, 12, 84.3, 600.0\n    K_lim = T / (d * As * Sp)\n    z = (K_lim - 0.2) / (0.15 * 0.2)\n    atteso = 0.5 * (1 + math.erf(z / math.sqrt(2)))\n    p = prob_snervamento(T, d, As, Sp, 0, 0.25)\n    assert abs(p - atteso) < 0.005\n\n\ndef test_monotona_nel_carico():\n    p1 = prob_snervamento(90e3, 12, 84.3, 600, 5_000, 0.25)\n    p2 = prob_snervamento(90e3, 12, 84.3, 600, 20_000, 0.25)\n    assert p2 > p1\n"
+    }
+  ]
 }

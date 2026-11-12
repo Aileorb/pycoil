@@ -1,0 +1,81 @@
+{
+  "id": "p8",
+  "title": "FEM 2D di una lastra forata",
+  "stars": 5,
+  "unlockAfter": "p7",
+  "module": "cst.py",
+  "summary": "Un solutore agli elementi finiti triangolari (CST) scritto da te: mesh, rigidezza, assemblaggio sparso, patch test e Kt di una lastra forata.",
+  "intro": "Il progetto più impegnativo: un **solutore FEM 2D** in stato piano di tensione con elementi triangolari a deformazione costante (**CST**), scritto da zero con NumPy e SciPy. Lo verifichi con il *patch test* (trazione uniforme) e lo usi per stimare il fattore di concentrazione `Kt` di una lastra con foro, da confrontare con il valore 3 di Kirsch.\n\nConvenzione dei gradi di libertà: il nodo `i` ha `ux` in `2i` e `uy` in `2i + 1`.\n\n**Come si lavora.** Crea una cartella con il file **`cst.py`**. A ogni tappa aggiungi le funzioni richieste, scarica il test della tappa nella stessa cartella e lancia `pytest -q`. Puoi anche incollare tutto il file nell'app e premere *Esegui i test*.",
+  "final": "## Cosa hai costruito\n\nUn solutore FEM completo in poche decine di righe. Ora puoi leggere il codice di scikit-fem o di un solutore commerciale sapendo cosa c'è dentro: è questo che distingue chi usa il FEM da chi lo capisce.",
+  "sources": [
+    "Logan, A First Course in the Finite Element Method, cap. 6 | https://www.cengage.com/",
+    "scipy.sparse | https://docs.scipy.org/doc/scipy/reference/sparse.html"
+  ],
+  "steps": [
+    {
+      "id": "mesh",
+      "title": "Una mesh strutturata di triangoli",
+      "minutes": 20,
+      "prompt": "Scrivi `mesh_rettangolo(Lx, Ly, nx, ny)` che restituisce `(nodi, tri)`: `nodi` è un array `(n, 2)` di coordinate su una griglia di `(nx+1)×(ny+1)` punti (prima lungo x), `tri` un array di interi `(2·nx·ny, 3)` con due triangoli **antiorari** per ogni rettangolo.",
+      "hints": [
+        "`np.meshgrid` e poi `ravel()` danno le coordinate riga per riga.",
+        "Per il rettangolo con vertice in basso a sinistra `a`: `(a, a+1, a+nx+2)` e `(a, a+nx+2, a+nx+1)`."
+      ],
+      "solution": "import numpy as np\n\n\ndef mesh_rettangolo(Lx, Ly, nx, ny):\n    x, y = np.meshgrid(np.linspace(0, Lx, nx + 1), np.linspace(0, Ly, ny + 1))\n    nodi = np.column_stack([x.ravel(), y.ravel()])\n    tri = []\n    for j in range(ny):\n        for i in range(nx):\n            a = j * (nx + 1) + i\n            b, c, d = a + 1, a + nx + 2, a + nx + 1\n            tri += [(a, b, c), (a, c, d)]\n    return nodi, np.array(tri)",
+      "testName": "test_mesh.py",
+      "test": "import numpy as np\nfrom cst import mesh_rettangolo\n\n\ndef test_dimensioni_e_area():\n    nodi, tri = mesh_rettangolo(2.0, 1.0, 4, 2)\n    assert nodi.shape == (15, 2)\n    assert tri.shape == (16, 3)\n    p = nodi[tri]\n    area = 0.5 * ((p[:, 1, 0] - p[:, 0, 0]) * (p[:, 2, 1] - p[:, 0, 1]) - (p[:, 2, 0] - p[:, 0, 0]) * (p[:, 1, 1] - p[:, 0, 1]))\n    assert np.all(area > 0)\n    assert np.isclose(area.sum(), 2.0)\n"
+    },
+    {
+      "id": "elemento",
+      "title": "La rigidezza dell'elemento CST",
+      "minutes": 25,
+      "prompt": "Scrivi `k_cst(xy, E, nu, t=1.0)` per un triangolo con vertici `xy` (array 3×2): restituisce `(k, B, D, A)` con `B` la matrice 3×6 deformazioni-spostamenti, `D` la matrice elastica dello stato piano di tensione, `A` l'area e `k = t·A·Bᵀ·D·B` (6×6).",
+      "hints": [
+        "Con `b_i = y_j − y_k` e `c_i = x_k − x_j` (indici ciclici), `B` ha `b` sulla riga di εx, `c` su εy, entrambe su γxy.",
+        "D per lo stato piano di tensione: `E/(1−ν²)·[[1, ν, 0], [ν, 1, 0], [0, 0, (1−ν)/2]]`."
+      ],
+      "solution": "def k_cst(xy, E, nu, t=1.0):\n    (x1, y1), (x2, y2), (x3, y3) = xy\n    A = 0.5 * ((x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1))\n    b = np.array([y2 - y3, y3 - y1, y1 - y2])\n    c = np.array([x3 - x2, x1 - x3, x2 - x1])\n    B = np.zeros((3, 6))\n    B[0, 0::2] = b\n    B[1, 1::2] = c\n    B[2, 0::2] = c\n    B[2, 1::2] = b\n    B /= 2 * A\n    D = E / (1 - nu**2) * np.array([[1, nu, 0], [nu, 1, 0], [0, 0, (1 - nu) / 2]])\n    return t * A * B.T @ D @ B, B, D, A",
+      "testName": "test_elemento.py",
+      "test": "import numpy as np\nfrom cst import k_cst\n\n\ndef test_proprieta():\n    xy = np.array([[0, 0], [2, 0], [0, 1.0]])\n    k, B, D, A = k_cst(xy, 1000.0, 0.3)\n    assert np.isclose(A, 1.0)\n    assert np.allclose(k, k.T)\n    # una traslazione rigida non produce forze\n    assert np.allclose(k @ np.array([1, 0, 1, 0, 1, 0]), 0)\n    assert np.allclose(k @ np.array([0, 1, 0, 1, 0, 1]), 0)\n    # deformazione uniforme ux = x  →  εx = 1\n    assert np.allclose(B @ np.array([0, 0, 2, 0, 0, 0]), [1, 0, 0])\n"
+    },
+    {
+      "id": "assembla",
+      "title": "Assemblaggio sparso",
+      "minutes": 20,
+      "prompt": "Scrivi `assembla(nodi, tri, E, nu, t=1.0)` che restituisce la matrice di rigidezza globale come matrice **sparsa** `scipy.sparse.csr_matrix` di dimensione `2n × 2n`, raccogliendo righe, colonne e valori di tutti gli elementi in formato COO.",
+      "hints": [
+        "I gradi dell'elemento: `[2a, 2a+1, 2b, 2b+1, 2c, 2c+1]`.",
+        "In formato COO i duplicati si sommano da soli nella conversione: `coo_matrix((v, (r, c))).tocsr()`."
+      ],
+      "solution": "import scipy.sparse as sps\n\n\ndef assembla(nodi, tri, E, nu, t=1.0):\n    righe, colonne, valori = [], [], []\n    for el in tri:\n        k = k_cst(nodi[el], E, nu, t)[0]\n        dofs = np.ravel([[2 * n, 2 * n + 1] for n in el])\n        righe.append(np.repeat(dofs, 6))\n        colonne.append(np.tile(dofs, 6))\n        valori.append(k.ravel())\n    n = 2 * len(nodi)\n    return sps.coo_matrix((np.concatenate(valori), (np.concatenate(righe), np.concatenate(colonne))), shape=(n, n)).tocsr()",
+      "testName": "test_assembla.py",
+      "test": "import numpy as np\nimport scipy.sparse as sps\nfrom cst import assembla, mesh_rettangolo\n\n\ndef test_sparsa_e_singolare_senza_vincoli():\n    nodi, tri = mesh_rettangolo(1, 1, 3, 3)\n    K = assembla(nodi, tri, 1000, 0.3)\n    assert sps.issparse(K)\n    assert K.shape == (32, 32)\n    assert np.allclose((K - K.T).toarray(), 0)\n    assert np.allclose(K @ np.tile([1.0, 0.0], 16), 0)\n"
+    },
+    {
+      "id": "patch",
+      "title": "Soluzione e patch test",
+      "minutes": 25,
+      "prompt": "Scrivi `risolvi(K, vincolati, F)` (gradi vincolati a spostamento nullo, risolve con `spsolve` sui gradi liberi e restituisce `u` completo) e `tensioni(nodi, tri, u, E, nu)` che restituisce un array `(n_elementi, 3)` con `[σx, σy, τxy]` di ogni elemento. Il test applica una trazione uniforme a una lastra: tutte le σx devono essere uguali.",
+      "hints": [
+        "Estrai il blocco libero con `K[liberi][:, liberi]`.",
+        "La tensione di un elemento è `D @ B @ u_elemento`: costante nell'elemento."
+      ],
+      "solution": "from scipy.sparse.linalg import spsolve\n\n\ndef risolvi(K, vincolati, F):\n    n = K.shape[0]\n    liberi = np.setdiff1d(np.arange(n), vincolati)\n    u = np.zeros(n)\n    u[liberi] = spsolve(K[liberi][:, liberi].tocsc(), F[liberi])\n    return u\n\n\ndef tensioni(nodi, tri, u, E, nu):\n    out = np.zeros((len(tri), 3))\n    for e, el in enumerate(tri):\n        _, B, D, _ = k_cst(nodi[el], E, nu)\n        dofs = np.ravel([[2 * n, 2 * n + 1] for n in el])\n        out[e] = D @ B @ u[dofs]\n    return out",
+      "testName": "test_patch.py",
+      "test": "import numpy as np\nfrom cst import assembla, mesh_rettangolo, risolvi, tensioni\n\n\ndef test_trazione_uniforme():\n    Lx, Ly, nx, ny = 4.0, 2.0, 8, 4\n    nodi, tri = mesh_rettangolo(Lx, Ly, nx, ny)\n    K = assembla(nodi, tri, 210e3, 0.3)\n    F = np.zeros(2 * len(nodi))\n    destra = np.nonzero(np.isclose(nodi[:, 0], Lx))[0]\n    q = 10.0 * Ly / ny                       # σ = 10 MPa su spessore unitario\n    for n in destra:\n        F[2 * n] += q if 0 < nodi[n, 1] < Ly else q / 2\n    sinistra = np.nonzero(np.isclose(nodi[:, 0], 0))[0]\n    vincolati = np.concatenate([2 * sinistra, [2 * sinistra[0] + 1]])\n    u = risolvi(K, vincolati, F)\n    s = tensioni(nodi, tri, u, 210e3, 0.3)\n    assert np.allclose(s[:, 0], 10.0)\n    assert np.allclose(s[:, 1:], 0, atol=1e-9)\n"
+    },
+    {
+      "id": "foro",
+      "title": "Il Kt della lastra forata",
+      "minutes": 30,
+      "prompt": "Usa il tuo solutore su un quarto di lastra con foro. La funzione di mesh è già pronta (copiala): `mesh_foro(a, W, nr, nt)`. Scrivi `kt_lastra(a=1.0, W=6.0, nr=30, nt=40)` che applica σ = 1 sul lato `x = W` (forze nodali come nel patch test, ripartite sulla lunghezza dei lati), impone le simmetrie (`ux = 0` su `x = 0`, `uy = 0` su `y = 0`) e restituisce la σx massima tra gli elementi che toccano il nodo in `(0, a)`.\n\n```python\ndef mesh_foro(a, W, nr, nt):\n    th = np.linspace(0, np.pi / 2, nt + 1)\n    ox = np.where(th <= np.pi / 4, W, W / np.tan(np.maximum(th, 1e-12)))\n    oy = np.where(th <= np.pi / 4, W * np.tan(th), W)\n    s = np.linspace(0, 1, nr + 1) ** 1.8\n    X = a * np.cos(th) + s[:, None] * (ox - a * np.cos(th))\n    Y = a * np.sin(th) + s[:, None] * (oy - a * np.sin(th))\n    nodi = np.column_stack([X.ravel(), Y.ravel()])\n    idx = np.arange(X.size).reshape(X.shape)\n    p, q, r, t = idx[:-1, :-1].ravel(), idx[1:, :-1].ravel(), idx[1:, 1:].ravel(), idx[:-1, 1:].ravel()\n    tri = np.vstack([np.column_stack([p, q, r]), np.column_stack([p, r, t])])\n    return nodi, tri\n```",
+      "hints": [
+        "Ordina i nodi del lato destro per y e ripartisci σ·L di ogni lato a metà sui suoi due nodi.",
+        "Il CST ha tensione costante per elemento: il valore nell'elemento al bordo del foro sottostima un po' il picco."
+      ],
+      "solution": "def mesh_foro(a, W, nr, nt):\n    th = np.linspace(0, np.pi / 2, nt + 1)\n    ox = np.where(th <= np.pi / 4, W, W / np.tan(np.maximum(th, 1e-12)))\n    oy = np.where(th <= np.pi / 4, W * np.tan(th), W)\n    s = np.linspace(0, 1, nr + 1) ** 1.8\n    X = a * np.cos(th) + s[:, None] * (ox - a * np.cos(th))\n    Y = a * np.sin(th) + s[:, None] * (oy - a * np.sin(th))\n    nodi = np.column_stack([X.ravel(), Y.ravel()])\n    idx = np.arange(X.size).reshape(X.shape)\n    p, q, r, t = idx[:-1, :-1].ravel(), idx[1:, :-1].ravel(), idx[1:, 1:].ravel(), idx[:-1, 1:].ravel()\n    tri = np.vstack([np.column_stack([p, q, r]), np.column_stack([p, r, t])])\n    return nodi, tri\n\n\ndef kt_lastra(a=1.0, W=6.0, nr=30, nt=40, E=210e3, nu=0.3):\n    nodi, tri = mesh_foro(a, W, nr, nt)\n    K = assembla(nodi, tri, E, nu)\n    F = np.zeros(2 * len(nodi))\n    destra = np.nonzero(np.isclose(nodi[:, 0], W))[0]\n    destra = destra[np.argsort(nodi[destra, 1])]\n    for n1, n2 in zip(destra[:-1], destra[1:]):\n        L = nodi[n2, 1] - nodi[n1, 1]\n        F[2 * n1] += L / 2\n        F[2 * n2] += L / 2\n    vincolati = np.concatenate([\n        2 * np.nonzero(np.isclose(nodi[:, 0], 0, atol=1e-9))[0],\n        2 * np.nonzero(np.isclose(nodi[:, 1], 0, atol=1e-9))[0] + 1,\n    ])\n    u = risolvi(K, vincolati, F)\n    s = tensioni(nodi, tri, u, E, nu)\n    top = np.argmin(nodi[:, 0] ** 2 + (nodi[:, 1] - a) ** 2)\n    vicini = np.nonzero((tri == top).any(axis=1))[0]\n    return float(s[vicini, 0].max())",
+      "testName": "test_foro.py",
+      "test": "from cst import kt_lastra\n\n\ndef test_vicino_a_kirsch():\n    kt = kt_lastra()\n    assert 2.6 < kt < 3.5\n"
+    }
+  ]
+}

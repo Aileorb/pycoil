@@ -18,7 +18,7 @@ print(sp.factor(-w.subs(sol).subs(x, L / 2)))
 
 **Da sapere per primo:** `symbols`, `diff`, `integrate`, `solve`, `subs`, `simplify`, `lambdify`.
 
-**Nel percorso:** Parte VI (in arrivo).
+**Nel percorso:** Parte VI, sezioni 6.1.1–6.1.3.
 
 ```bash
 pip install sympy

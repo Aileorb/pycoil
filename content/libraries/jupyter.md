@@ -12,4 +12,4 @@ jupyter lab
 
 > [!desktop] Su un computer senza installazioni puoi provare JupyterLite, che gira nel browser con lo stesso motore Pyodide usato da questa app.
 
-**Nel percorso:** Parte II, capitolo Strumenti (in arrivo).
+**Nel percorso:** sezione 2.7.1.

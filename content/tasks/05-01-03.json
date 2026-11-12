@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "resample",
+    "code": "import pandas as pd\ns = pd.Series([1, 3, 5, 7], index=pd.date_range(\"2026-01-01\", periods=4, freq=\"h\"))\nprint(s.resample(\"2h\").mean().tolist())",
+    "options": [
+      "[2.0, 6.0]",
+      "[4.0, 12.0]",
+      "[1.0, 5.0]",
+      "[3.0, 7.0]"
+    ],
+    "answer": 0,
+    "explain": "Si raggruppano le ore a due a due (1 e 3, 5 e 7) e si fa la media di ciascun gruppo."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Media mobile centrata",
+    "prompt": "Liscia la serie `s` con una media mobile **centrata** su 5 campioni in `liscia`. Poi metti in `picco` il valore massimo della serie lisciata (ignorando i `NaN` ai bordi).",
+    "starter": "import numpy as np\nimport pandas as pd\nrng = np.random.default_rng(0)\ns = pd.Series(np.sin(np.linspace(0, 3, 60)) + rng.normal(0, 0.1, 60))\nliscia = ...\npicco = ...\nprint(picco)",
+    "tests": "att = s.rolling(5, center=True).mean()\nassert liscia.isna().sum() == 4, \"una media centrata su 5 lascia 2 NaN per lato: usa center=True\"\nassert abs(picco - att.max()) < 1e-12, \"picco = massimo della serie lisciata\"",
+    "solution": "import numpy as np\nimport pandas as pd\nrng = np.random.default_rng(0)\ns = pd.Series(np.sin(np.linspace(0, 3, 60)) + rng.normal(0, 0.1, 60))\nliscia = s.rolling(5, center=True).mean()\npicco = liscia.max()\nprint(picco)",
+    "hints": [
+      "`s.rolling(5, center=True).mean()`.",
+      "`.max()` di pandas ignora già i NaN."
+    ]
+  }
+]

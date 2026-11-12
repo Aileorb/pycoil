@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "df.plot restituisce gli assi",
+    "code": "import pandas as pd\nax = pd.DataFrame({\"y\": [1, 4, 9]}).plot()\nprint(type(ax).__name__, len(ax.lines))",
+    "options": [
+      "Axes 1",
+      "Figure 1",
+      "Axes 3",
+      "list 1"
+    ],
+    "answer": 0,
+    "explain": "`df.plot()` restituisce l'oggetto `Axes` di Matplotlib con una linea per colonna."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Grafico di confronto per materiale",
+    "prompt": "Disegna con pandas un grafico a barre (`plot.bar`) della media di `Rm` per materiale e chiama gli assi `ax`. Etichetta l'asse y con `\"Rm medio [MPa]\"`.",
+    "starter": "import pandas as pd\ndf = pd.DataFrame({\"materiale\": [\"S235\", \"S235\", \"S355\", \"S355\", \"S275\"], \"Rm\": [418, 431, 532, 548, 465]})\nax = ...\n",
+    "tests": "import pandas as pd\nassert len(ax.patches) == 3, \"servono tre barre, una per materiale\"\nalt = sorted(round(p.get_height(), 1) for p in ax.patches)\nassert alt == [424.5, 465.0, 540.0], f\"altezze delle barre: {alt}\"\nassert ax.get_ylabel() == \"Rm medio [MPa]\", \"etichetta l'asse y\"",
+    "solution": "import pandas as pd\ndf = pd.DataFrame({\"materiale\": [\"S235\", \"S235\", \"S355\", \"S355\", \"S275\"], \"Rm\": [418, 431, 532, 548, 465]})\nax = df.groupby(\"materiale\")[\"Rm\"].mean().plot.bar(rot=0)\nax.set_ylabel(\"Rm medio [MPa]\")",
+    "hints": [
+      "Prima `groupby(\"materiale\")[\"Rm\"].mean()`, poi `.plot.bar()`.",
+      "`ax.set_ylabel(...)`."
+    ]
+  }
+]

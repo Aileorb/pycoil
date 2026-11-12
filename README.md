@@ -12,7 +12,7 @@ PyCoil è una web app installabile (PWA) che insegna Python a chi studia ingegne
 
 | Tab | Contenuto |
 |---|---|
-| **Oggi** | Streak con il pitone che festeggia sempre di più (dorato dai 30 giorni, scheletro se la perdi), frase di sfida, le 3 task del giorno (*Impara*, *Prevedi*, *Scrivi*) e le 2 avanzate (kata o tappe di progetto). |
+| **Oggi** | Streak con il pitone che festeggia sempre di più (dorato dai 30 giorni, scheletro se la perdi), frase di sfida, le 3 task del giorno (*Impara*, *Prevedi*, *Scrivi*) e le 2 avanzate (kata o tappe di progetto). Tre tentativi per esercizio prima che compaia la soluzione. |
 | **Percorso** | Il libro: Parti → capitoli → sezioni, spunta verde quando arrivi in fondo, precedente/successiva, ricerca, preferiti con la stella, progetti, librerie da sapere, appendice. |
 | **Statistiche** | Lo stadio di crescita (uovo → uovo crepato → occhio nel buio → piccolo → pitone → pitone beato sul ramo) con un cielo che schiarisce verso l'alba, livello e XP, capacità raggiunte, grafico settimanale con il pulcino che vola nei giorni con le avanzate. |
 
@@ -33,11 +33,11 @@ Il codice Python gira **nel browser** con [Pyodide](https://pyodide.org/) (Pytho
 
 ```
 content/            sorgenti didattici (Markdown + JSON) → public/content/*.json
-  book.json         Parti, capitoli, sezioni (le sezioni senza .md sono "in arrivo")
+  book.json         Parti, capitoli, sezioni (una sezione senza .md compare come "in arrivo")
   sections/*.md     testo delle sezioni; il pezzo prima di <!-- /card --> è la scheda "Impara"
   tasks/<sez>.json  esercizi Prevedi e Scrivi della sezione
   katas.json        task avanzate brevi (al computer, con file pytest)
-  projects/<id>/    i 7 progetti a tappe, a difficoltà crescente
+  projects/<id>/    i 9 progetti a tappe, a difficoltà crescente
   libraries*        le librerie da sapere assolutamente
   appendix/*.md     appendice A–G
   quiz.json         test di livello iniziale
@@ -102,13 +102,23 @@ Gli ID si generano da soli (`prevedi-03-01-01-a`, …). `verify_content.py` cont
 
 **Progetti** (`content/projects/pN/project.json`): `steps` con `prompt`, `solution`, `test` (file pytest) e `hints`. Le soluzioni delle tappe si sommano nel modulo indicato da `module`. Un progetto con `steps: []` compare come «in arrivo».
 
-## Roadmap dei contenuti
+## Contenuti
 
-- [x] Parte 0 · Primi passi, Parte I · Python solido, Parte III · NumPy e Matplotlib (complete)
-- [x] Parte II · Python idiomatico: classi, dataclass, `match` (altre sezioni in arrivo: dunder, iteratori, decoratori, type hint, strumenti)
-- [ ] Parte IV · SciPy, V · pandas, VI · SymPy/unità/incertezza, VII · applicazioni meccaniche e FEM 2D, VIII · automazione (indice, obiettivi e fonti già presenti)
-- [x] Progetti 1–3 completi (formulario delle sezioni, catalogo materiali, trave appoggiata); 4–7 con scaletta
-- [x] 11 kata, 13 librerie, appendice A–G
+| Parte | Argomento | Sezioni |
+|---|---|---|
+| 0 | Primi passi | 9 |
+| I | Python solido | 9 |
+| II | Python idiomatico: dunder, dataclass, `match`, generatori, decoratori, type hint, strumenti | 11 |
+| III | NumPy e Matplotlib | 8 |
+| IV | Metodi numerici con SciPy: radici, integrali, fit, ODE, ottimizzazione, FFT | 6 |
+| V | Dati sperimentali con pandas | 5 |
+| VI | SymPy, Lagrange, pint, incertezza | 5 |
+| VII | CoolProp, meccanismi, fatica, FEM 1D/2D, CadQuery | 7 |
+| VIII | Script, Excel, Arduino, prestazioni, modelli predittivi | 5 |
+
+Più 131 esercizi *Prevedi*/*Scrivi*, 22 kata e 9 progetti (formulario delle sezioni, catalogo materiali, trave appoggiata, vibrazioni di un albero, prova di trazione, collegamento bullonato, ciclo Rankine, FEM 2D con elementi CST, collaudo automatico), tutti verificati eseguendo il codice.
+
+Nell'app, `pint`, `openpyxl` e `scikit-fem` (non inclusi in Pyodide) si installano da PyPI con micropip al primo uso.
 
 ## Fonti del percorso
 

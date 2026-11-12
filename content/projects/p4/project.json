@@ -3,10 +3,79 @@
   "title": "Vibrazioni di un albero",
   "stars": 3,
   "unlockAfter": "p4",
-  "summary": "Velocità critiche di un albero con dischi: matrici di massa e rigidezza, modi propri con SciPy, risposta forzata e diagramma di Campbell semplificato.",
-  "intro": "Velocità critiche di un albero con dischi: matrici di massa e rigidezza, modi propri con SciPy, risposta forzata e diagramma di Campbell semplificato.\n\n> [!nota] Questo progetto arriva con i prossimi aggiornamenti dei contenuti, insieme alla Parte che lo sblocca.\n\n## Le tappe previste\n\n1. Modello a masse concentrate dell'albero\n2. Matrici M e K\n3. Frequenze e modi con `eigh`\n4. Risposta a uno squilibrio con `solve_ivp`\n5. Grafico della risposta in frequenza",
+  "module": "albero.py",
+  "summary": "Modello torsionale a masse concentrate: matrici, frequenze e modi, risposta forzata, transitorio e curva di risposta.",
+  "intro": "Un albero di trasmissione con tre dischi (motore, volano, utilizzatore) è modellato come una catena di **inerzie** `J` collegate da **rigidezze torsionali** `k`, con il primo disco collegato a un supporto rigido tramite il primo tratto d'albero. Costruisci **`albero.py`**: matrici del sistema, frequenze proprie, risposta a una coppia armonica, simulazione nel tempo e grafico della risposta in frequenza.\n\nUnità: kg·m² per le inerzie, N·m/rad per le rigidezze, N·m·s/rad per lo smorzamento.\n\n**Come si lavora.** Crea una cartella con il file **`albero.py`**. A ogni tappa aggiungi le funzioni richieste, scarica il test della tappa nella stessa cartella e lancia `pytest -q`. Puoi anche incollare tutto il file nell'app e premere *Esegui i test*.",
+  "final": "## Cosa hai costruito\n\nLo stesso flusso dei software di analisi rotordinamica: modello → modi → risposta. Prossimi passi: aggiungere i giunti elastici come elementi con smorzamento proprio, o passare al modello flessionale con le matrici di trave.",
   "sources": [
-    "SciPy: eigh | https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html"
+    "scipy.linalg.eigh | https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html",
+    "Rao, Mechanical Vibrations | https://www.pearson.com/"
   ],
-  "steps": []
+  "steps": [
+    {
+      "id": "matrici",
+      "title": "Matrici di massa e rigidezza",
+      "minutes": 20,
+      "prompt": "Scrivi `matrici(J, k)`: `J` è la lista delle inerzie dei dischi, `k` la lista delle rigidezze dei tratti (il tratto `k[0]` collega il supporto al disco 0, `k[i]` collega il disco `i-1` al disco `i`; le liste hanno la stessa lunghezza). Restituisci `(M, K)` come array NumPy.",
+      "hints": [
+        "Il tratto `k[i]` (con i > 0) contribuisce come una molla tra i gradi di libertà i−1 e i.",
+        "Il tratto `k[0]` va solo sulla diagonale del disco 0: l'altro estremo è fisso."
+      ],
+      "solution": "import numpy as np\n\n\ndef matrici(J, k):\n    n = len(J)\n    M = np.diag(np.asarray(J, dtype=float))\n    K = np.zeros((n, n))\n    for i, ki in enumerate(k):\n        K[i, i] += ki\n        if i > 0:\n            K[i - 1, i - 1] += ki\n            K[i - 1, i] -= ki\n            K[i, i - 1] -= ki\n    return M, K",
+      "testName": "test_matrici.py",
+      "test": "import numpy as np\nfrom albero import matrici\n\n\ndef test_due_dischi():\n    M, K = matrici([2.0, 1.0], [300.0, 100.0])\n    assert np.allclose(M, np.diag([2.0, 1.0]))\n    assert np.allclose(K, [[400.0, -100.0], [-100.0, 100.0]])\n\n\ndef test_simmetrica():\n    M, K = matrici([1, 1, 1], [10, 20, 30])\n    assert np.allclose(K, K.T)\n    assert np.allclose(K.sum(axis=1), [10, 0, 0])\n"
+    },
+    {
+      "id": "modi",
+      "title": "Frequenze e modi propri",
+      "minutes": 20,
+      "prompt": "Scrivi `modi(M, K)` che restituisce `(f, phi)`: le frequenze proprie in **Hz** in ordine crescente e la matrice dei modi (una colonna per modo) normalizzati con il valore massimo in modulo uguale a 1 e positivo. Usa `scipy.linalg.eigh`.",
+      "hints": [
+        "`eigh(K, M)` risolve il problema generalizzato e dà ω² crescenti.",
+        "Per ogni colonna dividi per l'elemento di modulo massimo (con il suo segno)."
+      ],
+      "solution": "from scipy.linalg import eigh\n\n\ndef modi(M, K):\n    w2, phi = eigh(K, M)\n    f = np.sqrt(np.clip(w2, 0, None)) / (2 * np.pi)\n    for j in range(phi.shape[1]):\n        col = phi[:, j]\n        phi[:, j] = col / col[np.argmax(np.abs(col))]\n    return f, phi",
+      "testName": "test_modi.py",
+      "test": "import numpy as np\nfrom albero import matrici, modi\n\n\ndef test_un_disco():\n    M, K = matrici([0.5], [2000.0])\n    f, phi = modi(M, K)\n    assert np.isclose(f[0], np.sqrt(2000 / 0.5) / (2 * np.pi))\n    assert np.isclose(phi[0, 0], 1.0)\n\n\ndef test_ordinate_e_normalizzate():\n    M, K = matrici([2.0, 1.0, 0.5], [3e4, 1e4, 5e3])\n    f, phi = modi(M, K)\n    assert np.all(np.diff(f) > 0)\n    assert np.allclose(np.abs(phi).max(axis=0), 1)\n    assert np.allclose(phi.max(axis=0), 1)\n"
+    },
+    {
+      "id": "risposta",
+      "title": "Risposta a una coppia armonica",
+      "minutes": 20,
+      "prompt": "Con smorzamento `C` e coppia armonica di ampiezza `T0` (vettore) e pulsazione `w`, l'ampiezza a regime si ricava da `(K − w²M + i·w·C) X = T0`. Scrivi `risposta(M, K, C, T0, w)` che restituisce le ampiezze `|X|` (array reale).",
+      "hints": [
+        "Usa numeri complessi: `1j * w * C`.",
+        "`np.linalg.solve` funziona anche con matrici complesse; poi `np.abs`."
+      ],
+      "solution": "def risposta(M, K, C, T0, w):\n    A = K - w**2 * M + 1j * w * C\n    return np.abs(np.linalg.solve(A, np.asarray(T0, dtype=complex)))",
+      "testName": "test_risposta.py",
+      "test": "import numpy as np\nfrom albero import matrici, risposta\n\n\ndef test_statico():\n    M, K = matrici([1.0, 1.0], [100.0, 100.0])\n    X = risposta(M, K, np.zeros((2, 2)), [0, 10.0], 0.0)\n    assert np.allclose(X, np.linalg.solve(K, [0, 10.0]))\n\n\ndef test_un_grado_di_liberta():\n    m, k, c, w = 2.0, 800.0, 4.0, 15.0\n    X = risposta(np.array([[m]]), np.array([[k]]), np.array([[c]]), [5.0], w)\n    assert np.isclose(X[0], 5 / np.hypot(k - m * w**2, c * w))\n"
+    },
+    {
+      "id": "transitorio",
+      "title": "Simulazione nel tempo",
+      "minutes": 25,
+      "prompt": "Scrivi `transitorio(M, K, C, T, t_fin, n=2000)`: `T(t)` è una funzione che restituisce il vettore delle coppie. Integra `M θ'' + C θ' + K θ = T(t)` da fermo con `solve_ivp` (stato `[θ, θ']`) e restituisci `(t, theta)` con `t` di `n` punti e `theta` di forma `(n_dischi, n)`.",
+      "hints": [
+        "Lo stato è `[θ, θ']`: la derivata è `[θ', M⁻¹(T − Cθ' − Kθ)]`.",
+        "`t_eval` fissa gli istanti in cui vuoi la soluzione."
+      ],
+      "solution": "from scipy.integrate import solve_ivp\n\n\ndef transitorio(M, K, C, T, t_fin, n=2000):\n    nd = M.shape[0]\n    Minv = np.linalg.inv(M)\n\n    def f(t, y):\n        th, om = y[:nd], y[nd:]\n        return np.concatenate([om, Minv @ (np.asarray(T(t)) - C @ om - K @ th)])\n\n    t = np.linspace(0, t_fin, n)\n    sol = solve_ivp(f, (0, t_fin), np.zeros(2 * nd), t_eval=t, rtol=1e-8, atol=1e-10)\n    return sol.t, sol.y[:nd]",
+      "testName": "test_transitorio.py",
+      "test": "import numpy as np\nfrom albero import matrici, transitorio\n\n\ndef test_gradino_un_disco():\n    M, K = np.array([[1.0]]), np.array([[400.0]])\n    C = np.array([[40.0]])  # smorzamento critico/1: si assesta in fretta\n    t, th = transitorio(M, K, C, lambda t: [8.0], 3.0)\n    assert th.shape == (1, 2000)\n    assert np.isclose(th[0, -1], 8.0 / 400.0, rtol=1e-3)\n\n\ndef test_parte_da_fermo():\n    M, K = matrici([1.0, 0.5], [1e3, 5e2])\n    t, th = transitorio(M, K, 0.01 * K, lambda t: [0, np.sin(5 * t)], 1.0, n=200)\n    assert np.allclose(th[:, 0], 0)\n"
+    },
+    {
+      "id": "frf",
+      "title": "La curva di risposta in frequenza",
+      "minutes": 20,
+      "prompt": "Scrivi `curva(M, K, C, T0, f_max, n=600)`: calcola le ampiezze per frequenze da 0.1 a `f_max` Hz, disegna una curva per disco su scala logaritmica e segna con linee verticali le frequenze proprie. Restituisci `(f, A, fig)` con `A` di forma `(n, n_dischi)`.",
+      "hints": [
+        "Una list comprehension di `risposta(...)` per ogni frequenza, poi `np.array`.",
+        "`ax.semilogy` mette l'asse y in scala logaritmica."
+      ],
+      "solution": "import matplotlib.pyplot as plt\n\n\ndef curva(M, K, C, T0, f_max, n=600):\n    f = np.linspace(0.1, f_max, n)\n    A = np.array([risposta(M, K, C, T0, 2 * np.pi * fi) for fi in f])\n    fig, ax = plt.subplots(figsize=(6, 3.2))\n    for j in range(A.shape[1]):\n        ax.semilogy(f, A[:, j], label=f\"disco {j}\")\n    for fn in modi(M, K)[0]:\n        if fn <= f_max:\n            ax.axvline(fn, ls=\":\", color=\"gray\")\n    ax.set(xlabel=\"f [Hz]\", ylabel=\"ampiezza [rad]\")\n    ax.legend()\n    return f, A, fig",
+      "testName": "test_frf.py",
+      "test": "import matplotlib\n\nmatplotlib.use(\"agg\")\nimport numpy as np\nfrom albero import curva, matrici, modi\n\n\ndef test_picchi_alle_frequenze_proprie():\n    M, K = matrici([0.2, 0.1], [2e4, 1e4])\n    C = 1e-4 * K\n    f, A, fig = curva(M, K, C, [0, 1.0], 120, n=2400)\n    fn = modi(M, K)[0]\n    picco = f[np.argmax(A[:, 1])]\n    assert min(abs(picco - x) for x in fn) < 0.2\n    assert A.shape == (2400, 2)\n    assert len(fig.axes[0].lines) >= 2\n"
+    }
+  ]
 }

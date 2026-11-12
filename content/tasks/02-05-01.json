@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Ordine di esecuzione di un decoratore",
+    "code": "def urla(f):\n    def interna(x):\n        return f(x).upper()\n    return interna\n\n@urla\ndef saluta(nome):\n    return \"ciao \" + nome\n\nprint(saluta(\"ada\"))",
+    "options": [
+      "CIAO ADA",
+      "ciao ada",
+      "CIAO ada",
+      "interna"
+    ],
+    "answer": 0,
+    "explain": "`saluta` è sostituita da `interna`, che chiama l'originale e mette tutto in maiuscolo."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Un decoratore che conta",
+    "prompt": "Scrivi il decoratore `conta_chiamate` che aggiunge alla funzione decorata un attributo `chiamate` (inizialmente 0) incrementato a ogni chiamata. Usa `functools.wraps`.",
+    "starter": "from functools import wraps\n\ndef conta_chiamate(f):\n    ...\n\n@conta_chiamate\ndef quadrato(x):\n    return x * x\n\nquadrato(2); quadrato(3)\nprint(quadrato.chiamate)",
+    "tests": "@conta_chiamate\ndef doppio(x):\n    return 2 * x\nassert doppio.chiamate == 0, \"all'inizio chiamate deve valere 0\"\nassert doppio(4) == 8, \"la funzione deve restituire il risultato originale\"\ndoppio(1)\nassert doppio.chiamate == 2, f\"dopo due chiamate atteso 2, ottenuto {doppio.chiamate}\"\nassert doppio.__name__ == \"doppio\", \"usa @wraps(f) per conservare il nome\"",
+    "solution": "from functools import wraps\n\ndef conta_chiamate(f):\n    @wraps(f)\n    def interna(*args, **kwargs):\n        interna.chiamate += 1\n        return f(*args, **kwargs)\n    interna.chiamate = 0\n    return interna\n\n@conta_chiamate\ndef quadrato(x):\n    return x * x\n\nquadrato(2); quadrato(3)\nprint(quadrato.chiamate)",
+    "hints": [
+      "Le funzioni possono avere attributi: `interna.chiamate = 0`.",
+      "Dentro `interna` incrementa `interna.chiamate` prima di chiamare `f`."
+    ]
+  }
+]

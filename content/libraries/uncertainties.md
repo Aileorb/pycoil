@@ -16,7 +16,7 @@ print(f"σ = {sigma:.1uS} MPa")
 
 **Da sapere per primo:** `ufloat`, `umath` per le funzioni, `.nominal_value`, `.std_dev`.
 
-**Nel percorso:** Parte VI (in arrivo).
+**Nel percorso:** sezione 6.2.2 e Progetto 6.
 
 ```bash
 pip install uncertainties

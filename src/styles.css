@@ -147,6 +147,7 @@ a { color: var(--blue); }
 .sheet-head h2 { margin: 0; font-size: 20px; font-weight: 700; }
 .sheet-head button { color: var(--blue); font-size: 17px; font-weight: 600; }
 .sheet-body { overflow-y: auto; padding: 0 16px calc(24px + var(--safe-b)); display: flex; flex-direction: column; gap: 14px; -webkit-overflow-scrolling: touch; }
+.sheet-body > * { flex-shrink: 0; }
 @keyframes up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
@@ -382,3 +383,6 @@ pre.code.out { background: transparent; border-style: dashed; color: var(--text2
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
+.attempts { margin: 0; font-size: 14px; color: var(--text2); }
+.attempts span { color: var(--orange-text); letter-spacing: 1px; }
+.option[aria-disabled="true"] { cursor: default; }

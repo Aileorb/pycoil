@@ -5,7 +5,7 @@ title: openpyxl
 
 **Perché ti serve.** In azienda molti calcoli vivono in Excel. Con openpyxl compili i fogli in automatico, raccogli dati da cento file o generi report formattati.
 
-```python norun
+```python
 from openpyxl import Workbook
 wb = Workbook()
 ws = wb.active
@@ -15,7 +15,7 @@ for nome, fy in [("S235", 235), ("S355", 355)]:
 wb.save("verifiche.xlsx")
 ```
 
-**Nel percorso:** Parte VIII (in arrivo).
+**Nel percorso:** sezione 8.1.2 e Progetto 9.
 
 ```bash
 pip install openpyxl

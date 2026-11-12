@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Arrotondare alle decine",
+    "code": "print(round(147.3, -1), round(155, -1))",
+    "options": [
+      "150.0 160",
+      "140.0 150",
+      "147 155",
+      "150 150"
+    ],
+    "answer": 0,
+    "explain": "`round(x, -1)` arrotonda alle decine. Per i numeri esattamente a metà Python arrotonda al pari: 155 → 160 (16 è pari)."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Tabella di una famiglia di perni",
+    "prompt": "Scrivi `perno(d)` che restituisce un dizionario con `d`, la lunghezza `L = 3·d` arrotondata ai 5 mm superiori (usa `math.ceil`) e il diametro della testa `D = 1.6·d` arrotondato al mm. Poi crea `famiglia`: la lista dei dizionari per `d` in `[6, 8, 10, 12]`.",
+    "starter": "import math\n\ndef perno(d):\n    ...\n\nfamiglia = ...\nfor p in famiglia:\n    print(p)",
+    "tests": "assert perno(8) == {\"d\": 8, \"L\": 25, \"D\": 13}, f\"perno(8) atteso d=8, L=25, D=13; ottenuto {perno(8)}\"\nassert perno(10)[\"L\"] == 30, \"L = 3·d arrotondato ai 5 mm superiori\"\nassert [p[\"d\"] for p in famiglia] == [6, 8, 10, 12], \"famiglia deve contenere d = 6, 8, 10, 12\"",
+    "solution": "import math\n\ndef perno(d):\n    return {\"d\": d, \"L\": 5 * math.ceil(3 * d / 5), \"D\": round(1.6 * d)}\n\nfamiglia = [perno(d) for d in [6, 8, 10, 12]]\nfor p in famiglia:\n    print(p)",
+    "hints": [
+      "Ai 5 mm superiori: `5 * math.ceil(x / 5)`.",
+      "La famiglia è una comprehension."
+    ]
+  }
+]

@@ -40,6 +40,16 @@ export interface TodayRecord {
   plan: DayPlan;
   tasks: Record<string, Task>;
   parts: PartSummary[];
+  /** Tentativi sbagliati di oggi per task (Prevedi: indici scelti; Scrivi e avanzate: un elemento per prova). */
+  attempts?: Record<string, number[]>;
+}
+
+export async function saveToday(rec: TodayRecord): Promise<void> {
+  try {
+    await set(TODAY_KEY, rec);
+  } catch {
+    /* in memoria */
+  }
 }
 
 export async function readToday(): Promise<TodayRecord | null> {

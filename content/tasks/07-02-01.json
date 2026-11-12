@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Assemblaggio di due elementi",
+    "code": "import numpy as np\nk = np.array([[1, -1], [-1, 1]])\nK = np.zeros((3, 3))\nfor e in range(2):\n    K[e:e + 2, e:e + 2] += k\nprint(K[1, 1])",
+    "options": [
+      "2.0",
+      "1.0",
+      "-1.0",
+      "0.0"
+    ],
+    "answer": 0,
+    "explain": "Il nodo centrale appartiene a entrambi gli elementi: i due contributi diagonali si sommano."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Barra a due tratti",
+    "prompt": "Una barra incastrata in `x = 0` è fatta di due tratti lunghi 500 mm: il primo con area `A1 = 200` mm², il secondo con `A2 = 100` mm² (`E = 70000` MPa). Una forza di 7000 N agisce sull'estremo libero. Assembla `K` (3×3), risolvi e metti gli spostamenti dei tre nodi in `u` (con `u[0] = 0`).",
+    "starter": "import numpy as np\nE, L = 70e3, 500.0\nA = [200.0, 100.0]\nK = np.zeros((3, 3))\n...\nF = np.array([0, 0, 7000.0])\nu = np.zeros(3)\n...\nprint(u)",
+    "tests": "import numpy as np\natt = np.array([0, 7000 * 500 / (70e3 * 200), 7000 * 500 / (70e3 * 200) + 7000 * 500 / (70e3 * 100)])\nassert np.allclose(u, att), f\"spostamenti attesi {att.round(4)}, ottenuti {u}\"",
+    "solution": "import numpy as np\nE, L = 70e3, 500.0\nA = [200.0, 100.0]\nK = np.zeros((3, 3))\nfor e in range(2):\n    K[e:e + 2, e:e + 2] += E * A[e] / L * np.array([[1, -1], [-1, 1]])\nF = np.array([0, 0, 7000.0])\nu = np.zeros(3)\nu[1:] = np.linalg.solve(K[1:, 1:], F[1:])\nprint(u)",
+    "hints": [
+      "La rigidezza dell'elemento e è `E·A[e]/L · [[1, −1], [−1, 1]]`.",
+      "Il nodo 0 è incastrato: risolvi solo `K[1:, 1:]`."
+    ]
+  }
+]

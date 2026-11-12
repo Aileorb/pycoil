@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Il resto con *",
+    "code": "match \"S1 102 98 101\".split():\n    case [nome, *valori]:\n        print(nome, len(valori))",
+    "options": [
+      "S1 3",
+      "S1 4",
+      "S1 102",
+      "nessun output"
+    ],
+    "answer": 0,
+    "explain": "`nome` prende la prima parola, `*valori` le altre tre."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Righe di un log di prova",
+    "prompt": "Scrivi `interpreta(riga)` con `match riga.split()`:\n\n- `\"LOAD t F\"` → `(\"load\", float(t), float(F))`\n- `\"PAUSE\"` → `(\"pause\",)`\n- qualunque altra riga → `None`",
+    "starter": "def interpreta(riga):\n    match riga.split():\n        ...\n\nprint(interpreta(\"LOAD 0.5 1200\"))",
+    "tests": "assert interpreta(\"LOAD 0.5 1200\") == (\"load\", 0.5, 1200.0), \"LOAD va trasformato in ('load', t, F)\"\nassert interpreta(\"PAUSE\") == (\"pause\",), \"PAUSE dà la tupla ('pause',)\"\nassert interpreta(\"LOAD 1\") is None, \"una riga incompleta dà None\"\nassert interpreta(\"\") is None, \"una riga vuota dà None\"",
+    "solution": "def interpreta(riga):\n    match riga.split():\n        case [\"LOAD\", t, F]:\n            return (\"load\", float(t), float(F))\n        case [\"PAUSE\"]:\n            return (\"pause\",)\n        case _:\n            return None\n\nprint(interpreta(\"LOAD 0.5 1200\"))",
+    "hints": [
+      "`case [\"LOAD\", t, F]:` combacia solo con tre parole.",
+      "Una tupla di un elemento si scrive `(\"pause\",)` con la virgola."
+    ]
+  }
+]

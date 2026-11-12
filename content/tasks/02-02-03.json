@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "order=True confronta i campi in ordine",
+    "code": "from dataclasses import dataclass\n\n@dataclass(order=True)\nclass V:\n    u: float\n    nome: str\n\nprint(sorted([V(0.9, \"a\"), V(0.5, \"c\"), V(0.5, \"b\")])[0].nome)",
+    "options": [
+      "b",
+      "c",
+      "a",
+      "TypeError"
+    ],
+    "answer": 0,
+    "explain": "Si confronta prima `u`: 0.5 pareggia, quindi decide `nome`: \"b\" < \"c\"."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Il profilo più leggero che basta",
+    "prompt": "Data la lista `catalogo` di tuple `(nome, peso_kg_m, Wy_mm3)`, scrivi `piu_leggero(catalogo, W_min)` che restituisce il **nome** del profilo più leggero con `Wy >= W_min`, oppure `None` se nessuno basta.",
+    "starter": "catalogo = [(\"IPE200\", 22.4, 194e3), (\"HEA160\", 30.4, 220e3), (\"IPE220\", 26.2, 252e3), (\"IPE240\", 30.7, 324e3)]\n\ndef piu_leggero(catalogo, W_min):\n    ...\n\nprint(piu_leggero(catalogo, 200e3))",
+    "tests": "assert piu_leggero(catalogo, 200e3) == \"IPE220\", \"con Wy ≥ 200e3 il più leggero è IPE220\"\nassert piu_leggero(catalogo, 100e3) == \"IPE200\", \"con Wy ≥ 100e3 vince IPE200\"\nassert piu_leggero(catalogo, 1e7) is None, \"se nessuno basta serve None\"",
+    "solution": "catalogo = [(\"IPE200\", 22.4, 194e3), (\"HEA160\", 30.4, 220e3), (\"IPE220\", 26.2, 252e3), (\"IPE240\", 30.7, 324e3)]\n\ndef piu_leggero(catalogo, W_min):\n    validi = [p for p in catalogo if p[2] >= W_min]\n    if not validi:\n        return None\n    return min(validi, key=lambda p: p[1])[0]\n\nprint(piu_leggero(catalogo, 200e3))",
+    "hints": [
+      "Prima filtra, poi `min(..., key=lambda p: p[1])`.",
+      "`min([])` dà errore: gestisci la lista vuota."
+    ]
+  }
+]

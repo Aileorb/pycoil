@@ -185,5 +185,203 @@
       "name": "test_mobile.py",
       "code": "import numpy as np\nfrom mobile import inviluppo\n\n\ndef test_formula():\n    x, M = inviluppo(6.0, 10.0)\n    assert np.allclose(M, 10 * x * (6 - x) / 6)\n    assert np.isclose(M.max(), 10 * 6 / 4)\n"
     }
+  },
+  {
+    "id": "kata-finestre",
+    "section": "02-04-01",
+    "title": "Finestre mobili con i generatori",
+    "minutes": 20,
+    "module": "finestre.py",
+    "prompt": "Crea il file **`finestre.py`**. Scrivi il generatore `finestre(iterabile, n)` che produce tuple di `n` elementi consecutivi (`(a, b, c)`, `(b, c, d)`, …) senza convertire l'input in lista (deve funzionare anche con un generatore infinito), e `medie_mobili(iterabile, n)` che produce la media di ogni finestra. Usa `collections.deque(maxlen=n)`.\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "Una `deque(maxlen=n)` butta via da sola l'elemento più vecchio.",
+      "Produci una finestra solo quando la deque è piena."
+    ],
+    "solution": "from collections import deque\nfrom itertools import islice\n\n\ndef finestre(iterabile, n):\n    buf = deque(maxlen=n)\n    for x in iterabile:\n        buf.append(x)\n        if len(buf) == n:\n            yield tuple(buf)\n\n\ndef medie_mobili(iterabile, n):\n    for f in finestre(iterabile, n):\n        yield sum(f) / n\n",
+    "testFile": {
+      "name": "test_finestre.py",
+      "code": "from itertools import count, islice\nfrom finestre import finestre, medie_mobili\n\n\ndef test_finestre():\n    assert list(finestre([1, 2, 3, 4], 2)) == [(1, 2), (2, 3), (3, 4)]\n    assert list(finestre([1, 2], 3)) == []\n\n\ndef test_infinito():\n    assert list(islice(finestre(count(), 3), 2)) == [(0, 1, 2), (1, 2, 3)]\n\n\ndef test_medie():\n    assert list(medie_mobili([2, 4, 6, 8], 2)) == [3.0, 5.0, 7.0]\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-barre",
+    "section": "02-05-01",
+    "title": "Tagli di barre con lru_cache",
+    "minutes": 25,
+    "module": "barre.py",
+    "prompt": "Crea il file **`barre.py`**. Le barre arrivano lunghe 6000 mm e servono pezzi di lunghezze date. Scrivi `combinazioni(L, misure)` che conta in quanti modi (ordine non importante) si può ottenere **esattamente** la lunghezza `L` sommando pezzi delle `misure` (ripetibili), con una funzione ricorsiva memorizzata con `functools.lru_cache`. Poi `sfrido_minimo(L, misure)` che restituisce il minimo avanzo `L − somma` ottenibile (somma ≤ L).\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "Ricorsione: o usi la misura `i` (e resti su `i`), o passi alla successiva.",
+      "`@lru_cache` sopra la funzione interna evita di ricalcolare gli stessi sottoproblemi."
+    ],
+    "solution": "from functools import lru_cache\n\n\ndef combinazioni(L, misure):\n    misure = tuple(sorted(set(misure)))\n\n    @lru_cache(maxsize=None)\n    def conta(resto, i):\n        if resto == 0:\n            return 1\n        if resto < 0 or i == len(misure):\n            return 0\n        return conta(resto - misure[i], i) + conta(resto, i + 1)\n\n    return conta(L, 0)\n\n\ndef sfrido_minimo(L, misure):\n    misure = tuple(sorted(set(misure)))\n\n    @lru_cache(maxsize=None)\n    def migliore(resto):\n        opzioni = [migliore(resto - m) for m in misure if m <= resto]\n        return min(opzioni) if opzioni else resto\n\n    return migliore(L)\n",
+    "testFile": {
+      "name": "test_barre.py",
+      "code": "from barre import combinazioni, sfrido_minimo\n\n\ndef test_monete():\n    assert combinazioni(10, [2, 5]) == 2          # 2+2+2+2+2, 5+5\n    assert combinazioni(4, [1, 2, 3]) == 4\n\n\ndef test_grande_e_veloce():\n    assert combinazioni(6000, [250, 400, 750, 1200]) > 0\n\n\ndef test_sfrido():\n    assert sfrido_minimo(6000, [1700, 2300]) == 300   # 2300 + 1700 + 1700 = 5700\n    assert sfrido_minimo(6000, [1500, 2000]) == 0\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-newton-sistemi",
+    "section": "04-01-01",
+    "title": "Newton per sistemi non lineari",
+    "minutes": 25,
+    "module": "newton.py",
+    "prompt": "Crea il file **`newton.py`**. Scrivi `jacobiana(F, x, h=1e-7)` che stima numericamente la matrice jacobiana di `F: Rⁿ → Rⁿ` con le differenze in avanti, e `newton_sistema(F, x0, tol=1e-10, max_iter=50)` che applica il metodo di Newton (`J·Δx = −F(x)`) e restituisce la soluzione. Se non converge entro `max_iter` solleva `RuntimeError`.\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "Colonna j della jacobiana: `(F(x + h·e_j) − F(x)) / h`.",
+      "Il passo di Newton si trova con `np.linalg.solve(J, -F(x))`."
+    ],
+    "solution": "import numpy as np\n\n\ndef jacobiana(F, x, h=1e-7):\n    x = np.asarray(x, dtype=float)\n    f0 = np.asarray(F(x))\n    J = np.zeros((f0.size, x.size))\n    for j in range(x.size):\n        xp = x.copy()\n        xp[j] += h\n        J[:, j] = (np.asarray(F(xp)) - f0) / h\n    return J\n\n\ndef newton_sistema(F, x0, tol=1e-10, max_iter=50):\n    x = np.asarray(x0, dtype=float)\n    for _ in range(max_iter):\n        f = np.asarray(F(x))\n        if np.linalg.norm(f) < tol:\n            return x\n        x = x + np.linalg.solve(jacobiana(F, x), -f)\n    raise RuntimeError(\"Newton non converge\")\n",
+    "testFile": {
+      "name": "test_newton.py",
+      "code": "import numpy as np\nimport pytest\nfrom scipy.optimize import fsolve\nfrom newton import jacobiana, newton_sistema\n\n\ndef F(v):\n    x, y = v\n    return [x**2 + y**2 - 25, y - x**2 / 4]\n\n\ndef test_jacobiana():\n    J = jacobiana(F, [1.0, 2.0])\n    assert np.allclose(J, [[2, 4], [-0.5, 1]], atol=1e-5)\n\n\ndef test_come_fsolve():\n    assert np.allclose(newton_sistema(F, [3, 2]), fsolve(F, [3, 2]), atol=1e-8)\n\n\ndef test_non_converge():\n    with pytest.raises(RuntimeError):\n        newton_sistema(lambda v: [v[0] ** 2 + 1], [0.5], max_iter=10)\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-rk4",
+    "section": "04-02-01",
+    "title": "Runge-Kutta del quarto ordine",
+    "minutes": 25,
+    "module": "rk4.py",
+    "prompt": "Crea il file **`rk4.py`**. Scrivi `rk4(f, t0, y0, h, n)` che integra `y' = f(t, y)` (con `y` vettore NumPy) per `n` passi di ampiezza `h` con il metodo di Runge-Kutta del 4° ordine e restituisce `(t, Y)` con `t` di forma `(n+1,)` e `Y` di forma `(n+1, len(y0))`. Verifica che l'errore scali come `h⁴`.\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "Quattro valutazioni: inizio, due a metà passo, fine; poi la media pesata 1-2-2-1.",
+      "Con un integratore di ordine 4, dimezzare h divide l'errore per circa 2⁴ = 16."
+    ],
+    "solution": "import numpy as np\n\n\ndef rk4(f, t0, y0, h, n):\n    y = np.asarray(y0, dtype=float)\n    t = t0 + h * np.arange(n + 1)\n    Y = np.zeros((n + 1, y.size))\n    Y[0] = y\n    for i in range(n):\n        ti = t[i]\n        k1 = np.asarray(f(ti, y))\n        k2 = np.asarray(f(ti + h / 2, y + h / 2 * k1))\n        k3 = np.asarray(f(ti + h / 2, y + h / 2 * k2))\n        k4 = np.asarray(f(ti + h, y + h * k3))\n        y = y + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)\n        Y[i + 1] = y\n    return t, Y\n",
+    "testFile": {
+      "name": "test_rk4.py",
+      "code": "import numpy as np\nfrom rk4 import rk4\n\n\ndef oscillatore(t, y):\n    return [y[1], -y[0]]\n\n\ndef test_forma():\n    t, Y = rk4(oscillatore, 0, [1, 0], 0.1, 10)\n    assert t.shape == (11,) and Y.shape == (11, 2)\n\n\ndef test_ordine_quattro():\n    errori = []\n    for n in (50, 100):\n        t, Y = rk4(oscillatore, 0, [1, 0], 2 * np.pi / n, n)\n        errori.append(np.linalg.norm(Y[-1] - [1, 0]))   # dopo un periodo si torna al punto di partenza\n    assert 12 < errori[0] / errori[1] < 20      # dimezzando h l'errore cala di ~16 volte\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-riassunto",
+    "section": "05-01-02",
+    "title": "Riassunto statistico di un lotto",
+    "minutes": 20,
+    "module": "lotto.py",
+    "prompt": "Crea il file **`lotto.py`**. Scrivi `riassunto(df, gruppo, colonne)` che per ogni valore della colonna `gruppo` calcola numero di prove, media, deviazione standard e valore caratteristico al 5 % (`media − 1.645·std`) di ciascuna colonna in `colonne`. Restituisci un DataFrame con indice il gruppo e colonne nominate `<colonna>_n`, `<colonna>_media`, `<colonna>_std`, `<colonna>_k`.\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "`g = df.groupby(gruppo)` e poi `g[c].mean()`, `g[c].std()`…",
+      "Assegnare una Series indicizzata per gruppo a una colonna allinea i valori per indice."
+    ],
+    "solution": "import pandas as pd\n\n\ndef riassunto(df, gruppo, colonne):\n    out = pd.DataFrame(index=sorted(df[gruppo].unique()))\n    g = df.groupby(gruppo)\n    for c in colonne:\n        out[f\"{c}_n\"] = g[c].count()\n        out[f\"{c}_media\"] = g[c].mean()\n        out[f\"{c}_std\"] = g[c].std()\n        out[f\"{c}_k\"] = out[f\"{c}_media\"] - 1.645 * out[f\"{c}_std\"]\n    out.index.name = gruppo\n    return out\n",
+    "testFile": {
+      "name": "test_lotto.py",
+      "code": "import pandas as pd\nfrom pytest import approx\nfrom lotto import riassunto\n\nDF = pd.DataFrame({\n    \"acciaio\": [\"S235\"] * 3 + [\"S355\"] * 3,\n    \"Rm\": [418, 431, 425, 532, 548, 541],\n    \"A\": [27, 29, 28, 22, 21, 23],\n})\n\n\ndef test_colonne_e_valori():\n    r = riassunto(DF, \"acciaio\", [\"Rm\", \"A\"])\n    assert list(r.columns) == [\"Rm_n\", \"Rm_media\", \"Rm_std\", \"Rm_k\", \"A_n\", \"A_media\", \"A_std\", \"A_k\"]\n    s = DF[DF.acciaio == \"S355\"][\"Rm\"]\n    assert r.loc[\"S355\", \"Rm_media\"] == approx(s.mean())\n    assert r.loc[\"S355\", \"Rm_k\"] == approx(s.mean() - 1.645 * s.std())\n    assert r.loc[\"S235\", \"A_n\"] == 3\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-linea-elastica",
+    "section": "06-01-02",
+    "title": "Linea elastica per qualsiasi carico",
+    "minutes": 25,
+    "module": "elastica.py",
+    "prompt": "Crea il file **`elastica.py`**. Con SymPy scrivi `linea_elastica(q_expr, x, L, EI)` che, dato un carico distribuito `q(x)` simbolico su una trave **appoggiata**, integra `EI·v'''' = q` con `v(0) = v(L) = 0` e `v''(0) = v''(L) = 0` e restituisce `v(x)` (positiva verso il basso se `q` è positivo verso il basso). Poi `freccia_max(v, x, L, valori)` che sostituisce i `valori` numerici e restituisce la freccia massima su `[0, L]` (campionando 1001 punti con `lambdify`).\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "Integra quattro volte `q/EI` e aggiungi un polinomio cubico con quattro costanti.",
+      "Le condizioni ai vincoli: spostamento e momento (cioè `v''`) nulli agli appoggi."
+    ],
+    "solution": "import numpy as np\nimport sympy as sp\n\n\ndef linea_elastica(q_expr, x, L, EI):\n    C1, C2, C3, C4 = sp.symbols(\"C1:5\")\n    v = sp.integrate(sp.integrate(sp.integrate(sp.integrate(q_expr / EI, x), x), x), x)\n    v = v + C1 * x**3 + C2 * x**2 + C3 * x + C4\n    eqs = [v.subs(x, 0), v.subs(x, L), sp.diff(v, x, 2).subs(x, 0), sp.diff(v, x, 2).subs(x, L)]\n    sol = sp.solve(eqs, [C1, C2, C3, C4])\n    return sp.simplify(v.subs(sol))\n\n\ndef freccia_max(v, x, L, valori):\n    f = sp.lambdify(x, v.subs(valori), \"numpy\")\n    L_num = float(L.subs(valori)) if hasattr(L, \"subs\") else float(L)\n    xs = np.linspace(0, L_num, 1001)\n    return float(np.max(f(xs)))\n",
+    "testFile": {
+      "name": "test_elastica.py",
+      "code": "import sympy as sp\nfrom pytest import approx\nfrom elastica import freccia_max, linea_elastica\n\nx, L, q, EI = sp.symbols(\"x L q EI\", positive=True)\n\n\ndef test_carico_uniforme():\n    v = linea_elastica(q, x, L, EI)\n    assert sp.simplify(v.subs(x, L / 2) - 5 * q * L**4 / (384 * EI)) == 0\n\n\ndef test_carico_triangolare_numerico():\n    v = linea_elastica(q * x / L, x, L, EI)\n    vmax = freccia_max(v, x, L, {q: 2.0, L: 3.0, EI: 1.0})\n    assert vmax == approx(0.00652 * 2.0 * 3.0**4 / 1.0, rel=2e-3)\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-travatura",
+    "section": "07-02-02",
+    "title": "Un solutore generale per travature",
+    "minutes": 30,
+    "module": "travature.py",
+    "prompt": "Crea il file **`travature.py`**. Scrivi `risolvi_travatura(nodi, aste, vincoli, carichi, EA)`: `nodi` array `(n, 2)`, `aste` lista di coppie di nodi, `vincoli` lista di gradi di libertà bloccati (`2i` per x, `2i+1` per y), `carichi` dizionario `grado → forza`, `EA` numero o lista (una per asta). Restituisci `(u, N, R)`: spostamenti, sforzi normali delle aste (trazione positiva) e reazioni (`K·u − F`). Se la struttura è labile solleva `ValueError(\"struttura labile\")`.\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "Riusa l'assemblaggio della sezione 7.2.2 dentro una funzione generale.",
+      "Una matrice ridotta con rango insufficiente indica un meccanismo: controlla `np.linalg.matrix_rank`."
+    ],
+    "solution": "import numpy as np\n\n\ndef risolvi_travatura(nodi, aste, vincoli, carichi, EA):\n    nodi = np.asarray(nodi, dtype=float)\n    EA = np.broadcast_to(np.asarray(EA, dtype=float), (len(aste),))\n    ndof = 2 * len(nodi)\n    K = np.zeros((ndof, ndof))\n    dati = []\n    for (i, j), ea in zip(aste, EA):\n        d = nodi[j] - nodi[i]\n        L = np.linalg.norm(d)\n        c, s = d / L\n        v = np.array([-c, -s, c, s])\n        dofs = [2 * i, 2 * i + 1, 2 * j, 2 * j + 1]\n        K[np.ix_(dofs, dofs)] += ea / L * np.outer(v, v)\n        dati.append((dofs, v, ea / L))\n    F = np.zeros(ndof)\n    for g, val in carichi.items():\n        F[g] += val\n    liberi = np.setdiff1d(np.arange(ndof), vincoli)\n    Kl = K[np.ix_(liberi, liberi)]\n    if np.linalg.matrix_rank(Kl) < len(liberi):\n        raise ValueError(\"struttura labile\")\n    u = np.zeros(ndof)\n    u[liberi] = np.linalg.solve(Kl, F[liberi])\n    N = np.array([k * v @ u[dofs] for dofs, v, k in dati])\n    return u, N, K @ u - F\n",
+    "testFile": {
+      "name": "test_travature.py",
+      "code": "import numpy as np\nimport pytest\nfrom travature import risolvi_travatura\n\n\ndef test_due_aste_a_v():\n    nodi = [[-1, 0], [1, 0], [0, -1]]\n    u, N, R = risolvi_travatura(nodi, [(0, 2), (1, 2)], [0, 1, 2, 3], {5: -1000.0}, 1e6)\n    assert np.allclose(N, [1000 / np.sqrt(2)] * 2)\n    assert np.isclose(R[1] + R[3], 1000)\n\n\ndef test_capriata_simmetrica():\n    nodi = [[0, 0], [2, 0], [4, 0], [1, 1.5], [3, 1.5]]\n    aste = [(0, 1), (1, 2), (0, 3), (3, 1), (1, 4), (4, 2), (3, 4)]\n    u, N, R = risolvi_travatura(nodi, aste, [0, 1, 5], {7: -1e4, 9: -1e4}, 1.26e8)\n    assert np.isclose(N[0], N[1]) and np.isclose(N[2], N[5])\n    assert np.isclose(R[1], 1e4) and np.isclose(R[5], 1e4)\n\n\ndef test_labile():\n    with pytest.raises(ValueError):\n        risolvi_travatura([[0, 0], [1, 0], [1, 1], [0, 1]], [(0, 1), (1, 2), (2, 3), (3, 0)], [0, 1, 3], {4: 1.0}, 1.0)\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-albero-fatica",
+    "section": "07-01-03",
+    "title": "Verifica a fatica di un albero",
+    "minutes": 25,
+    "module": "fatica.py",
+    "prompt": "Crea il file **`fatica.py`**. Scrivi `marin(Su, d, finitura)` (fattori ka·kb come nella sezione 7.1.3, con `finitura` tra `\"rettificato\"`, `\"lavorato\"`, `\"laminato a caldo\"`), `tensioni_albero(d, M_max, M_min, T, Kf=1.0, Kfs=1.0)` che restituisce `(σa, σm)` equivalenti di von Mises (flessione alternata/media più torsione costante: `σm = √(σm_f² + 3τ²)`, `σa = σa_f`) e `n_goodman_albero(...)` che combina tutto restituendo il coefficiente di sicurezza.\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "Moduli di resistenza: W = πd³/32 a flessione, Wt = πd³/16 a torsione.",
+      "Con flessione rotante pura la tensione media è nulla."
+    ],
+    "solution": "import math\n\n\ndef marin(Su, d, finitura):\n    a, b = {\"rettificato\": (1.58, -0.085), \"lavorato\": (4.51, -0.265), \"laminato a caldo\": (57.7, -0.718)}[finitura]\n    ka = a * Su**b\n    kb = 1.24 * d**-0.107 if 2.79 <= d <= 51 else 1.51 * d**-0.157\n    return ka * kb\n\n\ndef tensioni_albero(d, M_max, M_min, T, Kf=1.0, Kfs=1.0):\n    W = math.pi * d**3 / 32\n    Wt = math.pi * d**3 / 16\n    sa = Kf * (M_max - M_min) / 2 / W\n    sm_f = Kf * (M_max + M_min) / 2 / W\n    tau = Kfs * T / Wt\n    return sa, math.sqrt(sm_f**2 + 3 * tau**2)\n\n\ndef n_goodman_albero(Su, d, finitura, M_max, M_min, T, Kf=1.0, Kfs=1.0):\n    Se = marin(Su, d, finitura) * (0.5 * Su if Su <= 1400 else 700)\n    sa, sm = tensioni_albero(d, M_max, M_min, T, Kf, Kfs)\n    return 1 / (sa / Se + sm / Su)\n",
+    "testFile": {
+      "name": "test_fatica.py",
+      "code": "import math\nfrom pytest import approx\nfrom fatica import marin, n_goodman_albero, tensioni_albero\n\n\ndef test_marin():\n    assert marin(600, 30, \"lavorato\") == approx(4.51 * 600**-0.265 * 1.24 * 30**-0.107)\n\n\ndef test_flessione_rotante_pura():\n    sa, sm = tensioni_albero(30, 200e3, -200e3, 0)\n    assert sa == approx(200e3 * 32 / (math.pi * 30**3))\n    assert sm == approx(0)\n\n\ndef test_n():\n    n = n_goodman_albero(600, 30, \"lavorato\", 200e3, -200e3, 150e3, Kf=1.7, Kfs=1.5)\n    assert 1.0 < n < 2.5\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-cli-csv",
+    "section": "08-01-01",
+    "title": "Uno script che riassume un CSV",
+    "minutes": 20,
+    "module": "riassumi.py",
+    "prompt": "Crea il file **`riassumi.py`**. Scrivi `main(argv=None)`: argomento posizionale `file` (un CSV con separatore `;`), opzione `--colonna` (obbligatoria) e flag `--json`. Stampa il numero di valori, minimo, massimo e media della colonna; con `--json` stampa invece un oggetto JSON con le chiavi `n`, `min`, `max`, `media`. Restituisce `0`, oppure `2` se la colonna non esiste (stampando un messaggio).\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "`action=\"store_true\"` crea un flag senza valore.",
+      "Salta le celle vuote e accetta la virgola decimale."
+    ],
+    "solution": "import argparse\nimport csv\nimport json\n\n\ndef main(argv=None):\n    p = argparse.ArgumentParser(description=\"Riassunto di una colonna di un CSV\")\n    p.add_argument(\"file\")\n    p.add_argument(\"--colonna\", required=True)\n    p.add_argument(\"--json\", action=\"store_true\")\n    a = p.parse_args(argv)\n    with open(a.file, newline=\"\") as f:\n        righe = list(csv.DictReader(f, delimiter=\";\"))\n    if not righe or a.colonna not in righe[0]:\n        print(f\"colonna {a.colonna!r} non trovata\")\n        return 2\n    v = [float(r[a.colonna].replace(\",\", \".\")) for r in righe if r[a.colonna].strip()]\n    ris = {\"n\": len(v), \"min\": min(v), \"max\": max(v), \"media\": sum(v) / len(v)}\n    if a.json:\n        print(json.dumps(ris))\n    else:\n        print(f\"n = {ris['n']}, min = {ris['min']:g}, max = {ris['max']:g}, media = {ris['media']:.4g}\")\n    return 0\n",
+    "testFile": {
+      "name": "test_riassumi.py",
+      "code": "import contextlib\nimport io\nimport json\nfrom pathlib import Path\nfrom riassumi import main\n\n\ndef esegui(argv):\n    out = io.StringIO()\n    with contextlib.redirect_stdout(out):\n        codice = main(argv)\n    return codice, out.getvalue()\n\n\ndef test_json():\n    Path(\"dati.csv\").write_text(\"t;F\\n0;10\\n1;12,5\\n2;\\n3;7,5\\n\")\n    codice, testo = esegui([\"dati.csv\", \"--colonna\", \"F\", \"--json\"])\n    assert codice == 0\n    assert json.loads(testo) == {\"n\": 3, \"min\": 7.5, \"max\": 12.5, \"media\": 10.0}\n\n\ndef test_colonna_mancante():\n    Path(\"dati.csv\").write_text(\"t;F\\n0;10\\n\")\n    codice, testo = esegui([\"dati.csv\", \"--colonna\", \"X\"])\n    assert codice == 2 and \"non trovata\" in testo\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-fem-sparso",
+    "section": "08-02-02",
+    "title": "FEM 1D sparso con 100 000 elementi",
+    "minutes": 25,
+    "module": "barra_sparsa.py",
+    "prompt": "Crea il file **`barra_sparsa.py`**. Scrivi `barra(n, L, EA, p)` che risolve con matrici **sparse** (`scipy.sparse`) una barra incastrata in `x = 0`, libera in `x = L`, con carico distribuito uniforme `p`, divisa in `n` elementi lineari. Restituisci l'array degli spostamenti nodali (`n + 1` valori). Con `n = 100 000` deve impiegare meno di un secondo o due: costruisci la matrice con `scipy.sparse.diags` o in formato COO, senza cicli Python sugli elementi.\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "La matrice è tridiagonale: `sps.diags([sotto, diagonale, sopra], [-1, 0, 1])`.",
+      "Il primo e l'ultimo nodo hanno metà rigidezza e metà carico rispetto agli interni."
+    ],
+    "solution": "import numpy as np\nimport scipy.sparse as sps\nfrom scipy.sparse.linalg import spsolve\n\n\ndef barra(n, L, EA, p):\n    le = L / n\n    k = EA / le\n    diag = np.full(n + 1, 2 * k)\n    diag[0] = diag[-1] = k\n    K = sps.diags([np.full(n, -k), diag, np.full(n, -k)], [-1, 0, 1], format=\"csc\")\n    F = np.full(n + 1, p * le)\n    F[0] = F[-1] = p * le / 2\n    u = np.zeros(n + 1)\n    u[1:] = spsolve(K[1:, 1:], F[1:])\n    return u\n",
+    "testFile": {
+      "name": "test_barra_sparsa.py",
+      "code": "import time\nimport numpy as np\nfrom barra_sparsa import barra\n\n\ndef test_esatta_ai_nodi():\n    L, EA, p = 2.0, 1e6, 50.0\n    u = barra(10, L, EA, p)\n    x = np.linspace(0, L, 11)\n    assert np.allclose(u, p / EA * (L * x - x**2 / 2))\n\n\ndef test_veloce():\n    t0 = time.perf_counter()\n    u = barra(100_000, 1.0, 1.0, 1.0)\n    assert time.perf_counter() - t0 < 5\n    assert np.isclose(u[-1], 0.5)\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-modello-usura",
+    "section": "08-02-03",
+    "title": "Prevedere l'usura dell'utensile",
+    "minutes": 25,
+    "module": "usura.py",
+    "prompt": "Crea il file **`usura.py`**. Scrivi `allena(df)` che allena una `LinearRegression` di scikit-learn su `log(vita)` in funzione di `log(v)`, `log(f)`, `log(ap)` (colonne di un DataFrame) e restituisce il modello; `esponenti(modello)` che restituisce il dizionario `{\"v\": …, \"f\": …, \"ap\": …}`; `vita_prevista(modello, v, f, ap)` che restituisce la vita in minuti (torna dalla scala logaritmica).\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "Lavora sui logaritmi: la legge di potenza diventa lineare.",
+      "Per tornare ai minuti applica `np.exp` alla previsione."
+    ],
+    "solution": "import numpy as np\nfrom sklearn.linear_model import LinearRegression\n\nCOLONNE = [\"v\", \"f\", \"ap\"]\n\n\ndef allena(df):\n    X = np.log(df[COLONNE].to_numpy())\n    return LinearRegression().fit(X, np.log(df[\"vita\"].to_numpy()))\n\n\ndef esponenti(modello):\n    return {c: float(k) for c, k in zip(COLONNE, modello.coef_)}\n\n\ndef vita_prevista(modello, v, f, ap):\n    return float(np.exp(modello.predict(np.log([[v, f, ap]]))[0]))\n",
+    "testFile": {
+      "name": "test_usura.py",
+      "code": "import numpy as np\nimport pandas as pd\nfrom pytest import approx\nfrom usura import allena, esponenti, vita_prevista\n\n\ndef dati(n=300, seed=0):\n    rng = np.random.default_rng(seed)\n    v, f, ap = rng.uniform(100, 300, n), rng.uniform(0.05, 0.3, n), rng.uniform(0.5, 3, n)\n    vita = 6e5 * v**-1.6 * f**-0.6 * ap**-0.2 * rng.lognormal(0, 0.05, n)\n    return pd.DataFrame({\"v\": v, \"f\": f, \"ap\": ap, \"vita\": vita})\n\n\ndef test_esponenti():\n    e = esponenti(allena(dati()))\n    assert e[\"v\"] == approx(-1.6, abs=0.05)\n    assert e[\"f\"] == approx(-0.6, abs=0.05)\n\n\ndef test_previsione():\n    m = allena(dati())\n    atteso = 6e5 * 200**-1.6 * 0.1**-0.6 * 1.5**-0.2\n    assert vita_prevista(m, 200, 0.1, 1.5) == approx(atteso, rel=0.05)\n"
+    },
+    "nuovo": true
   }
 ]

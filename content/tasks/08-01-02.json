@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Celle e righe in openpyxl",
+    "code": "from openpyxl import Workbook\nws = Workbook().active\nws.append([\"a\", \"b\"])\nws.append([1, 2])\nprint(ws[\"B2\"].value, ws.max_row)",
+    "options": [
+      "2 2",
+      "b 2",
+      "2 1",
+      "1 2"
+    ],
+    "answer": 0,
+    "explain": "La seconda riga aggiunta è la riga 2: in B2 c'è 2 e il foglio ha 2 righe."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Foglio delle verifiche",
+    "prompt": "Crea con openpyxl un file `utilizzi.xlsx` con intestazione `[\"elemento\", \"utilizzo\"]` e una riga per ogni coppia di `dati`. Poi rileggilo con `load_workbook` e metti in `oltre` la lista dei nomi con utilizzo maggiore di 1.",
+    "starter": "from openpyxl import Workbook, load_workbook\ndati = [(\"trave A\", 0.82), (\"colonna 3\", 1.07), (\"controvento\", 0.45), (\"mensola\", 1.21)]\n...\noltre = ...\nprint(oltre)",
+    "tests": "from openpyxl import load_workbook\nws = load_workbook(\"utilizzi.xlsx\").active\nrighe = list(ws.iter_rows(values_only=True))\nassert righe[0] == (\"elemento\", \"utilizzo\"), f\"intestazione: {righe[0]}\"\nassert len(righe) == 5, \"servono intestazione + 4 righe\"\nassert oltre == [\"colonna 3\", \"mensola\"], f\"ottenuto {oltre}\"",
+    "solution": "from openpyxl import Workbook, load_workbook\ndati = [(\"trave A\", 0.82), (\"colonna 3\", 1.07), (\"controvento\", 0.45), (\"mensola\", 1.21)]\nwb = Workbook()\nws = wb.active\nws.append([\"elemento\", \"utilizzo\"])\nfor riga in dati:\n    ws.append(list(riga))\nwb.save(\"utilizzi.xlsx\")\nws2 = load_workbook(\"utilizzi.xlsx\").active\noltre = [nome for nome, u in ws2.iter_rows(min_row=2, values_only=True) if u > 1]\nprint(oltre)",
+    "hints": [
+      "`ws.append([...])` aggiunge una riga; `wb.save(nome)` salva.",
+      "`iter_rows(min_row=2, values_only=True)` dà le tuple dei valori senza l'intestazione."
+    ]
+  }
+]

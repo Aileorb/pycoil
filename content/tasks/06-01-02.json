@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Integrale definito",
+    "code": "import sympy as sp\ny, h = sp.symbols(\"y h\", positive=True)\nprint(sp.integrate(y**2, (y, 0, h)))",
+    "options": [
+      "h**3/3",
+      "h**2/2",
+      "2*h",
+      "h**3"
+    ],
+    "answer": 0,
+    "explain": "∫₀ʰ y² dy = h³/3."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Freccia di una mensola con Castigliano",
+    "prompt": "Una mensola di luce `L` ha un carico distribuito `q` e una forza fittizia `F` in punta. Il momento è `M = F*(L - x) + q*(L - x)**2/2`. Calcola l'energia `U = ∫₀ᴸ M²/(2EI) dx`, poi la freccia in punta `v = dU/dF` valutata con `F = 0`. Metti il risultato semplificato in `v`.",
+    "starter": "import sympy as sp\nx, L, q, EI, F = sp.symbols(\"x L q EI F\", positive=True)\nM = F * (L - x) + q * (L - x)**2 / 2\nU = ...\nv = ...\nprint(v)",
+    "tests": "import sympy as sp\nx_, L_, q_, EI_ = sp.symbols(\"x L q EI\", positive=True)\nassert sp.simplify(v - q_ * L_**4 / (8 * EI_)) == 0, f\"la freccia deve essere qL⁴/8EI, ottenuto {v}\"",
+    "solution": "import sympy as sp\nx, L, q, EI, F = sp.symbols(\"x L q EI F\", positive=True)\nM = F * (L - x) + q * (L - x)**2 / 2\nU = sp.integrate(M**2 / (2 * EI), (x, 0, L))\nv = sp.simplify(sp.diff(U, F).subs(F, 0))\nprint(v)",
+    "hints": [
+      "`sp.integrate(espressione, (x, 0, L))`.",
+      "Deriva rispetto a F **prima** di porre F = 0."
+    ]
+  }
+]
