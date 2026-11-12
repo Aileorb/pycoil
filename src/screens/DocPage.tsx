@@ -19,7 +19,7 @@ const loaders: Record<Kind, (id: string) => Promise<SectionDoc>> = {
 
 /** Pagina di lettura: sezione del libro, libreria, voce di appendice o progetto. */
 export function DocPage({ kind, id }: { kind: Kind; id: string }) {
-  const { index, readSection, state, addFavorite } = useStore();
+  const { index, readSection, state, addFavorite, update } = useStore();
   const [doc, setDoc] = useState<SectionDoc | null>(null);
   const [error, setError] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -36,16 +36,25 @@ export function DocPage({ kind, id }: { kind: Kind; id: string }) {
     window.scrollTo(0, 0);
   }, [kind, id]);
 
-  // barra di lettura
+  // barra di lettura; per le sezioni del Percorso ricorda fin dove sei arrivato (cerchietto parziale)
+  const maxProgress = useRef(0);
   useEffect(() => {
+    maxProgress.current = 0;
     const on = () => {
       const h = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(h > 0 ? Math.min(1, window.scrollY / h) : 1);
+      const p = h > 0 ? Math.min(1, window.scrollY / h) : 1;
+      setProgress(p);
+      if (doc && window.scrollY > 0) maxProgress.current = Math.max(maxProgress.current, p);
     };
     window.addEventListener('scroll', on, { passive: true });
     on();
-    return () => window.removeEventListener('scroll', on);
-  }, [doc]);
+    return () => {
+      window.removeEventListener('scroll', on);
+      const reached = Math.round(maxProgress.current * 100) / 100;
+      if (kind !== 'percorso' || !doc || reached < 0.05) return;
+      update((s) => (s.sections.includes(id) || (s.scroll[id] ?? 0) >= reached ? s : { ...s, scroll: { ...s.scroll, [id]: reached } }));
+    };
+  }, [doc, kind, id, update]);
 
   // spunta verde: fine pagina visibile per 1 s e almeno 20 s di permanenza
   useEffect(() => {

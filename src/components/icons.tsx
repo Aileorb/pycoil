@@ -19,6 +19,17 @@ export const Todo = ({ size = 26 }: P) => (
 export const Reading = ({ size = 20 }: P) => (
   <svg width={size} height={size} viewBox="0 0 24 24" role="img" aria-label="In lettura"><circle cx="12" cy="12" r="10" fill="none" stroke="var(--blue)" strokeWidth="2" /><path d="M12 2a10 10 0 010 20z" fill="var(--blue)" opacity=".35" /></svg>
 );
+/** Sezione iniziata ma non finita: spicchio proporzionale a quanto hai letto. */
+export const Partial = ({ size = 20, pct }: P & { pct: number }) => {
+  const a = Math.min(0.95, Math.max(0.12, pct)) * 2 * Math.PI;
+  const x = 12 + 7 * Math.sin(a), y = 12 - 7 * Math.cos(a);
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" role="img" aria-label={`Iniziata, ${Math.round(pct * 100)}%`}>
+      <circle cx="12" cy="12" r="10" fill="none" stroke="var(--blue)" strokeWidth="2" />
+      <path d={`M12 12 L12 5 A7 7 0 ${a > Math.PI ? 1 : 0} 1 ${x.toFixed(2)} ${y.toFixed(2)} Z`} fill="var(--blue)" />
+    </svg>
+  );
+};
 export const Skipped = ({ size = 24 }: P) => (
   <svg width={size} height={size} viewBox="0 0 24 24" role="img" aria-label="Saltata"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#AEAEB2" strokeWidth="2" strokeDasharray="3 3" /><path d="M7.5 12.5l3 3L16.5 9" fill="none" stroke="#AEAEB2" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 );

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { FavoritesButton } from '../components/Favorites';
-import { Check, Chevron, ChevronDown, Doc, Laptop, Reading, Search, Skipped, Toolbox, Todo } from '../components/icons';
+import { Check, Chevron, ChevronDown, Doc, Laptop, Partial, Reading, Search, Skipped, Toolbox, Todo } from '../components/icons';
 import { isProjectUnlocked, skippedParts, pathSections, sectionNumber } from '../engine/scheduler';
 import type { ContentIndex } from '../engine/types';
 
@@ -33,6 +33,9 @@ function PathBody({ index, read }: { index: ContentIndex; read: Set<string> }) {
   const [openChapters, setOpenChapters] = useState<Set<string>>(() => new Set(currentChapter ? [currentChapter] : []));
   const total = path.length;
   const readCount = path.filter((s) => read.has(s)).length;
+  // iniziata ma non finita: pagina scorsa in parte, oppure introduzione letta in Oggi
+  const learned = new Set(state.learned);
+  const started = (id: string) => Math.max(state.scroll[id] ?? 0, learned.has(id) ? 0.25 : 0);
   const resumeTitle = index.parts.flatMap((p) => p.chapters.flatMap((c) => c.sections)).find((s) => s.id === resume)?.title;
 
   const toggle = (set: Set<string>, id: string, fn: (s: Set<string>) => void) => {
@@ -90,7 +93,7 @@ function PathBody({ index, read }: { index: ContentIndex; read: Set<string> }) {
                   <span className="roman">{p.roman}</span>
                   <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <span className="ttl" style={isSkipped ? { color: 'var(--text2)' } : undefined}>{p.title}</span>
-                    {isSkipped ? (
+                    {isSkipped && done === 0 ? (
                       <span style={{ fontSize: 13, color: 'var(--text2)' }}>Saltata col test · ripassa quando vuoi</span>
                     ) : (
                       <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -99,7 +102,7 @@ function PathBody({ index, read }: { index: ContentIndex; read: Set<string> }) {
                       </span>
                     )}
                   </span>
-                  {isSkipped ? <Skipped /> : complete ? <Check size={24} /> : null}
+                  {complete ? <Check size={24} /> : isSkipped ? <Skipped /> : null}
                   {isOpen ? <ChevronDown color="var(--blue)" /> : <Chevron />}
                 </button>
                 {isOpen &&
@@ -119,7 +122,7 @@ function PathBody({ index, read }: { index: ContentIndex; read: Set<string> }) {
                             <a key={s.id} href={`#/percorso/${s.id}`} className={`sec-row sub ${s.id === resume ? 'reading' : ''}`}>
                               <span className="grow">{s.title}</span>
                               {s.desktop && <span className="chip desk">Desktop</span>}
-                              {s.stub ? <span style={{ fontSize: 12, color: 'var(--text2)' }}>in arrivo</span> : read.has(s.id) ? <Check size={20} /> : s.id === resume ? <Reading /> : <Todo size={20} />}
+                              {s.stub ? <span style={{ fontSize: 12, color: 'var(--text2)' }}>in arrivo</span> : read.has(s.id) ? <Check size={20} /> : started(s.id) > 0 ? <Partial pct={started(s.id)} /> : s.id === resume ? <Reading /> : <Todo size={20} />}
                             </a>
                           ))}
                       </div>
