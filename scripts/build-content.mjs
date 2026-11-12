@@ -118,6 +118,19 @@ const sources = (list = []) =>
 
 const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'));
 
+/** Librerie esterne importate da un pezzo di codice (nomi di import), per la gestione dello spazio nell'app. */
+const LIBS = ['numpy', 'scipy', 'matplotlib', 'pandas', 'sympy', 'uncertainties', 'CoolProp', 'sklearn', 'pint', 'openpyxl', 'skfem', 'pytest'];
+function libsOf(...codes) {
+  const found = new Set();
+  for (const code of codes) {
+    if (!code) continue;
+    for (const m of code.matchAll(/^\s*(?:from|import)\s+([A-Za-z_][\w]*)/gm)) if (LIBS.includes(m[1])) found.add(m[1]);
+    // pandas usa openpyxl per i file .xlsx senza importarlo esplicitamente
+    if (/to_excel|read_excel/.test(code)) found.add('openpyxl');
+  }
+  return found.size ? [...found].sort() : undefined;
+}
+
 /**
  * Mescola le opzioni in modo deterministico (stesso ID → stesso ordine) e ricalcola
  * l'indice della risposta: negli autori la giusta è spesso la prima, nell'app no.
@@ -160,6 +173,8 @@ for (const part of book.parts) {
       const [cardMd] = body.split('<!-- /card -->');
       if (!body.includes('<!-- /card -->')) fail(`${file}: manca il marcatore <!-- /card -->`);
       const html = mdBlock(body.replace('<!-- /card -->', ''));
+      const runnable = [...body.matchAll(/```python(?:[^\S\n]*)\n([\s\S]*?)```/g)].map((m) => m[1]);
+      sec.libs = libsOf(...runnable);
       const words = body.replace(/```[\s\S]*?```/g, '').split(/\s+/).length;
       sec.minutes = Number(meta.minutes) || Math.max(3, Math.round(words / 160) + 2);
       if (meta.desktop === 'true') sec.desktop = true;
@@ -199,7 +214,7 @@ for (const f of readdirSync(taskDir).filter((f) => f.endsWith('.json'))) {
         promptHtml: mdBlock(t.prompt), starter: t.starter ?? '', tests: t.tests, solution: t.solution, hints: (t.hints ?? []).map(mdInline)
       });
     } else fail(`${id}: tipo sconosciuto ${t.kind}`);
-    tasksIndex.push({ id, type: t.kind, section, title: t.title, minutes: t.minutes ?? (t.kind === 'prevedi' ? 2 : 4) });
+    tasksIndex.push({ id, type: t.kind, section, title: t.title, minutes: t.minutes ?? (t.kind === 'prevedi' ? 2 : 4), libs: t.kind === 'scrivi' ? libsOf(t.starter, t.tests, t.solution) : undefined });
   }
 }
 
@@ -211,14 +226,14 @@ const katasIndex = katas.map((k) => {
     id: k.id, type: 'kata', section: k.section, title: k.title, minutes: k.minutes,
     promptHtml: mdBlock(k.prompt), hints: (k.hints ?? []).map(mdInline), solution: k.solution, testFile: k.testFile, module: k.module
   });
-  return { id: k.id, type: 'kata', section: k.section, title: k.title, minutes: k.minutes };
+  return { id: k.id, type: 'kata', section: k.section, title: k.title, minutes: k.minutes, libs: libsOf(k.solution, k.testFile?.code) };
 });
 
 // ---------------------------------------------------------------- progetti
 const projects = [];
 for (const pid of readdirSync(join(SRC, 'projects'))) {
   const p = readJson(join(SRC, 'projects', pid, 'project.json'));
-  projects.push({ id: p.id, title: p.title, stars: p.stars, unlockAfter: p.unlockAfter, summary: p.summary, steps: p.steps.map((s) => ({ id: s.id, title: s.title, minutes: s.minutes })) });
+  projects.push({ id: p.id, title: p.title, stars: p.stars, unlockAfter: p.unlockAfter, summary: p.summary, steps: p.steps.map((s) => ({ id: s.id, title: s.title, minutes: s.minutes, libs: libsOf(s.solution, s.test) })) });
   p.steps.forEach((s, i) => {
     emit(`tasks/${p.id}-${s.id}.json`, {
       id: `${p.id}-${s.id}`, type: 'step', section: p.unlockAfter, project: p.id, step: i + 1, title: s.title, minutes: s.minutes,
@@ -257,7 +272,7 @@ const index = {
   python: book.python,
   parts: book.parts.map((p) => ({
     id: p.id, roman: p.roman, title: p.title, short: p.short,
-    chapters: p.chapters.map((c) => ({ id: c.id, title: c.title, sections: c.sections.map((s) => ({ id: s.id, title: s.title, minutes: s.minutes ?? 5, desktop: s.desktop || undefined, stub: s.stub || undefined })) }))
+    chapters: p.chapters.map((c) => ({ id: c.id, title: c.title, sections: c.sections.map((s) => ({ id: s.id, title: s.title, minutes: s.minutes ?? 5, desktop: s.desktop || undefined, stub: s.stub || undefined, libs: s.libs })) }))
   })),
   libraries, appendix, tasks: tasksIndex, katas: katasIndex, projects, quiz
 };

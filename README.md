@@ -27,6 +27,7 @@ Il codice Python gira **nel browser** con [Pyodide](https://pyodide.org/) (Pytho
 - Sul dispositivo (IndexedDB) restano solo:
   - `pycoil:state`: ID e contatori (task fatte, XP, streak, sezioni lette, progetti, preferiti);
   - `pycoil:today`: testi e soluzioni delle task **di oggi**, cancellati al cambio di giorno.
+- Il motore Python (Pyodide, ~13 MB) e le librerie si salvano nella cache `pycoil-python` solo quando servono. **Impostazioni › Spazio usato** mostra i valori reali del dispositivo e libera le librerie che non servono più dalla Parte attuale in poi (né ai ripassi o al progetto in corso); se servono di nuovo si riscaricano da sole.
 - Nessun account, nessun server, nessun tracciamento. Esporta e importa i progressi dalle Impostazioni.
 
 ## Struttura

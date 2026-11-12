@@ -4,6 +4,7 @@ import { useStore } from '../store';
 import { exportState, clearToday } from '../engine/storage';
 import { normalize } from '../engine/state';
 import { PYODIDE_VERSION } from '../py/version';
+import { SpaceUsage } from '../components/SpaceUsage';
 
 export function Settings({ onClose }: { onClose: () => void }) {
   const { state, update, reloadToday, showToast, index } = useStore();
@@ -48,6 +49,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
           <span className="grow"><span className="t">Riscarica le task di oggi</span><span className="st">Se qualcosa non si è caricato</span></span>
         </button>
       </div>
+      <SpaceUsage />
       <div className="group">
         {!confirmReset ? (
           <button className="row" onClick={() => setConfirmReset(true)}>

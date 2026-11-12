@@ -38,7 +38,25 @@ export default defineConfig({
         globIgnores: ['content/**'],
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/\/content\//],
-        runtimeCaching: []
+        // Il motore Python (Pyodide e le sue librerie) e i pacchetti presi da PyPI finiscono in una
+        // cache dell'app, così le Impostazioni possono misurarli e liberare le librerie non più usate.
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/pyodide\//,
+            handler: 'CacheFirst',
+            options: { cacheName: 'pycoil-python', cacheableResponse: { statuses: [200] } }
+          },
+          {
+            urlPattern: /^https:\/\/files\.pythonhosted\.org\//,
+            handler: 'CacheFirst',
+            options: { cacheName: 'pycoil-python', cacheableResponse: { statuses: [200] } }
+          },
+          {
+            urlPattern: /^https:\/\/pypi\.org\/(simple|pypi)\//,
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'pycoil-python', cacheableResponse: { statuses: [200] } }
+          }
+        ]
       }
     })
   ],

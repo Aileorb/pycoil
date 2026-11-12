@@ -8,6 +8,8 @@ export interface SectionMeta {
   minutes: number;
   desktop?: boolean;
   stub?: boolean;
+  /** Librerie esterne usate dagli esempi eseguibili (nomi di import). */
+  libs?: string[];
 }
 
 export interface ChapterMeta {
@@ -47,6 +49,7 @@ export interface TaskMeta {
   section: string;
   title: string;
   minutes: number;
+  libs?: string[];
 }
 
 export interface ProjectMeta {
@@ -55,7 +58,7 @@ export interface ProjectMeta {
   stars: number;
   unlockAfter: string; // id della Parte prerequisito
   summary: string;
-  steps: { id: string; title: string; minutes: number }[];
+  steps: { id: string; title: string; minutes: number; libs?: string[] }[];
 }
 
 export interface ContentIndex {

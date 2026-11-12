@@ -460,3 +460,10 @@ body:has(.task-screen) .toast { top: calc(var(--safe-t) + 70px); bottom: auto; }
   .sx-play .sx-pop { animation: none; transform: scale(1); }
   .sx-dot { transition: none; }
 }
+
+/* ---------- impostazioni: spazio usato ---------- */
+.space .row.static { cursor: default; }
+.space-v { font-size: 15px; color: var(--text2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.space-total { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; font-size: 15px; border-bottom: 0.5px solid var(--sep); }
+.space-total b { font-size: 17px; }
+.space-note { margin: 4px 16px 10px; font-size: 13px; color: var(--text2); line-height: 1.45; }

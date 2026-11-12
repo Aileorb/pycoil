@@ -36,4 +36,4 @@ Ogni giorno di streak aggiunge l'1% ai punti, fino al +50%. Un progetto si sbloc
 - I testi del libro e degli esercizi **non** sono salvati sul telefono: si scaricano da GitHub quando li apri.
 - Sul dispositivo restano solo i testi e le soluzioni delle task **di oggi**, cancellati il giorno dopo, e i tuoi contatori (task fatte, punti, streak, preferiti).
 - Non ci sono account né server: niente lascia il tuo dispositivo. Puoi esportare e importare i progressi dalle Impostazioni.
-- Python gira nel browser con **Pyodide**, scaricato la prima volta che esegui del codice.
+- Python gira nel browser con **Pyodide**, scaricato la prima volta che esegui del codice (circa 13 MB, più le librerie che gli esercizi usano). In **Impostazioni › Spazio usato** vedi quanto occupa ogni parte e puoi liberare le librerie che non servono più per la Parte in cui sei arrivato.
