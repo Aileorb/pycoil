@@ -482,3 +482,5 @@ body:has(.task-screen) .toast { top: calc(var(--safe-t) + 70px); bottom: auto; }
 .round-btn.goal { background: var(--green); animation: goal-pop 0.45s var(--spring); }
 @keyframes goal-pop { 0% { transform: scale(0.4); } 70% { transform: scale(1.12); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .round-btn.goal { animation: none; } }
+.intro-row { background: rgba(0, 122, 255, 0.05); }
+.intro-go { font-size: 15px; font-weight: 600; color: #fff; background: var(--blue); border-radius: 14px; padding: 5px 12px; }

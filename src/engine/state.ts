@@ -132,6 +132,11 @@ export function completeAdvanced(s: AppState, day: string, taskId: string, proje
   };
 }
 
+/** Introduzione letta: il concetto entra tra quelli imparati (non conta come task e non dà punti). */
+export function learnSection(s: AppState, sectionId: string): AppState {
+  return s.learned.includes(sectionId) ? s : { ...s, learned: [...s.learned, sectionId] };
+}
+
 export function markSectionRead(s: AppState, sectionId: string): CompletionResult {
   if (s.sections.includes(sectionId)) return { state: s, gained: 0, dayCompleted: false };
   return { state: { ...s, sections: [...s.sections, sectionId], xp: s.xp + XP.section }, gained: XP.section, dayCompleted: false };

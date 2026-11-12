@@ -27,11 +27,12 @@ type DraftGetter = () => TaskDraft | undefined;
 
 /** Task a schermo intero: pausa (arancio) e uscita senza completare (rosso) in alto. */
 export function TaskSheet({ task, done, onClose, nav }: { task: Task; done: boolean; onClose: () => void; nav: TaskNav }) {
-  const { saveDraft, todayRec, lastCompletion, state } = useStore();
+  const { saveDraft, todayRec, lastCompletion, state, learnIntro } = useStore();
   const [success, setSuccess] = useState(false);
   const draftOf = useRef<DraftGetter | null>(null);
   const draft = todayRec?.drafts?.[task.id];
-  const label = { impara: 'Impara', prevedi: 'Prevedi', scrivi: 'Scrivi', kata: 'Avanzata · kata', step: `Avanzata · passo ${(task as AdvancedTask).step ?? ''}` }[task.type];
+  const isIntro = task.type === 'impara';
+  const label = { impara: 'Introduzione', prevedi: 'Prevedi', scrivi: 'Scrivi', kata: 'Avanzata · kata', step: `Avanzata · passo ${(task as AdvancedTask).step ?? ''}` }[task.type];
 
   const pause = () => {
     const d = draftOf.current?.();
@@ -96,7 +97,7 @@ export function TaskSheet({ task, done, onClose, nav }: { task: Task; done: bool
           <b style={{ color: TASK_COLORS[task.type] }}>{label}</b>
           <span>{nav.position}</span>
         </div>
-        {!done && (
+        {!done && !isIntro && (
           <button className="round-btn pause" onClick={pause} aria-label="Metti in pausa" title="Pausa: riprendi più tardi da dove eri">
             <svg width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><rect x="1" y="1" width="3.4" height="12" rx="1.2" fill="currentColor" /><rect x="7.6" y="1" width="3.4" height="12" rx="1.2" fill="currentColor" /></svg>
           </button>
@@ -106,7 +107,7 @@ export function TaskSheet({ task, done, onClose, nav }: { task: Task; done: bool
             <svg width="16" height="13" viewBox="0 0 16 13" aria-hidden="true"><path d="M1.8 6.8l4.2 4.2L14.2 2" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
         ) : (
-          <button className="round-btn exit" onClick={done ? onClose : exit} aria-label={done ? 'Chiudi' : 'Esci senza completare'} title={done ? 'Chiudi' : 'Esci senza completare'}>
+          <button className="round-btn exit" onClick={done || isIntro ? onClose : exit} aria-label={done || isIntro ? 'Chiudi' : 'Esci senza completare'} title={done || isIntro ? 'Chiudi' : 'Esci senza completare'}>
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
           </button>
         )}
@@ -129,13 +130,18 @@ export function TaskSheet({ task, done, onClose, nav }: { task: Task; done: bool
         <div className="task-inner" style={success ? { display: 'none' } : undefined}>
           <h3 className="task-title">{task.title}</h3>
           {draft && !done && <div className="paused-note">Ripresa da dove l'avevi lasciata.</div>}
-          {task.type === 'impara' && <Impara task={task} done={done} onClose={onClose} />}
+          {task.type === 'impara' && <Impara task={task} onClose={onClose} />}
           {task.type === 'prevedi' && <Prevedi task={task} done={done} />}
           {task.type === 'scrivi' && <Scrivi task={task} done={done} draft={draft} register={(g) => (draftOf.current = g)} />}
           {(task.type === 'kata' || task.type === 'step') && <Advanced task={task as AdvancedTask} done={done} draft={draft} register={(g) => (draftOf.current = g)} />}
         </div>
       </div>
-      {done && (
+      {isIntro && (
+        <footer className="task-foot">
+          <button className="big-btn" onClick={() => { learnIntro(task.section); if (nav.next) nav.onNext(); else onClose(); }}>Iniziamo!</button>
+        </footer>
+      )}
+      {done && !isIntro && (
         <footer className={`task-foot ${success ? 'late' : ''}`}>
           {nav.next ? (
             <button className="big-btn" onClick={nav.onNext}>
@@ -159,27 +165,11 @@ function DoneBanner({ text = 'Completata' }: { text?: string }) {
   );
 }
 
-function Impara({ task, done, onClose }: { task: ImparaTask; done: boolean; onClose: () => void }) {
-  const { finishTask } = useStore();
-  const end = useRef<HTMLDivElement>(null);
-  const [reachedEnd, setReachedEnd] = useState(done);
-  useEffect(() => {
-    if (!end.current || done) return;
-    const io = new IntersectionObserver(([e]) => e.isIntersecting && setReachedEnd(true), { threshold: 1 });
-    io.observe(end.current);
-    return () => io.disconnect();
-  }, [done]);
+/** Introduzione al concetto del giorno: si legge prima delle 3 task e non conta come task. */
+function Impara({ task, onClose }: { task: ImparaTask; onClose: () => void }) {
   return (
     <>
       <RichHtml html={task.html} />
-      <div ref={end} />
-      {done ? (
-        <DoneBanner />
-      ) : (
-        <button className="pill-btn" disabled={!reachedEnd} onClick={() => finishTask(task.id, { sectionLearned: task.section, quiet: true })}>
-          {reachedEnd ? 'Ho capito, segna come fatta' : 'Leggi fino in fondo'}
-        </button>
-      )}
       <a className="ghost-btn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }} href={`#/percorso/${task.section}`} onClick={onClose}>
         Apri la sezione completa nel Percorso
       </a>

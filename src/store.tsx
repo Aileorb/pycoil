@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { AppState, ContentIndex, Favorite } from './engine/types';
 import { dayKey, weekStart } from './engine/dates';
-import { compactHistory, completeAdvanced, completeTask, markSectionRead, refreshStreak, emptyState } from './engine/state';
+import { compactHistory, completeAdvanced, completeTask, learnSection, markSectionRead, refreshStreak, emptyState } from './engine/state';
 import { ensureToday, loadState, saveState, saveToday, clearToday, type TaskDraft, type TodayRecord } from './engine/storage';
 import { loadIndex } from './engine/content';
 
@@ -27,6 +27,8 @@ interface Store {
   /** L'ultimo completamento (per l'animazione di successo nella task a schermo intero). */
   lastCompletion: Completion | null;
   readSection: (id: string) => void;
+  /** Introduzione del giorno letta: il concetto diventa «imparato» (non è una task). */
+  learnIntro: (sectionId: string) => void;
   addFavorite: (f: Omit<Favorite, 'id' | 'ts'>) => void;
   removeFavorite: (id: string) => void;
   showToast: (t: string) => void;
@@ -152,6 +154,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [today, update, showToast]
   );
 
+  const learnIntro = useCallback((sectionId: string) => update((s) => learnSection(s, sectionId)), [update]);
+
   const readSection = useCallback(
     (id: string) => {
       const r = markSectionRead(stateRef.current, id);
@@ -214,8 +218,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [today, getIndex]);
 
   const value = useMemo<Store>(
-    () => ({ ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, saveDraft, getIndex, lastCompletion }),
-    [ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, saveDraft, getIndex, lastCompletion]
+    () => ({ ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, saveDraft, getIndex, lastCompletion, learnIntro }),
+    [ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, saveDraft, getIndex, lastCompletion, learnIntro]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

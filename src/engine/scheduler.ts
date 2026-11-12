@@ -36,7 +36,9 @@ export function sectionPart(index: ContentIndex, sectionId: string): string | nu
 }
 
 export interface DayPlan {
-  required: string[]; // 3 ID di task
+  /** Introduzione del giorno (la scheda «Impara» del nuovo concetto): si legge prima, non conta come task. */
+  intro: string | null;
+  required: string[]; // 3 ID di esercizi (Prevedi / Scrivi)
   advanced: string[]; // 0–2 ID di task avanzate
   project: string | null;
 }
@@ -54,9 +56,9 @@ function advDoneEver(state: AppState): Set<string> {
 }
 
 /**
- * Sceglie le task del giorno in modo deterministico (seed = data + livello + progressi):
- * 1 "Impara" sul prossimo concetto, 1 "Prevedi"/"Scrivi" sullo stesso concetto,
- * 1 ripasso dal calendario di ripetizione dilazionata.
+ * Sceglie la giornata in modo deterministico (seed = data + livello + progressi):
+ * un'introduzione al prossimo concetto (non conta come task) e 3 esercizi: prima la pratica
+ * sul concetto di oggi, poi il ripasso dal calendario di ripetizione dilazionata, poi altri esercizi.
  */
 export function planDay(index: ContentIndex, state: AppState, day: string): DayPlan {
   const path = pathSections(index, state.level);
@@ -66,11 +68,11 @@ export function planDay(index: ContentIndex, state: AppState, day: string): DayP
   const seed = seedOf(`${day}|${state.level}|${state.learned.length}|${state.xp}`);
   const required: string[] = [];
 
-  // 1) Impara: primo concetto non ancora introdotto.
+  // Introduzione: primo concetto non ancora introdotto.
   const current = path.find((s) => !learned.has(s) && byId.has(`impara-${s}`)) ?? null;
-  if (current) required.push(`impara-${current}`);
+  const intro = current ? `impara-${current}` : null;
 
-  // 2) Pratica sul concetto di oggi (o sull'ultimo introdotto).
+  // 1) Pratica sul concetto di oggi (o sull'ultimo introdotto): prima Prevedi, poi Scrivi, al massimo 2.
   const practiceOf = (sec: string | null) =>
     index.tasks.filter((t) => t.section === sec && t.type !== 'impara' && !done.has(t.id));
   const lastLearned = [...state.learned].reverse().find((s) => path.includes(s)) ?? null;
@@ -79,25 +81,33 @@ export function planDay(index: ContentIndex, state: AppState, day: string): DayP
   if (!practice.length) {
     practice = index.tasks.filter((t) => t.type !== 'impara' && learned.has(t.section) && !done.has(t.id));
   }
-  if (practice.length) required.push(pick(practice, seed).id);
+  const order = (t: TaskMeta) => (t.type === 'prevedi' ? 0 : 1);
+  const sameSection = practice.filter((t) => t.section === practice[0]?.section).sort((a, b) => order(a) - order(b));
+  if (sameSection.length > 1) required.push(...sameSection.slice(0, 2).map((t) => t.id));
+  else if (practice.length) required.push(pick(practice, seed).id);
 
-  // 3) Ripasso: la task con scadenza più vecchia, poi altra pratica non fatta, poi qualsiasi.
+  // 2) Ripasso: l'esercizio con scadenza più vecchia, poi altra pratica non fatta, poi qualsiasi.
   const due = Object.entries(state.review)
-    .filter(([id, r]) => r.due <= day && byId.has(id) && !required.includes(id))
+    .filter(([id, r]) => r.due <= day && byId.has(id) && byId.get(id)!.type !== 'impara' && !required.includes(id))
     .sort((a, b) => a[1].due.localeCompare(b[1].due));
-  if (due.length) required.push(due[0][0]);
+  if (due.length && required.length < 3) required.push(due[0][0]);
 
-  const fillers: TaskMeta[][] = [
-    index.tasks.filter((t) => t.type !== 'impara' && (learned.has(t.section) || t.section === current) && !done.has(t.id)),
-    index.tasks.filter((t) => t.type !== 'impara' && path.includes(t.section) && !done.has(t.id)),
-    index.tasks.filter((t) => t.type !== 'impara' && path.includes(t.section)),
-    index.tasks.filter((t) => t.type !== 'impara')
+  // 3) Riempitivi, mai esercizi di argomenti lontani: prima quelli dei concetti già visti (a caso),
+  //    poi i più vicini lungo il percorso (in ordine), poi ripetizioni di esercizi già fatti.
+  const pos = (t: TaskMeta) => path.indexOf(t.section);
+  const here = current ? path.indexOf(current) : path.length;
+  const practiceTasks = index.tasks.filter((t) => t.type !== 'impara' && pos(t) >= 0);
+  const fillers: { pool: TaskMeta[]; random: boolean }[] = [
+    { pool: practiceTasks.filter((t) => learned.has(t.section) && !done.has(t.id)), random: true },
+    { pool: practiceTasks.filter((t) => !done.has(t.id) && pos(t) >= here).sort((x, y) => pos(x) - pos(y)), random: false },
+    { pool: practiceTasks.filter((t) => learned.has(t.section) || pos(t) <= here), random: true },
+    { pool: [...practiceTasks].sort((x, y) => pos(x) - pos(y)), random: false }
   ];
-  for (const pool of fillers) {
+  for (const { pool, random } of fillers) {
     while (required.length < 3) {
       const options = pool.filter((t) => !required.includes(t.id));
       if (!options.length) break;
-      required.push(pick(options, seed + required.length).id);
+      required.push((random ? pick(options, seed + required.length) : options[0]).id);
     }
   }
 
@@ -117,7 +127,7 @@ export function planDay(index: ContentIndex, state: AppState, day: string): DayP
       advanced.push(k.id);
     }
   }
-  return { required: required.slice(0, 3), advanced, project: project?.id ?? null };
+  return { intro, required: required.slice(0, 3), advanced, project: project?.id ?? null };
 }
 
 function pick<T>(arr: T[], seed: number): T {

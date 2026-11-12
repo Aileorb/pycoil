@@ -77,7 +77,7 @@ export async function clearToday(): Promise<void> {
 
 export async function buildToday(index: ContentIndex, state: AppState, day: string): Promise<TodayRecord> {
   const plan = planDay(index, state, day);
-  const ids = [...plan.required, ...plan.advanced];
+  const ids = [...(plan.intro ? [plan.intro] : []), ...plan.required, ...plan.advanced];
   const loaded = await Promise.all(ids.map((id) => loadTask(id).catch(() => null)));
   const tasks: Record<string, Task> = {};
   loaded.forEach((t, i) => {
@@ -109,7 +109,18 @@ export async function ensureToday(
   getIndex: () => Promise<ContentIndex>
 ): Promise<TodayRecord | null> {
   const cached = await readToday();
-  if (cached && cached.date === day) return cached;
+  // un piano di oggi nel formato precedente (senza introduzione) si ricalcola, tenendo tentativi e bozze
+  if (cached && cached.date === day && 'intro' in cached.plan) return cached;
+  if (cached && cached.date === day) {
+    try {
+      const rec = await buildToday(await getIndex(), state, day);
+      const merged = { ...rec, attempts: cached.attempts, drafts: cached.drafts };
+      await saveToday(merged);
+      return merged;
+    } catch {
+      return cached;
+    }
+  }
   if (cached) await clearToday();
   try {
     return await buildToday(await getIndex(), state, day);

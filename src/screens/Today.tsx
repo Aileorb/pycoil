@@ -66,7 +66,7 @@ export function Today() {
   const navFor = (t: Task) => {
     const pos = plan?.required.indexOf(t.id) ?? -1;
     return {
-      position: pos >= 0 ? `Task ${pos + 1} di ${plan!.required.length} · ${t.minutes} min` : `Al computer · ${t.minutes} min · +40 XP`,
+      position: t.type === 'impara' ? `Prima delle 3 task · ${t.minutes} min` : pos >= 0 ? `Task ${pos + 1} di ${plan!.required.length} · ${t.minutes} min` : `Al computer · ${t.minutes} min · +40 XP`,
       progress: plan ? plan.required.map((id) => log.done.includes(id)) : [],
       next: nextAfter(t),
       onNext: () => setOpen(nextAfter(t))
@@ -121,6 +121,20 @@ export function Today() {
         )}
         {plan && (
           <div className="group">
+            {plan.intro && todayRec!.tasks[plan.intro] && (() => {
+              const t = todayRec!.tasks[plan.intro!];
+              const read = state.learned.includes(t.section);
+              return (
+                <button className="row intro-row" onClick={() => setOpen(t)}>
+                  <span className="tile" style={{ background: TASK_COLORS.impara }}><TaskGlyph type="impara" /></span>
+                  <span className="grow">
+                    <span className="t">{t.title}</span>
+                    <span className="st">Introduzione · {t.minutes} min{partOf(t.section) ? ` · Parte ${partOf(t.section)}` : ''}</span>
+                  </span>
+                  {read ? <Check size={22} /> : <span className="intro-go">Inizia</span>}
+                </button>
+              );
+            })()}
             {plan.required.map((id) => {
               const t = todayRec!.tasks[id];
               if (!t) return null;

@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { addDays } from '../src/engine/dates';
 import { activeProject, pathSections, planDay } from '../src/engine/scheduler';
-import { completeAdvanced, completeTask, emptyState, isDayComplete, markSectionRead } from '../src/engine/state';
+import { completeAdvanced, completeTask, emptyState, isDayComplete, learnSection } from '../src/engine/state';
 import type { AppState, ContentIndex, LevelId } from '../src/engine/types';
 
 const FILE = 'public/content/index.json';
@@ -23,15 +23,19 @@ describe.skipIf(!index)('contenuti reali', () => {
       const plan = planDay(idx, s, day);
       expect(plan.required).toHaveLength(3);
       expect(new Set(plan.required).size).toBe(3);
-      for (const id of [...plan.required, ...plan.advanced]) {
+      for (const id of [...(plan.intro ? [plan.intro] : []), ...plan.required, ...plan.advanced]) {
         const isStep = idx.projects.some((p) => p.steps.some((st) => `${p.id}-${st.id}` === id));
         expect(allTasks.has(id) || isStep, `task inesistente ${id}`).toBe(true);
       }
+      expect(plan.required.some((id) => id.startsWith('impara-'))).toBe(false);
+      // niente esercizi di argomenti lontani: al massimo due sezioni oltre il concetto di oggi
+      const here = plan.intro ? path.indexOf(plan.intro.replace('impara-', '')) : path.length;
       for (const id of plan.required) {
-        const meta = idx.tasks.find((t) => t.id === id)!;
-        if (meta.type === 'impara') s = markSectionRead(s, meta.section).state;
-        s = completeTask(s, day, id, { firstTry: true, sectionLearned: meta.type === 'impara' ? meta.section : undefined }).state;
+        const sec = idx.tasks.find((t) => t.id === id)!.section;
+        expect(path.indexOf(sec), `${id} troppo avanti (giorno ${i})`).toBeLessThanOrEqual(here + 2);
       }
+      if (plan.intro) s = learnSection(s, plan.intro.replace('impara-', ''));
+      for (const id of plan.required) s = completeTask(s, day, id, { firstTry: true }).state;
       expect(isDayComplete(s, day)).toBe(true);
       for (const id of plan.advanced) {
         const proj = idx.projects.find((p) => id.startsWith(`${p.id}-`));

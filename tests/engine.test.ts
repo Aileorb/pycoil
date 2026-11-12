@@ -153,12 +153,13 @@ describe('scheduler', () => {
     expect(pathSections(index, 'base')).toEqual(['01-01']);
   });
 
-  it('propone Impara, pratica sullo stesso concetto e un terzo esercizio', () => {
+  it("l'introduzione è separata e le 3 task sono esercizi sul concetto di oggi", () => {
     const s = { ...emptyState(), level: 'principiante' as const };
     const plan = planDay(index, s, '2026-11-12');
+    expect(plan.intro).toBe('impara-00-01');
     expect(plan.required).toHaveLength(3);
-    expect(plan.required[0]).toBe('impara-00-01');
-    expect(['prevedi-00-01-a', 'scrivi-00-01-a']).toContain(plan.required[1]);
+    expect(plan.required.slice(0, 2)).toEqual(['prevedi-00-01-a', 'scrivi-00-01-a']);
+    expect(plan.required.some((id) => id.startsWith('impara-'))).toBe(false);
     expect(new Set(plan.required).size).toBe(3);
   });
 
