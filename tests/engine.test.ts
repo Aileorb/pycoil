@@ -233,7 +233,7 @@ describe('azzerare la giornata', () => {
     expect(r.projects).toEqual(before.projects);
     expect(r.learned).toEqual(before.learned);
     // restano solo i punti della sezione letta oggi nel Percorso
-    expect(r.xp).toBe(before.xp + 15);
+    expect(r.xp).toBe(before.xp + 2);
     expect(r.sections).toContain('altra');
     expect(r.daySnap).toBeUndefined();
     // rifare le task dopo l'azzeramento ridà la stessa streak
@@ -248,5 +248,19 @@ describe('azzerare la giornata', () => {
     const r = resetDay(s, '2026-11-12');
     expect(r.xp).toBe(s.xp);
     expect(r.days).toEqual(s.days);
+  });
+});
+
+describe('punti della lettura', () => {
+  it('2 punti a sezione, 10 in più quando la Parte è letta tutta', () => {
+    const parte = ['00-01-01', '00-01-02', '00-02-01'];
+    let s = emptyState();
+    let r = markSectionRead(s, '00-01-01', parte);
+    expect([r.gained, r.partCompleted]).toEqual([2, false]);
+    s = markSectionRead(r.state, '00-02-01', parte).state;
+    r = markSectionRead(s, '00-01-02', parte);
+    expect([r.gained, r.partCompleted]).toEqual([12, true]);
+    expect(r.state.xp).toBe(16);
+    expect(markSectionRead(r.state, '00-01-02', parte).gained).toBe(0);
   });
 });

@@ -175,9 +175,16 @@ export function learnSection(s: AppState, sectionId: string): AppState {
   return s.learned.includes(sectionId) ? s : { ...s, learned: [...s.learned, sectionId] };
 }
 
-export function markSectionRead(s: AppState, sectionId: string): CompletionResult {
-  if (s.sections.includes(sectionId)) return { state: s, gained: 0, dayCompleted: false };
-  return { state: { ...s, sections: [...s.sections, sectionId], xp: s.xp + XP.section }, gained: XP.section, dayCompleted: false };
+/**
+ * Sezione letta fino in fondo: pochi punti. Se con questa la sua Parte è letta tutta (`partSections`),
+ * arriva anche il bonus della Parte. `partCompleted` dice se è scattato.
+ */
+export function markSectionRead(s: AppState, sectionId: string, partSections: string[] = []): CompletionResult & { partCompleted: boolean } {
+  if (s.sections.includes(sectionId)) return { state: s, gained: 0, dayCompleted: false, partCompleted: false };
+  const sections = [...s.sections, sectionId];
+  const partCompleted = partSections.includes(sectionId) && partSections.every((id) => sections.includes(id));
+  const gained = XP.section + (partCompleted ? XP.part : 0);
+  return { state: { ...s, sections, xp: s.xp + gained }, gained, dayCompleted: false, partCompleted };
 }
 
 /** Ripetizione dilazionata: 1, 3, 7, 14, 30 giorni. */

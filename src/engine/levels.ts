@@ -35,7 +35,8 @@ export function levelProgress(xp: number): { stage: Stage; next: Stage | null; p
 export const XP = {
   task: 10,
   firstTry: 5,
-  section: 15,
+  section: 2,
+  part: 10,
   advanced: 40,
   fullDay: 10
 };

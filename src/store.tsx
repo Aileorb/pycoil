@@ -159,13 +159,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const readSection = useCallback(
     (id: string) => {
-      const r = markSectionRead(stateRef.current, id);
+      const part = index?.parts.find((p) => p.chapters.some((c) => c.sections.some((x) => x.id === id)));
+      const partSections = part ? part.chapters.flatMap((c) => c.sections.filter((x) => !x.stub).map((x) => x.id)) : [];
+      const r = markSectionRead(stateRef.current, id, partSections);
       if (r.gained) {
         update(() => r.state);
-        showToast(`Sezione completata · +${r.gained} XP`);
+        showToast(r.partCompleted ? `Parte ${part!.roman} completata · +${r.gained} XP` : `Sezione completata · +${r.gained} XP`);
       }
     },
-    [update, showToast]
+    [update, showToast, index]
   );
 
   const addFavorite = useCallback(
