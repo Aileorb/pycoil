@@ -5,6 +5,13 @@ import { compactHistory, completeAdvanced, completeTask, markSectionRead, refres
 import { ensureToday, loadState, saveState, saveToday, clearToday, type TaskDraft, type TodayRecord } from './engine/storage';
 import { loadIndex } from './engine/content';
 
+export interface Completion {
+  id: string;
+  gained: number;
+  firstTry: boolean;
+  dayCompleted: boolean;
+}
+
 interface Store {
   ready: boolean;
   state: AppState;
@@ -15,8 +22,10 @@ interface Store {
   indexError: boolean;
   toast: string | null;
   update: (fn: (s: AppState) => AppState) => void;
-  finishTask: (id: string, opts?: { firstTry?: boolean; sectionLearned?: string }) => void;
-  finishAdvanced: (id: string, project?: string, stepId?: string) => void;
+  finishTask: (id: string, opts?: { firstTry?: boolean; sectionLearned?: string; quiet?: boolean }) => void;
+  finishAdvanced: (id: string, project?: string, stepId?: string, quiet?: boolean) => void;
+  /** L'ultimo completamento (per l'animazione di successo nella task a schermo intero). */
+  lastCompletion: Completion | null;
   readSection: (id: string) => void;
   addFavorite: (f: Omit<Favorite, 'id' | 'ts'>) => void;
   removeFavorite: (id: string) => void;
@@ -115,11 +124,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toastTimer.current = window.setTimeout(() => setToast(null), 2200);
   }, []);
 
+  const [lastCompletion, setLastCompletion] = useState<Completion | null>(null);
+
   const finishTask = useCallback(
-    (id: string, opts?: { firstTry?: boolean; sectionLearned?: string }) => {
+    (id: string, opts?: { firstTry?: boolean; sectionLearned?: string; quiet?: boolean }) => {
       const r = completeTask(stateRef.current, today, id, opts);
       if (r.gained) {
         update(() => r.state);
+        setLastCompletion({ id, gained: r.gained, firstTry: !!opts?.firstTry, dayCompleted: r.dayCompleted });
+        if (opts?.quiet) return; // l'animazione di successo mostra già i punti
         if ('vibrate' in navigator) navigator.vibrate?.(r.dayCompleted ? [10, 40, 10] : 10);
         showToast(r.dayCompleted ? `Giornata completa! +${r.gained} XP` : `+${r.gained} XP`);
       }
@@ -128,11 +141,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
 
   const finishAdvanced = useCallback(
-    (id: string, project?: string, stepId?: string) => {
+    (id: string, project?: string, stepId?: string, quiet = false) => {
       const r = completeAdvanced(stateRef.current, today, id, project, stepId);
       if (r.gained) {
         update(() => r.state);
-        showToast(`Avanzata fatta! +${r.gained} XP`);
+        setLastCompletion({ id, gained: r.gained, firstTry: false, dayCompleted: false });
+        if (!quiet) showToast(`Avanzata fatta! +${r.gained} XP`);
       }
     },
     [today, update, showToast]
@@ -200,8 +214,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [today, getIndex]);
 
   const value = useMemo<Store>(
-    () => ({ ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, saveDraft, getIndex }),
-    [ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, saveDraft, getIndex]
+    () => ({ ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, saveDraft, getIndex, lastCompletion }),
+    [ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, saveDraft, getIndex, lastCompletion]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

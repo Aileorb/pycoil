@@ -6,6 +6,7 @@ import { CodeEditor } from './CodeEditor';
 import { runPython, isPythonBooted, type RunResult } from '../py/runner';
 import { useStore } from '../store';
 import { Check, TASK_COLORS } from './icons';
+import { SuccessSnake } from './Success';
 import type { TaskDraft } from '../engine/storage';
 import { MAX_ATTEMPTS } from '../engine/state';
 
@@ -24,7 +25,8 @@ type DraftGetter = () => TaskDraft | undefined;
 
 /** Task a schermo intero: pausa (arancio) e uscita senza completare (rosso) in alto. */
 export function TaskSheet({ task, done, onClose, nav }: { task: Task; done: boolean; onClose: () => void; nav: TaskNav }) {
-  const { saveDraft, todayRec } = useStore();
+  const { saveDraft, todayRec, lastCompletion, state } = useStore();
+  const [success, setSuccess] = useState(false);
   const draftOf = useRef<DraftGetter | null>(null);
   const draft = todayRec?.drafts?.[task.id];
   const label = { impara: 'Impara', prevedi: 'Prevedi', scrivi: 'Scrivi', kata: 'Avanzata · kata', step: `Avanzata · passo ${(task as AdvancedTask).step ?? ''}` }[task.type];
@@ -56,17 +58,32 @@ export function TaskSheet({ task, done, onClose, nav }: { task: Task; done: bool
   useEffect(() => {
     body.current?.scrollTo({ top: 0 }); // nei browser recenti scrollTo restituisce una Promise: non va restituita all'effetto
   }, [task.id]);
-  // appena la task si completa, porta in vista l'esito (spiegazione, soluzione) sopra i bottoni
+  // appena la task si completa: animazione di successo al posto del contenuto
   const wasDone = useRef(done);
   useEffect(() => {
-    if (done && !wasDone.current) {
-      window.setTimeout(() => {
-        const el = body.current;
-        el?.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-      }, 350);
-    }
+    if (done && !wasDone.current) setSuccess(true);
     wasDone.current = done;
   }, [done]);
+  const review = () => {
+    setSuccess(false);
+    window.setTimeout(() => {
+      const el = body.current;
+      el?.scrollTo({ top: el.scrollHeight });
+    }, 30);
+  };
+  const gain = lastCompletion?.id === task.id ? lastCompletion : null;
+  const missing = nav.progress.filter((x) => !x).length;
+  const isAdv = task.type === 'kata' || task.type === 'step';
+  const successTitle = gain?.dayCompleted ? 'Giornata completa!' : 'Completata!';
+  const successSub = gain?.dayCompleted
+    ? `Streak a ${state.streak.current} ${state.streak.current === 1 ? 'giorno' : 'giorni'}. A domani!`
+    : isAdv
+      ? 'Un altro pezzo fatto al computer.'
+      : missing === 0
+        ? 'Le task di oggi sono tutte fatte.'
+        : missing === 1
+          ? 'Ancora una task e la giornata è chiusa.'
+          : `Ancora ${missing} task e la giornata è chiusa.`;
 
   return createPortal(
     <section className="task-screen" role="dialog" aria-modal="true" aria-label={`${label}: ${task.title}`}>
@@ -90,7 +107,16 @@ export function TaskSheet({ task, done, onClose, nav }: { task: Task; done: bool
         </div>
       )}
       <div className="task-body" ref={body}>
-        <div className="task-inner">
+        {success && (
+          <div className="success-panel" role="status">
+            <SuccessSnake gold={state.streak.current >= 30} />
+            {gain && <span className="success-xp">+{gain.gained} XP{gain.firstTry ? ' · al primo colpo' : ''}</span>}
+            <span className="success-title">{successTitle}</span>
+            <span className="success-sub">{successSub}</span>
+            <button className="success-review" onClick={review}>Rivedi la task</button>
+          </div>
+        )}
+        <div className="task-inner" style={success ? { display: 'none' } : undefined}>
           <h3 className="task-title">{task.title}</h3>
           {draft && !done && <div className="paused-note">Ripresa da dove l'avevi lasciata.</div>}
           {task.type === 'impara' && <Impara task={task} done={done} onClose={onClose} />}
@@ -100,7 +126,7 @@ export function TaskSheet({ task, done, onClose, nav }: { task: Task; done: bool
         </div>
       </div>
       {done && (
-        <footer className="task-foot">
+        <footer className={`task-foot ${success ? 'late' : ''}`}>
           {nav.next ? (
             <button className="big-btn" onClick={nav.onNext}>
               Prossima task
@@ -140,7 +166,7 @@ function Impara({ task, done, onClose }: { task: ImparaTask; done: boolean; onCl
       {done ? (
         <DoneBanner />
       ) : (
-        <button className="pill-btn" disabled={!reachedEnd} onClick={() => finishTask(task.id, { sectionLearned: task.section })}>
+        <button className="pill-btn" disabled={!reachedEnd} onClick={() => finishTask(task.id, { sectionLearned: task.section, quiet: true })}>
           {reachedEnd ? 'Ho capito, segna come fatta' : 'Leggi fino in fondo'}
         </button>
       )}
@@ -175,11 +201,11 @@ function Prevedi({ task, done }: { task: PrevediTask; done: boolean }) {
     if (revealed || wrong.includes(i)) return;
     if (i === task.answer) {
       setRight(true);
-      finishTask(task.id, { firstTry: wrong.length === 0 });
+      finishTask(task.id, { firstTry: wrong.length === 0, quiet: true });
     } else {
       recordAttempt(task.id, i);
       if ('vibrate' in navigator) navigator.vibrate?.([20, 40, 20]);
-      if (wrong.length + 1 >= max) finishTask(task.id, { firstTry: false });
+      if (wrong.length + 1 >= max) finishTask(task.id, { firstTry: false, quiet: true });
     }
   };
   return (
@@ -251,7 +277,7 @@ function Scrivi({ task, done, draft, register }: { task: ScriviTask; done: boole
       const ft = failedRuns === 0 && hints === 0;
       setSolved(true);
       setFirstTry(ft);
-      finishTask(task.id, { firstTry: ft });
+      finishTask(task.id, { firstTry: ft, quiet: true });
     } else if (!envError(r)) {
       recordAttempt(task.id);
     }
@@ -274,7 +300,7 @@ function Scrivi({ task, done, draft, register }: { task: ScriviTask; done: boole
       {!solved && !exhausted && hints < task.hints.length && <button className="ghost-btn" onClick={() => setHints(hints + 1)}>Mostra un suggerimento</button>}
       {(solved || exhausted) && <Solution code={task.solution} open={exhausted && !solved} />}
       {exhausted && !solved && (
-        <button className="ghost-btn" onClick={() => { setSolved(true); finishTask(task.id, { firstTry: false }); }}>
+        <button className="ghost-btn" onClick={() => { setSolved(true); finishTask(task.id, { firstTry: false, quiet: true }); }}>
           Ho capito, segna come fatta
         </button>
       )}
@@ -335,7 +361,7 @@ function Advanced({ task, done, draft, register }: { task: AdvancedTask; done: b
   const [busy, setBusy] = useState(false);
   const [passed, setPassed] = useState(false);
   const canVerify = !!task.testFile && !!task.module;
-  const markDone = () => finishAdvanced(task.id, task.project, task.project ? task.id.slice(task.project.length + 1) : undefined);
+  const markDone = () => finishAdvanced(task.id, task.project, task.project ? task.id.slice(task.project.length + 1) : undefined, true);
 
   const download = () => {
     if (!task.testFile) return;
