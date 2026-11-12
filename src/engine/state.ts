@@ -1,4 +1,4 @@
-import type { AppState, DayLog } from './types';
+import type { AppState, DayLog, DaySnap } from './types';
 import { addDays, daysBetween } from './dates';
 import { XP, streakMultiplier } from './levels';
 
@@ -70,6 +70,41 @@ export function isDayComplete(s: AppState, day: string): boolean {
   return dayLog(s, day).done.length >= DAY_TASKS;
 }
 
+/** La fotografia di oggi: quella esistente se è di oggi, altrimenti una nuova dallo stato attuale. */
+function snapOf(s: AppState, day: string): DaySnap {
+  if (s.daySnap?.date === day) return s.daySnap;
+  return { date: day, streak: s.streak, review: s.review, firstTry: s.firstTry, projects: s.projects, learned: s.learned, xpGained: 0 };
+}
+
+/** L'introduzione di oggi letta: la sezione entra tra quelle imparate (si annulla con resetDay). */
+export function learnIntroToday(s: AppState, day: string, sectionId: string): AppState {
+  if (s.learned.includes(sectionId)) return s;
+  return { ...learnSection(s, sectionId), daySnap: snapOf(s, day) };
+}
+
+/**
+ * Azzera la giornata: toglie le task fatte oggi (obbligatorie e avanzate) e riporta punti, streak,
+ * ripassi, esiti al primo colpo e passi dei progetti a com'erano prima della prima task di oggi.
+ * Le sezioni lette nel Percorso restano.
+ */
+export function resetDay(s: AppState, day: string): AppState {
+  const days = { ...s.days };
+  delete days[day];
+  const snap = s.daySnap?.date === day ? s.daySnap : null;
+  if (!snap) return { ...s, days };
+  return {
+    ...s,
+    days,
+    xp: Math.max(0, s.xp - snap.xpGained),
+    streak: snap.streak,
+    review: snap.review,
+    firstTry: snap.firstTry,
+    projects: snap.projects,
+    learned: snap.learned ?? s.learned,
+    daySnap: undefined
+  };
+}
+
 export interface CompletionResult {
   state: AppState;
   gained: number;
@@ -89,6 +124,7 @@ export function completeTask(
   const mult = streakMultiplier(s.streak.current);
   let gained = XP.task + (opts.firstTry ? XP.firstTry : 0);
   const done = [...log.done, taskId];
+  const snap = snapOf(s, day);
   const next: AppState = {
     ...s,
     days: { ...s.days, [day]: { ...log, done } },
@@ -112,6 +148,7 @@ export function completeTask(
     next.streak = { current, best: Math.max(s.streak.best, current), lastFullDay: day, lost: false };
   }
   next.xp = s.xp + Math.round(gained * mult);
+  next.daySnap = { ...snap, xpGained: snap.xpGained + Math.round(gained * mult) };
   return { state: next, gained: Math.round(gained * mult), dayCompleted };
 }
 
@@ -125,8 +162,9 @@ export function completeAdvanced(s: AppState, day: string, taskId: string, proje
     const steps = projects[project] ?? [];
     if (!steps.includes(stepId)) projects[project] = [...steps, stepId];
   }
+  const snap = snapOf(s, day);
   return {
-    state: { ...s, xp: s.xp + gained, days: { ...s.days, [day]: { ...log, adv: [...log.adv, taskId] } }, projects },
+    state: { ...s, xp: s.xp + gained, days: { ...s.days, [day]: { ...log, adv: [...log.adv, taskId] } }, projects, daySnap: { ...snap, xpGained: snap.xpGained + gained } },
     gained,
     dayCompleted: false
   };

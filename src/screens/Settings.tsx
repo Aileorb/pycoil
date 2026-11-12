@@ -7,9 +7,18 @@ import { PYODIDE_VERSION } from '../py/version';
 import { SpaceUsage } from '../components/SpaceUsage';
 
 export function Settings({ onClose }: { onClose: () => void }) {
-  const { state, update, reloadToday, showToast, index } = useStore();
+  const { state, today, update, reloadToday, resetToday, showToast, index } = useStore();
   const file = useRef<HTMLInputElement>(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmDay, setConfirmDay] = useState(false);
+  const log = state.days[today];
+  const doneToday = (log?.done.length ?? 0) + (log?.adv.length ?? 0);
+
+  const doResetDay = async () => {
+    setConfirmDay(false);
+    const ok = await resetToday();
+    showToast(ok ? (doneToday ? 'Giornata azzerata: task riscaricate' : 'Task di oggi riscaricate') : 'Non riesco a scaricarle: sei offline?');
+  };
 
   const doExport = () => {
     const url = URL.createObjectURL(new Blob([exportState(state)], { type: 'application/json' }));
@@ -45,9 +54,21 @@ export function Settings({ onClose }: { onClose: () => void }) {
           <span className="grow"><span className="t">Importa i progressi</span><span className="st">Da un export precedente</span></span>
         </button>
         <input ref={file} type="file" accept="application/json" hidden onChange={(e) => e.target.files?.[0] && doImport(e.target.files[0])} />
-        <button className="row" onClick={() => { reloadToday(); showToast('Task di oggi riscaricate'); }}>
-          <span className="grow"><span className="t">Riscarica le task di oggi</span><span className="st">Se qualcosa non si è caricato</span></span>
-        </button>
+        {doneToday > 0 && confirmDay ? (
+          <button className="row" onClick={doResetDay}>
+            <span className="grow">
+              <span className="t" style={{ color: 'var(--red)' }}>Conferma: riscarica e azzera oggi</span>
+              <span className="st">Tolgo {doneToday === 1 ? 'la task fatta' : `le ${doneToday} task fatte`} oggi, con punti e streak di oggi</span>
+            </span>
+          </button>
+        ) : (
+          <button className="row" onClick={() => (doneToday > 0 ? setConfirmDay(true) : void doResetDay())}>
+            <span className="grow">
+              <span className="t">Riscarica le task di oggi</span>
+              <span className="st">{doneToday > 0 ? 'Ricominci da capo le task di oggi' : 'Se qualcosa non si è caricato'}</span>
+            </span>
+          </button>
+        )}
       </div>
       <SpaceUsage />
       <div className="group">

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { addDays, dayKey, daysBetween, weekStart } from '../src/engine/dates';
-import { completeAdvanced, completeTask, compactHistory, emptyState, markSectionRead, normalize, refreshStreak } from '../src/engine/state';
+import { completeAdvanced, completeTask, compactHistory, emptyState, learnIntroToday, markSectionRead, normalize, refreshStreak, resetDay } from '../src/engine/state';
 import { levelProgress, moodFor, stageFor } from '../src/engine/levels';
 import { planDay, pathSections, isProjectUnlocked } from '../src/engine/scheduler';
 import type { AppState, ContentIndex } from '../src/engine/types';
@@ -206,5 +206,45 @@ describe('task del giorno usa-e-getta', () => {
     const s = finishDay(emptyState(), '2026-11-12');
     const json = JSON.stringify(s);
     expect(json).not.toMatch(/solution|promptHtml|codeHtml|tests/);
+  });
+});
+
+describe('azzerare la giornata', () => {
+  it('riporta punti, streak, ripassi, progetti e introduzione a prima delle task di oggi', () => {
+    // ieri giornata completa: streak 1
+    let s = emptyState();
+    for (const id of ['a', 'b', 'c']) s = completeTask(s, '2026-11-11', id, { firstTry: true }).state;
+    s = markSectionRead(s, 'sez-letta').state;
+    const before = structuredClone({ ...s, daySnap: undefined });
+    // oggi: introduzione, 3 task (streak 2), un'avanzata di progetto, una sezione letta nel Percorso
+    s = learnIntroToday(s, '2026-11-12', 'sez-nuova');
+    for (const id of ['d', 'e', 'f']) s = completeTask(s, '2026-11-12', id, { firstTry: false }).state;
+    s = completeAdvanced(s, '2026-11-12', 'p1-s1', 'p1', 's1').state;
+    s = markSectionRead(s, 'altra').state;
+    expect(s.streak.current).toBe(2);
+    const r = resetDay(s, '2026-11-12');
+    expect(r.days['2026-11-12']).toBeUndefined();
+    expect(r.days['2026-11-11'].done).toEqual(['a', 'b', 'c']);
+    expect(r.streak).toEqual(before.streak);
+    expect(r.review).toEqual(before.review);
+    expect(r.firstTry).toEqual(before.firstTry);
+    expect(r.projects).toEqual(before.projects);
+    expect(r.learned).toEqual(before.learned);
+    // restano solo i punti della sezione letta oggi nel Percorso
+    expect(r.xp).toBe(before.xp + 15);
+    expect(r.sections).toContain('altra');
+    expect(r.daySnap).toBeUndefined();
+    // rifare le task dopo l'azzeramento ridà la stessa streak
+    let again = r;
+    for (const id of ['d', 'e', 'f']) again = completeTask(again, '2026-11-12', id).state;
+    expect(again.streak.current).toBe(2);
+  });
+
+  it('senza nulla fatto oggi non cambia niente di importante', () => {
+    let s = emptyState();
+    s = completeTask(s, '2026-11-11', 'a').state;
+    const r = resetDay(s, '2026-11-12');
+    expect(r.xp).toBe(s.xp);
+    expect(r.days).toEqual(s.days);
   });
 });

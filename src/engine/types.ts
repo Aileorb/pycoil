@@ -171,4 +171,17 @@ export interface AppState {
   projects: Record<string, string[]>; // id progetto -> passi fatti
   favorites: Favorite[];
   scroll: Record<string, number>;
+  /** Fotografia presa alla prima task del giorno: permette di azzerare la giornata con precisione. */
+  daySnap?: DaySnap;
+}
+
+export interface DaySnap {
+  date: string;
+  streak: AppState['streak'];
+  review: AppState['review'];
+  firstTry: AppState['firstTry'];
+  projects: AppState['projects'];
+  learned: AppState['learned'];
+  /** Punti guadagnati oggi con le task (le sezioni lette non contano). */
+  xpGained: number;
 }

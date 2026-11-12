@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { AppState, ContentIndex, Favorite } from './engine/types';
 import { dayKey, weekStart } from './engine/dates';
-import { compactHistory, completeAdvanced, completeTask, learnSection, markSectionRead, refreshStreak, emptyState } from './engine/state';
-import { ensureToday, loadState, saveState, saveToday, clearToday, type TaskDraft, type TodayRecord } from './engine/storage';
+import { compactHistory, completeAdvanced, completeTask, learnIntroToday, markSectionRead, resetDay, refreshStreak, emptyState } from './engine/state';
+import { buildToday, ensureToday, loadState, saveState, saveToday, clearToday, type TaskDraft, type TodayRecord } from './engine/storage';
 import { loadIndex } from './engine/content';
 
 export interface Completion {
@@ -33,6 +33,7 @@ interface Store {
   removeFavorite: (id: string) => void;
   showToast: (t: string) => void;
   reloadToday: () => void;
+  resetToday: () => Promise<boolean>;
   /** Registra un tentativo sbagliato di oggi (resta salvato fino a domani). */
   recordAttempt: (id: string, pick?: number) => void;
   /** Salva (o con null cancella) la bozza di una task messa in pausa. */
@@ -154,7 +155,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [today, update, showToast]
   );
 
-  const learnIntro = useCallback((sectionId: string) => update((s) => learnSection(s, sectionId)), [update]);
+  const learnIntro = useCallback((sectionId: string) => update((s) => learnIntroToday(s, today, sectionId)), [update, today]);
 
   const readSection = useCallback(
     (id: string) => {
@@ -217,9 +218,33 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     });
   }, [today, getIndex]);
 
+  /** Riscarica le task di oggi e azzera la giornata: completamenti, punti, streak, tentativi e bozze. */
+  const resetToday = useCallback(async () => {
+    const prev = todayRef.current?.date === today ? todayRef.current : null;
+    const s = resetDay(stateRef.current, today);
+    stateRef.current = s;
+    setState(s);
+    void saveState(s);
+    setLastCompletion(null);
+    await clearToday();
+    todayRef.current = null;
+    setTodayRec(null);
+    let rec: TodayRecord | null = null;
+    try {
+      // stesso piano di prima (se c'era): si rifanno le stesse task, non quelle dopo
+      rec = await buildToday(await getIndex(), s, today, prev?.plan);
+    } catch {
+      rec = null;
+    }
+    todayRef.current = rec;
+    setTodayRec(rec);
+    setTodayError(!rec);
+    return !!rec;
+  }, [today, getIndex]);
+
   const value = useMemo<Store>(
-    () => ({ ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, saveDraft, getIndex, lastCompletion, learnIntro }),
-    [ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, recordAttempt, saveDraft, getIndex, lastCompletion, learnIntro]
+    () => ({ ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, resetToday, recordAttempt, saveDraft, getIndex, lastCompletion, learnIntro }),
+    [ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, resetToday, recordAttempt, saveDraft, getIndex, lastCompletion, learnIntro]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -112,9 +112,11 @@ export function SpaceUsage() {
                 <span className="space-v">{formatBytes(r.size)}</span>
               </div>
             ))}
-            <button className="pill-btn" style={{ margin: '10px 16px 4px' }} disabled={busy || m.plan.removableSize === 0} onClick={libera}>
-              {busy ? 'Libero spazio…' : m.plan.removableSize ? `Libera ${formatBytes(m.plan.removableSize)}` : 'Niente da liberare'}
-            </button>
+            <div className="space-action">
+              <button className="pill-btn" disabled={busy || m.plan.removableSize === 0} onClick={libera}>
+                {busy ? 'Libero spazio…' : m.plan.removableSize ? `Libera ${formatBytes(m.plan.removableSize)}` : 'Niente da liberare'}
+              </button>
+            </div>
             <p className="space-note">
               Toglie le librerie che non servono né alla Parte in cui sei arrivato né a quelle dopo, ai ripassi in calendario e al progetto in corso.
               Se più avanti un esercizio le usa di nuovo, si riscaricano da sole (serve la connessione).

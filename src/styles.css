@@ -99,6 +99,7 @@ a { color: var(--blue); }
 .card { background: var(--card); border-radius: 20px; padding: 16px; }
 .pill-btn { height: 50px; border-radius: 14px; background: var(--blue); color: #fff; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center; width: 100%; text-decoration: none; }
 .pill-btn:disabled { opacity: 0.4; }
+.space-action { padding: 10px 16px 4px; }
 .ghost-btn { height: 44px; color: var(--blue); font-size: 17px; width: 100%; }
 .bar { height: 8px; border-radius: 4px; background: var(--fill); overflow: hidden; }
 .bar > span { display: block; height: 100%; border-radius: 4px; background: var(--green); transition: width 0.6s var(--spring); }
@@ -126,6 +127,7 @@ a { color: var(--blue); }
 .dots i { width: 16px; height: 16px; border-radius: 8px; background: var(--fill); display: block; }
 .dots i.on { background: var(--orange); }
 .dots i.today { background: transparent; border: 2.5px solid var(--orange); }
+@media (max-width: 340px) { .dots { gap: 3px; } .dots i { width: 14px; height: 14px; border-radius: 7px; } }
 .challenge { margin: 0; padding: 4px 6px 2px; font-size: 21px; line-height: 1.25; font-weight: 600; letter-spacing: -0.3px; }
 @media (min-width: 600px) { .home-top { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; align-items: center; } }
 .status-ok { width: 26px; height: 26px; flex-shrink: 0; }

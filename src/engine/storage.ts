@@ -75,8 +75,8 @@ export async function clearToday(): Promise<void> {
   }
 }
 
-export async function buildToday(index: ContentIndex, state: AppState, day: string): Promise<TodayRecord> {
-  const plan = planDay(index, state, day);
+export async function buildToday(index: ContentIndex, state: AppState, day: string, keepPlan?: DayPlan): Promise<TodayRecord> {
+  const plan = keepPlan ?? planDay(index, state, day);
   const ids = [...(plan.intro ? [plan.intro] : []), ...plan.required, ...plan.advanced];
   const loaded = await Promise.all(ids.map((id) => loadTask(id).catch(() => null)));
   const tasks: Record<string, Task> = {};
