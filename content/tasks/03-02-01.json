@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Prodotto: * contro @",
+    "code": "import numpy as np\nA = np.array([[1, 2], [3, 4]])\nx = np.array([1, 1])\nprint(A @ x, (A * x)[1])",
+    "options": [
+      "[3 7] [3 4]",
+      "[3 7] [3 7]",
+      "[4 6] [3 4]",
+      "[1 2] [3 4]"
+    ],
+    "answer": 0,
+    "explain": "`@` è il prodotto matrice-vettore; `*` moltiplica elemento per elemento (con broadcasting)."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Tre molle in serie",
+    "prompt": "Tre molle in serie (`k1`, `k2`, `k3`, N/mm) sono fissate a sinistra; sul nodo finale agisce `F`. Costruisci la matrice di rigidezza 3×3 `K` dei tre nodi liberi e risolvi `u` con `np.linalg.solve`.",
+    "starter": "import numpy as np\nk1, k2, k3, F = 1000.0, 500.0, 250.0, 100.0\nK = np.array([\n    ...\n])\nf = np.array([0.0, 0.0, F])\nu = ...\nprint(u.round(4))",
+    "tests": "import numpy as np\nKa = np.array([[1500.0, -500, 0], [-500, 750, -250], [0, -250, 250]])\nassert np.allclose(K, Ka), \"riga i: k_i + k_(i+1) sulla diagonale, −k_(i+1) accanto\"\natt = np.array([0.1, 0.3, 0.7])\nassert np.allclose(u, att), f\"spostamenti attesi {att}, ottenuti {u}\"",
+    "solution": "import numpy as np\nk1, k2, k3, F = 1000.0, 500.0, 250.0, 100.0\nK = np.array([\n    [k1 + k2, -k2, 0.0],\n    [-k2, k2 + k3, -k3],\n    [0.0, -k3, k3],\n])\nf = np.array([0.0, 0.0, F])\nu = np.linalg.solve(K, f)\nprint(u.round(4))",
+    "hints": [
+      "Sulla diagonale la somma delle rigidezze collegate al nodo.",
+      "Fuori diagonale −k della molla che collega i due nodi."
+    ]
+  }
+]

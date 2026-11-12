@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Autovalori di una diagonale",
+    "code": "import numpy as np\nw = np.linalg.eigvalsh(np.diag([9.0, 4.0]))\nprint(np.sqrt(w))",
+    "options": [
+      "[2. 3.]",
+      "[3. 2.]",
+      "[4. 9.]",
+      "[81. 16.]"
+    ],
+    "answer": 0,
+    "explain": "Gli autovalori di una diagonale sono gli elementi; `eigvalsh` li ordina crescenti: radici 2 e 3."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Frequenza di un oscillatore a 2 gdl",
+    "prompt": "Con `scipy.linalg.eigh(K, M)` calcola le frequenze proprie (Hz) del sistema dato e mettile in `f` in ordine crescente.",
+    "starter": "import numpy as np\nfrom scipy.linalg import eigh\nM = np.diag([1.0, 1.0])\nK = np.array([[2000.0, -1000.0], [-1000.0, 1000.0]])\nw2, modi = ...\nf = ...\nprint(f.round(3))",
+    "tests": "import numpy as np\nw = np.sqrt(np.linalg.eigvalsh(np.array([[2000.0, -1000.0], [-1000.0, 1000.0]])))\nassert np.allclose(f, w / (2 * np.pi)), f\"frequenze attese {(w / (2 * np.pi)).round(3)}\"",
+    "solution": "import numpy as np\nfrom scipy.linalg import eigh\nM = np.diag([1.0, 1.0])\nK = np.array([[2000.0, -1000.0], [-1000.0, 1000.0]])\nw2, modi = eigh(K, M)\nf = np.sqrt(w2) / (2 * np.pi)\nprint(f.round(3))",
+    "hints": [
+      "`eigh` restituisce ω² (crescenti) e i modi.",
+      "f = √(ω²) / 2π."
+    ]
+  }
+]

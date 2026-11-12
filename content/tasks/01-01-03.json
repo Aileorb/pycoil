@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "get con valore di default",
+    "code": "E = {\"acciaio\": 210, \"alluminio\": 70}\nprint(E.get(\"titanio\", 0), len(E))",
+    "options": [
+      "0 2",
+      "None 2",
+      "KeyError",
+      "0 3"
+    ],
+    "answer": 0,
+    "explain": "`get` restituisce il default se la chiave manca e **non** la aggiunge al dizionario."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Conteggio dei componenti",
+    "prompt": "Data la lista `pezzi`, costruisci il dizionario `conteggio` che associa a ogni tipo di pezzo quante volte compare.",
+    "starter": "pezzi = [\"vite\", \"dado\", \"vite\", \"rondella\", \"vite\", \"dado\"]\nconteggio = {}\n...\nprint(conteggio)",
+    "tests": "assert conteggio == {\"vite\": 3, \"dado\": 2, \"rondella\": 1}, f\"ottenuto {conteggio}\"",
+    "solution": "pezzi = [\"vite\", \"dado\", \"vite\", \"rondella\", \"vite\", \"dado\"]\nconteggio = {}\nfor p in pezzi:\n    conteggio[p] = conteggio.get(p, 0) + 1\nprint(conteggio)",
+    "hints": [
+      "`conteggio.get(p, 0)` vale 0 la prima volta.",
+      "Esiste anche `collections.Counter`, ma provaci a mano."
+    ]
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Quante iterazioni?",
+    "code": "x = 100\nn = 0\nwhile x > 1:\n    x = x / 10\n    n += 1\nprint(n)",
+    "options": [
+      "2",
+      "3",
+      "1",
+      "100"
+    ],
+    "answer": 0,
+    "explain": "100 → 10 → 1: dopo due divisioni `x` vale 1 e la condizione `x > 1` è falsa."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Radice con il metodo di Newton",
+    "prompt": "Calcola la radice quadrata di `a = 2` con il metodo di Newton: parti da `x = a` e ripeti `x = (x + a / x) / 2` **finché** `abs(x * x - a) > 1e-10`. Conta le iterazioni in `n`.",
+    "starter": "a = 2\nx = a\nn = 0\n...\nprint(x, n)",
+    "tests": "assert abs(x - 2 ** 0.5) < 1e-9, f\"x deve essere √2, ottenuto {x}\"\nassert 1 <= n <= 10, \"il metodo converge in pochi passi: hai contato le iterazioni in n?\"",
+    "solution": "a = 2\nx = a\nn = 0\nwhile abs(x * x - a) > 1e-10:\n    x = (x + a / x) / 2\n    n += 1\nprint(x, n)",
+    "hints": [
+      "La condizione del `while` è `abs(x * x - a) > 1e-10`.",
+      "Dentro il ciclo aggiorna `x` e incrementa `n`."
+    ]
+  }
+]

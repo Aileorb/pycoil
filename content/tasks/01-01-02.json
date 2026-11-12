@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Unpacking esteso",
+    "code": "primo, *resto = (5, 8, 13, 21)\nprint(primo, resto)",
+    "options": [
+      "5 [8, 13, 21]",
+      "5 (8, 13, 21)",
+      "(5,) [8, 13, 21]",
+      "5 8"
+    ],
+    "answer": 0,
+    "explain": "Con `*resto` si raccoglie tutto il resto in una **lista**, anche se l'origine è una tupla."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Reazioni di una trave",
+    "prompt": "Scrivi `reazioni(F, a, L)` per una trave appoggiata di luce `L` con forza `F` a distanza `a` dall'appoggio A. Restituisci la tupla `(RA, RB)`.",
+    "starter": "def reazioni(F, a, L):\n    ...\n\nRA, RB = reazioni(10, 1, 4)\nprint(RA, RB)",
+    "tests": "RA, RB = reazioni(10, 1, 4)\nassert abs(RA - 7.5) < 1e-9 and abs(RB - 2.5) < 1e-9, f\"con F=10, a=1, L=4 servono (7.5, 2.5), ottenuto {(RA, RB)}\"\nassert isinstance(reazioni(1, 1, 2), tuple), \"restituisci una tupla\"",
+    "solution": "def reazioni(F, a, L):\n    RB = F * a / L\n    RA = F - RB\n    return RA, RB\n\nRA, RB = reazioni(10, 1, 4)\nprint(RA, RB)",
+    "hints": [
+      "Equilibrio dei momenti in A: RB·L = F·a.",
+      "`return RA, RB` crea già una tupla."
+    ]
+  }
+]

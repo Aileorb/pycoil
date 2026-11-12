@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "return e print",
+    "code": "def f(x):\n    print(x * 2)\n\nr = f(3)\nprint(r)",
+    "options": [
+      "6\nNone",
+      "6\n6",
+      "None",
+      "6"
+    ],
+    "answer": 0,
+    "explain": "La funzione **stampa** 6 ma non ha `return`: restituisce `None`, che viene stampato dopo."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Tensione normale",
+    "prompt": "Scrivi `tensione(N, A)` che restituisce la tensione σ = N/A. Se `A` è minore o uguale a zero, restituisci `None`.",
+    "starter": "def tensione(N, A):\n    ...\n\nprint(tensione(10000, 200))",
+    "tests": "assert tensione(10000, 200) == 50, \"tensione(10000, 200) deve valere 50\"\nassert tensione(1, 0) is None, \"con A = 0 serve None\"\nassert tensione(1, -5) is None, \"con A < 0 serve None\"",
+    "solution": "def tensione(N, A):\n    if A <= 0:\n        return None\n    return N / A\n\nprint(tensione(10000, 200))",
+    "hints": [
+      "Controlla `A <= 0` per primo.",
+      "Ricorda il `return`, non `print`."
+    ]
+  }
+]

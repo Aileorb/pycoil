@@ -1,0 +1,13 @@
+{
+  "id": "p6",
+  "title": "Verifiche con unità e incertezze",
+  "stars": 4,
+  "unlockAfter": "p6",
+  "summary": "Un calcolo di collegamento bullonato con SymPy per le formule, controllo delle unità e propagazione dell'incertezza delle misure con `uncertainties`.",
+  "intro": "Un calcolo di collegamento bullonato con SymPy per le formule, controllo delle unità e propagazione dell'incertezza delle misure con `uncertainties`.\n\n> [!nota] Questo progetto arriva con i prossimi aggiornamenti dei contenuti, insieme alla Parte che lo sblocca.\n\n## Le tappe previste\n\n1. Formule simboliche e derivazione\n2. Dalla formula alla funzione con `lambdify`\n3. Propagazione dell'incertezza\n4. Report del collegamento",
+  "sources": [
+    "SymPy | https://docs.sympy.org/latest/tutorials/intro-tutorial/index.html",
+    "uncertainties | https://uncertainties.readthedocs.io/"
+  ],
+  "steps": []
+}

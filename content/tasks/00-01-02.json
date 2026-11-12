@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Tipi numerici",
+    "code": "a = 10\nb = 4.0\nprint(type(a + b).__name__, a * 2)",
+    "options": [
+      "float 20",
+      "int 20",
+      "float 20.0",
+      "int 20.0"
+    ],
+    "answer": 0,
+    "explain": "Un `int` più un `float` dà un `float`; `a * 2` resta intero: `20`."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Peso di una barra d'acciaio",
+    "prompt": "Una barra lunga `L = 2.5` m ha area `A = 0.0004` m² e densità `rho = 7850` kg/m³. Calcola la massa `m` (kg) e il peso `P` (N) con `g = 9.81`.",
+    "starter": "L = 2.5\nA = 0.0004\nrho = 7850\ng = 9.81\nm = ...\nP = ...\nprint(m, P)",
+    "tests": "assert abs(m - 7.85) < 1e-9, \"la massa è rho·A·L = 7.85 kg\"\nassert abs(P - 7.85 * 9.81) < 1e-9, \"il peso è m·g\"",
+    "solution": "L = 2.5\nA = 0.0004\nrho = 7850\ng = 9.81\nm = rho * A * L\nP = m * g\nprint(m, P)",
+    "hints": [
+      "Volume = A·L.",
+      "m = rho·V, P = m·g."
+    ]
+  }
+]

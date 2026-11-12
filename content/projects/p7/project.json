@@ -1,0 +1,12 @@
+{
+  "id": "p7",
+  "title": "FEM 2D di una lastra forata",
+  "stars": 5,
+  "unlockAfter": "p7",
+  "summary": "Un solutore agli elementi finiti triangolari (CST) scritto da te per una lastra con foro, confrontato con il fattore di concentrazione delle tensioni di Kirsch e con scikit-fem.",
+  "intro": "Un solutore agli elementi finiti triangolari (CST) scritto da te per una lastra con foro, confrontato con il fattore di concentrazione delle tensioni di Kirsch e con scikit-fem.\n\n> [!nota] Questo progetto arriva con i prossimi aggiornamenti dei contenuti, insieme alla Parte che lo sblocca.\n\n## Le tappe previste\n\n1. Mesh triangolare della lastra\n2. Matrice di rigidezza dell'elemento CST\n3. Assemblaggio e vincoli\n4. Soluzione e tensioni di von Mises\n5. Confronto con Kirsch (Kt ≈ 3)\n6. Lo stesso problema con scikit-fem",
+  "sources": [
+    "scikit-fem | https://scikit-fem.readthedocs.io/"
+  ],
+  "steps": []
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "else e finally",
+    "code": "try:\n    x = int(\"12\")\nexcept ValueError:\n    print(\"errore\")\nelse:\n    print(\"ok\", x)\nfinally:\n    print(\"fine\")",
+    "options": [
+      "ok 12\nfine",
+      "errore\nfine",
+      "ok 12",
+      "fine"
+    ],
+    "answer": 0,
+    "explain": "Nessuna eccezione: si esegue `else`, e `finally` gira **sempre**."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Lettura robusta",
+    "prompt": "Scrivi `leggi_numero(testo)` che converte una stringa in `float` accettando anche la virgola decimale. Se la conversione fallisce, solleva `ValueError` con il messaggio `\"valore non numerico: <testo>\"`.",
+    "starter": "def leggi_numero(testo):\n    ...\n\nprint(leggi_numero(\"3,5\"), leggi_numero(\"2.25\"))",
+    "tests": "assert leggi_numero(\"3,5\") == 3.5, \"'3,5' deve dare 3.5\"\nassert leggi_numero(\" 2.25 \") == 2.25, \"gestisci anche gli spazi (float li tollera)\"\ntry:\n    leggi_numero(\"abc\")\n    raise AssertionError(\"con 'abc' deve essere sollevato ValueError\")\nexcept ValueError as e:\n    assert \"valore non numerico: abc\" in str(e), f\"messaggio atteso 'valore non numerico: abc', ottenuto {e}\"",
+    "solution": "def leggi_numero(testo):\n    try:\n        return float(testo.replace(\",\", \".\"))\n    except ValueError:\n        raise ValueError(f\"valore non numerico: {testo}\") from None\n\nprint(leggi_numero(\"3,5\"), leggi_numero(\"2.25\"))",
+    "hints": [
+      "Avvolgi la conversione in `try/except ValueError`.",
+      "Nell'except: `raise ValueError(f\"valore non numerico: {testo}\")`."
+    ]
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Operazioni elemento per elemento",
+    "code": "import numpy as np\na = np.array([1, 2, 3])\nprint(a * 2, [1, 2, 3] * 2)",
+    "options": [
+      "[2 4 6] [1, 2, 3, 1, 2, 3]",
+      "[2 4 6] [2, 4, 6]",
+      "[1 2 3 1 2 3] [1, 2, 3, 1, 2, 3]",
+      "TypeError"
+    ],
+    "answer": 0,
+    "explain": "Su un array `* 2` moltiplica ogni elemento; su una lista **ripete** la lista."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Discretizzare una trave",
+    "prompt": "Crea `x`: 11 punti equispaziati da 0 a `L = 5` m con `np.linspace`. Poi calcola `M = q * x * (L - x) / 2` con `q = 4` kN/m e metti in `Mmax` il massimo.",
+    "starter": "import numpy as np\nL, q = 5.0, 4.0\nx = ...\nM = ...\nMmax = ...\nprint(Mmax)",
+    "tests": "import numpy as np\nassert len(x) == 11 and x[0] == 0 and x[-1] == 5, \"x deve avere 11 punti da 0 a 5\"\nassert np.allclose(M, 4 * x * (5 - x) / 2), \"M = q·x·(L−x)/2\"\nassert abs(Mmax - 12.5) < 1e-9, f\"Mmax = qL²/8 = 12.5, ottenuto {Mmax}\"",
+    "solution": "import numpy as np\nL, q = 5.0, 4.0\nx = np.linspace(0, L, 11)\nM = q * x * (L - x) / 2\nMmax = M.max()\nprint(Mmax)",
+    "hints": [
+      "`np.linspace(0, L, 11)`.",
+      "Il massimo con `M.max()`."
+    ]
+  }
+]

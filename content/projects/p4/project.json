@@ -1,0 +1,12 @@
+{
+  "id": "p4",
+  "title": "Vibrazioni di un albero",
+  "stars": 3,
+  "unlockAfter": "p4",
+  "summary": "Velocità critiche di un albero con dischi: matrici di massa e rigidezza, modi propri con SciPy, risposta forzata e diagramma di Campbell semplificato.",
+  "intro": "Velocità critiche di un albero con dischi: matrici di massa e rigidezza, modi propri con SciPy, risposta forzata e diagramma di Campbell semplificato.\n\n> [!nota] Questo progetto arriva con i prossimi aggiornamenti dei contenuti, insieme alla Parte che lo sblocca.\n\n## Le tappe previste\n\n1. Modello a masse concentrate dell'albero\n2. Matrici M e K\n3. Frequenze e modi con `eigh`\n4. Risposta a uno squilibrio con `solve_ivp`\n5. Grafico della risposta in frequenza",
+  "sources": [
+    "SciPy: eigh | https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html"
+  ],
+  "steps": []
+}

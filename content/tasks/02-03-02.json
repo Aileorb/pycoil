@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Guardia nel case",
+    "code": "def classe(s):\n    match s:\n        case x if x < 0:\n            return \"compressione\"\n        case 0:\n            return \"scarico\"\n        case _:\n            return \"trazione\"\n\nprint(classe(-3), classe(0), classe(4))",
+    "options": [
+      "compressione scarico trazione",
+      "trazione scarico trazione",
+      "compressione compressione trazione",
+      "scarico scarico trazione"
+    ],
+    "answer": 0,
+    "explain": "La guardia `if x < 0` accetta solo i negativi; 0 combacia col letterale; il resto va in `_`."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Area dei carichi misti",
+    "prompt": "Date le dataclass `Concentrato(F)` e `Distribuito(q, L)`, scrivi `risultante(c)` con `match` e pattern di classe: restituisce `F` per un carico concentrato e `q * L` per uno distribuito.",
+    "starter": "from dataclasses import dataclass\n\n@dataclass\nclass Concentrato:\n    F: float\n\n@dataclass\nclass Distribuito:\n    q: float\n    L: float\n\ndef risultante(c):\n    ...\n\nprint(sum(risultante(c) for c in [Concentrato(10), Distribuito(2, 3)]))",
+    "tests": "assert risultante(Concentrato(10)) == 10, \"un concentrato vale F\"\nassert risultante(Distribuito(2, 3)) == 6, \"un distribuito vale q·L\"\nassert risultante(Distribuito(q=1.5, L=4)) == 6, \"q=1.5, L=4 dà 6\"",
+    "solution": "from dataclasses import dataclass\n\n@dataclass\nclass Concentrato:\n    F: float\n\n@dataclass\nclass Distribuito:\n    q: float\n    L: float\n\ndef risultante(c):\n    match c:\n        case Concentrato(F=F):\n            return F\n        case Distribuito(q=q, L=L):\n            return q * L\n\nprint(sum(risultante(c) for c in [Concentrato(10), Distribuito(2, 3)]))",
+    "hints": [
+      "`case Concentrato(F=F):` cattura il campo.",
+      "Le dataclass supportano anche la forma posizionale `Distribuito(q, L)`."
+    ]
+  }
+]

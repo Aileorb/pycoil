@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Attributo di istanza",
+    "code": "class Molla:\n    def __init__(self, k):\n        self.k = k\n    def forza(self, x):\n        return self.k * x\n\nm = Molla(200)\nm.k = 300\nprint(m.forza(0.5))",
+    "options": [
+      "150.0",
+      "100.0",
+      "300",
+      "AttributeError"
+    ],
+    "answer": 0,
+    "explain": "`m.k` viene riassegnato a 300 prima della chiamata: 300 · 0.5 = 150.0."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Classe Sezione rettangolare",
+    "prompt": "Scrivi la classe `Rettangolo` con `__init__(self, b, h)` e i metodi `area()` e `inerzia()` (momento d'inerzia rispetto all'asse baricentrico orizzontale, b·h³/12).",
+    "starter": "class Rettangolo:\n    ...\n\nr = Rettangolo(100, 200)\nprint(r.area(), r.inerzia())",
+    "tests": "r = Rettangolo(100, 200)\nassert r.area() == 20000, \"area di 100×200 = 20000\"\nassert abs(r.inerzia() - 100 * 200**3 / 12) < 1e-6, \"inerzia = b·h³/12\"\nassert Rettangolo(10, 10).area() == 100, \"controlla che area usi self.b e self.h\"",
+    "solution": "class Rettangolo:\n    def __init__(self, b, h):\n        self.b = b\n        self.h = h\n\n    def area(self):\n        return self.b * self.h\n\n    def inerzia(self):\n        return self.b * self.h**3 / 12\n\nr = Rettangolo(100, 200)\nprint(r.area(), r.inerzia())",
+    "hints": [
+      "Salva `b` e `h` su `self` in `__init__`.",
+      "Ogni metodo riceve `self` come primo parametro."
+    ]
+  }
+]

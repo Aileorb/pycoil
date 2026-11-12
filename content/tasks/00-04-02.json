@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Slicing",
+    "code": "m = [10, 20, 30, 40, 50]\nprint(m[1:3], m[-1])",
+    "options": [
+      "[20, 30] 50",
+      "[10, 20, 30] 50",
+      "[20, 30, 40] 40",
+      "[20, 30] 40"
+    ],
+    "answer": 0,
+    "explain": "`m[1:3]` prende gli indici 1 e 2; `m[-1]` è l'ultimo elemento."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Le tre letture più alte",
+    "prompt": "Data la lista `letture`, crea `top3` con le tre letture più alte in ordine **decrescente**, senza modificare `letture`.",
+    "starter": "letture = [12.1, 15.8, 9.4, 18.2, 14.0, 16.5]\ntop3 = ...\nprint(top3)",
+    "tests": "assert top3 == [18.2, 16.5, 15.8], f\"atteso [18.2, 16.5, 15.8], ottenuto {top3}\"\nassert letture == [12.1, 15.8, 9.4, 18.2, 14.0, 16.5], \"la lista originale non deve cambiare: usa sorted()\"",
+    "solution": "letture = [12.1, 15.8, 9.4, 18.2, 14.0, 16.5]\ntop3 = sorted(letture, reverse=True)[:3]\nprint(top3)",
+    "hints": [
+      "`sorted(...)` crea una nuova lista, `.sort()` modifica l'originale.",
+      "Poi prendi i primi tre con lo slicing."
+    ]
+  }
+]

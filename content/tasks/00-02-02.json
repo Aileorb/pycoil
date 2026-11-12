@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "f-string con decimali",
+    "code": "sigma = 123.456\nprint(f\"σ = {sigma:.1f} MPa\")",
+    "options": [
+      "σ = 123.5 MPa",
+      "σ = 123.4 MPa",
+      "σ = 123.456 MPa",
+      "σ = 1.2e+02 MPa"
+    ],
+    "answer": 0,
+    "explain": "`:.1f` arrotonda a un decimale: 123.456 → 123.5."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Etichetta di una verifica",
+    "prompt": "Data la tensione `sigma = 187.349` MPa, crea la stringa `riga` uguale a `\"σ = 187.35 MPa\"` usando una f-string con due decimali.",
+    "starter": "sigma = 187.349\nriga = ...\nprint(riga)",
+    "tests": "assert riga == \"σ = 187.35 MPa\", f\"ottenuto {riga!r}, atteso 'σ = 187.35 MPa'\"",
+    "solution": "sigma = 187.349\nriga = f\"σ = {sigma:.2f} MPa\"\nprint(riga)",
+    "hints": [
+      "Il formato è `{valore:.2f}`.",
+      "Attento agli spazi intorno a `=`."
+    ]
+  }
+]

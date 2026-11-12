@@ -1,0 +1,81 @@
+{
+  "id": "p2",
+  "title": "Catalogo dei materiali",
+  "stars": 2,
+  "unlockAfter": "p2",
+  "module": "materiali.py",
+  "summary": "Dataclass, lettura di un catalogo CSV e verifica di resistenza con match sui tipi di carico.",
+  "intro": "Costruisci **`materiali.py`**: un catalogo di acciai letto da CSV e un motore di verifica che riconosce diversi tipi di sollecitazione con `match`. Usi dataclass immutabili, ordinamento e pattern di classe.\n\nLavora sul computer nella cartella `materiali/`, aggiungi le funzioni tappa dopo tappa e lancia `pytest` con il test di ogni tappa. Unità: N, mm, MPa.",
+  "final": "## Cosa hai costruito\n\nUn piccolo modello di dominio: dati immutabili, parsing robusto, logica espressa con `match`. È la struttura tipica di uno strumento di calcolo interno in un ufficio tecnico.",
+  "sources": [
+    "dataclasses | https://docs.python.org/3/library/dataclasses.html",
+    "PEP 636, pattern matching | https://peps.python.org/pep-0636/"
+  ],
+  "steps": [
+    {
+      "id": "materiale",
+      "title": "La dataclass Materiale",
+      "minutes": 15,
+      "prompt": "Crea la dataclass **immutabile** (`frozen=True`) `Materiale` con i campi `nome: str`, `fy: float`, `E: float = 210_000`, `rho: float = 7850` e il metodo `fyd(gamma=1.05)` che restituisce `fy / gamma`.",
+      "hints": [
+        "`@dataclass(frozen=True)` sopra la classe.",
+        "Il metodo riceve `self` e un `gamma` con default."
+      ],
+      "solution": "from dataclasses import dataclass\n\n\n@dataclass(frozen=True)\nclass Materiale:\n    nome: str\n    fy: float\n    E: float = 210_000.0\n    rho: float = 7850.0\n\n    def fyd(self, gamma=1.05):\n        return self.fy / gamma",
+      "testName": "test_materiale.py",
+      "test": "import dataclasses\nimport pytest\nfrom materiali import Materiale\n\n\ndef test_default_e_fyd():\n    m = Materiale(\"S355\", 355)\n    assert m.E == 210_000 and m.rho == 7850\n    assert m.fyd() == pytest.approx(355 / 1.05)\n    assert m.fyd(1.25) == pytest.approx(284)\n\n\ndef test_immutabile():\n    with pytest.raises(dataclasses.FrozenInstanceError):\n        Materiale(\"S235\", 235).fy = 300\n"
+    },
+    {
+      "id": "catalogo",
+      "title": "Leggere il catalogo",
+      "minutes": 20,
+      "prompt": "Scrivi `carica_catalogo(testo)` che legge un CSV (separatore `;`, intestazione `nome;fy;E;rho`, virgola decimale ammessa) e restituisce un dizionario `nome → Materiale`. Le righe vuote vanno ignorate.",
+      "hints": [
+        "`csv.DictReader(io.StringIO(testo), delimiter=\";\")`.",
+        "Una riga vuota arriva con `nome` vuoto o `None`: saltala."
+      ],
+      "solution": "import csv\nimport io\n\n\ndef _num(s):\n    return float(s.strip().replace(\",\", \".\"))\n\n\ndef carica_catalogo(testo):\n    righe = csv.DictReader(io.StringIO(testo.strip()), delimiter=\";\")\n    catalogo = {}\n    for r in righe:\n        if not r[\"nome\"]:\n            continue\n        catalogo[r[\"nome\"].strip()] = Materiale(r[\"nome\"].strip(), _num(r[\"fy\"]), _num(r[\"E\"]), _num(r[\"rho\"]))\n    return catalogo",
+      "testName": "test_catalogo.py",
+      "test": "from materiali import carica_catalogo\n\nCSV = \"\"\"nome;fy;E;rho\nS235;235;210000;7850\nS355;355;210000;7850\n\nAL6061;240;69000;2700\nC45;430,5;206000;7850\n\"\"\"\n\n\ndef test_catalogo():\n    cat = carica_catalogo(CSV)\n    assert set(cat) == {\"S235\", \"S355\", \"AL6061\", \"C45\"}\n    assert cat[\"AL6061\"].E == 69000\n    assert cat[\"C45\"].fy == 430.5\n"
+    },
+    {
+      "id": "carichi",
+      "title": "Tipi di carico con match",
+      "minutes": 20,
+      "prompt": "Definisci le dataclass `Trazione(N)`, `Flessione(M, W)` e `Taglio(V, Av)`. Poi `tensione_ideale(carico, A)` che usa `match`: trazione → `N/A`, flessione → `M/W`, taglio → `√3 · V / Av` (von Mises). Un tipo sconosciuto solleva `TypeError`.",
+      "hints": [
+        "`case Trazione(N=N):` cattura il campo.",
+        "Le dataclass vanno definite prima della funzione."
+      ],
+      "solution": "import math\n\n\n@dataclass(frozen=True)\nclass Trazione:\n    N: float\n\n\n@dataclass(frozen=True)\nclass Flessione:\n    M: float\n    W: float\n\n\n@dataclass(frozen=True)\nclass Taglio:\n    V: float\n    Av: float\n\n\ndef tensione_ideale(carico, A):\n    match carico:\n        case Trazione(N=N):\n            return N / A\n        case Flessione(M=M, W=W):\n            return M / W\n        case Taglio(V=V, Av=Av):\n            return math.sqrt(3) * V / Av\n        case _:\n            raise TypeError(f\"carico non riconosciuto: {carico!r}\")",
+      "testName": "test_carichi.py",
+      "test": "import math\nimport pytest\nfrom materiali import Flessione, Taglio, Trazione, tensione_ideale\n\n\ndef test_tre_casi():\n    assert tensione_ideale(Trazione(10_000), 100) == pytest.approx(100)\n    assert tensione_ideale(Flessione(5e6, 50_000), 1) == pytest.approx(100)\n    assert tensione_ideale(Taglio(1000, 10), 1) == pytest.approx(100 * math.sqrt(3))\n\n\ndef test_sconosciuto():\n    with pytest.raises(TypeError):\n        tensione_ideale(\"vento\", 1)\n"
+    },
+    {
+      "id": "esito",
+      "title": "L'esito della verifica",
+      "minutes": 15,
+      "prompt": "Crea la dataclass ordinabile `Esito` (`order=True`) con i campi `utilizzo: float` e `materiale: str`, e la funzione `verifica(mat, carico, A, gamma=1.05)` che restituisce `Esito(σ / fyd, mat.nome)`. Aggiungi la proprietà `ok` (vera se utilizzo ≤ 1).",
+      "hints": [
+        "`@dataclass(frozen=True, order=True)`: l'ordine segue i campi, quindi `utilizzo` va per primo.",
+        "`@property` trasforma un metodo in un attributo calcolato."
+      ],
+      "solution": "@dataclass(frozen=True, order=True)\nclass Esito:\n    utilizzo: float\n    materiale: str\n\n    @property\n    def ok(self):\n        return self.utilizzo <= 1\n\n\ndef verifica(mat, carico, A, gamma=1.05):\n    return Esito(tensione_ideale(carico, A) / mat.fyd(gamma), mat.nome)",
+      "testName": "test_esito.py",
+      "test": "import pytest\nfrom materiali import Esito, Materiale, Trazione, verifica\n\n\ndef test_utilizzo():\n    e = verifica(Materiale(\"S235\", 235), Trazione(20_000), 100)\n    assert e.utilizzo == pytest.approx(200 / (235 / 1.05))\n    assert e.ok\n\n\ndef test_ordinamento():\n    assert sorted([Esito(0.9, \"a\"), Esito(0.4, \"b\")])[0].materiale == \"b\"\n"
+    },
+    {
+      "id": "scegli",
+      "title": "Quale acciaio basta?",
+      "minutes": 20,
+      "prompt": "Scrivi `scegli(catalogo, carico, A)`: tra i materiali che superano la verifica restituisci il nome di quello con `fy` **minima** (il più economico). Se nessuno basta, restituisci `None`.",
+      "hints": [
+        "Filtra con una comprehension, poi `min(..., key=...)`.",
+        "Attenzione al caso lista vuota: `min([])` solleva un errore."
+      ],
+      "solution": "def scegli(catalogo, carico, A):\n    validi = [m for m in catalogo.values() if verifica(m, carico, A).ok]\n    if not validi:\n        return None\n    return min(validi, key=lambda m: m.fy).nome",
+      "testName": "test_scegli.py",
+      "test": "from materiali import Materiale, Trazione, scegli\n\nCAT = {n: Materiale(n, fy) for n, fy in [(\"S235\", 235), (\"S275\", 275), (\"S355\", 355)]}\n\n\ndef test_sceglie_il_minimo_sufficiente():\n    assert scegli(CAT, Trazione(25_000), 100) == \"S275\"\n    assert scegli(CAT, Trazione(10_000), 100) == \"S235\"\n\n\ndef test_nessuno():\n    assert scegli(CAT, Trazione(1e6), 100) is None\n"
+    }
+  ]
+}

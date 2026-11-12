@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Alias di import",
+    "code": "import math as m\nfrom math import pi\nprint(m.pi == pi, round(m.floor(pi * 10)))",
+    "options": [
+      "True 31",
+      "False 31",
+      "True 32",
+      "NameError"
+    ],
+    "answer": 0,
+    "explain": "`m` e `pi` vengono dallo stesso modulo; `floor(31.41...)` è 31."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Il tuo modulo di unità",
+    "prompt": "Lo starter crea il file `unita.py`. Completalo scrivendo nella stringa la funzione `kN(n)` che converte newton in kilonewton; poi importa il modulo e calcola `r = unita.kN(2500)`.",
+    "starter": "import sys\nfrom pathlib import Path\nsys.path.insert(0, \".\")\n\nPath(\"unita.py\").write_text(\"\"\"\ndef kN(n):\n    ...\n\"\"\")\n\nimport unita\nr = ...\nprint(r)",
+    "tests": "assert r == 2.5, f\"unita.kN(2500) deve valere 2.5, ottenuto {r!r}\"",
+    "solution": "import sys\nfrom pathlib import Path\nsys.path.insert(0, \".\")\n\nPath(\"unita.py\").write_text(\"\"\"\ndef kN(n):\n    return n / 1000\n\"\"\")\n\nimport importlib, unita\nimportlib.reload(unita)\nr = unita.kN(2500)\nprint(r)",
+    "hints": [
+      "Dentro la stringa scrivi `return n / 1000`.",
+      "Se hai già importato una versione vecchia, `importlib.reload(unita)` la ricarica."
+    ]
+  }
+]

@@ -1,0 +1,15 @@
+[
+  { "id": "numpy", "name": "NumPy", "abbr": "np", "part": "p3", "priority": "Essenziale", "color": "#4DABCF", "desc": "Array, algebra lineare e calcolo vettoriale: la base di tutto il resto", "url": "https://numpy.org/doc/stable/" },
+  { "id": "matplotlib", "name": "Matplotlib", "abbr": "plt", "part": "p3", "priority": "Essenziale", "color": "#11557C", "desc": "Grafici tecnici di qualità da relazione e da tesi", "url": "https://matplotlib.org/stable/" },
+  { "id": "scipy", "name": "SciPy", "abbr": "sp", "part": "p4", "priority": "Essenziale", "color": "#0054A6", "desc": "Equazioni, integrali, ODE, ottimizzazione, autovalori, interpolazione", "url": "https://docs.scipy.org/doc/scipy/" },
+  { "id": "pandas", "name": "pandas", "abbr": "pd", "part": "p5", "priority": "Essenziale", "color": "#150458", "desc": "Tabelle di dati sperimentali: leggere, pulire, raggruppare, esportare", "url": "https://pandas.pydata.org/docs/" },
+  { "id": "pytest", "name": "pytest", "abbr": "pt", "part": "p2", "priority": "Essenziale", "color": "#0A9EDC", "desc": "Test automatici per essere sicuri che i tuoi calcoli restino giusti", "url": "https://docs.pytest.org/" },
+  { "id": "jupyter", "name": "Jupyter", "abbr": "Jy", "part": "p2", "priority": "Molto utile", "color": "#F37626", "desc": "Notebook con codice, formule, grafici e testo: il quaderno di laboratorio", "url": "https://docs.jupyter.org/" },
+  { "id": "sympy", "name": "SymPy", "abbr": "Sy", "part": "p6", "priority": "Molto utile", "color": "#3B5526", "desc": "Calcolo simbolico: derivate, integrali, equazioni e formule esatte", "url": "https://docs.sympy.org/latest/" },
+  { "id": "pint", "name": "Pint", "abbr": "u", "part": "p6", "priority": "Molto utile", "color": "#8E5A2B", "desc": "Grandezze con unità di misura: conversioni e controllo dimensionale", "url": "https://pint.readthedocs.io/" },
+  { "id": "uncertainties", "name": "uncertainties", "abbr": "±", "part": "p6", "priority": "Specialistica", "color": "#6A4C93", "desc": "Propagazione automatica dell'incertezza delle misure", "url": "https://uncertainties.readthedocs.io/" },
+  { "id": "coolprop", "name": "CoolProp", "abbr": "CP", "part": "p7", "priority": "Molto utile", "color": "#C0392B", "desc": "Proprietà termodinamiche di acqua, aria, refrigeranti: le tabelle del vapore in codice", "url": "http://www.coolprop.org/" },
+  { "id": "scikit-fem", "name": "scikit-fem", "abbr": "fem", "part": "p7", "priority": "Specialistica", "color": "#2E7D32", "desc": "Elementi finiti in puro Python, leggero e didattico", "url": "https://scikit-fem.readthedocs.io/" },
+  { "id": "cadquery", "name": "CadQuery", "abbr": "cq", "part": "p7", "priority": "Specialistica", "color": "#455A64", "desc": "Modellazione CAD parametrica scritta in codice, esporta STEP e STL", "url": "https://cadquery.readthedocs.io/" },
+  { "id": "openpyxl", "name": "openpyxl", "abbr": "xl", "part": "p8", "priority": "Molto utile", "color": "#1D6F42", "desc": "Leggere e scrivere file Excel, per automatizzare i fogli dell'ufficio tecnico", "url": "https://openpyxl.readthedocs.io/" }
+]

@@ -1,0 +1,189 @@
+[
+  {
+    "id": "kata-eulero",
+    "section": "00-02-01",
+    "title": "Carico critico di Eulero",
+    "minutes": 15,
+    "module": "eulero.py",
+    "prompt": "Crea il file **`eulero.py`**. Scrivi `carico_critico(E, I, L, beta=1.0)` che restituisce `π² E I / (β L)²` e `snellezza(L, i, beta=1.0)` che restituisce `β L / i`. Aggiungi `verifica_instabilita(N, E, I, L, beta=1.0)` che restituisce `True` se `N` è minore del carico critico.\n\nScarica il test nella stessa cartella e lancia `pytest -q`.",
+    "hints": [
+      "Usa `math.pi`.",
+      "Le funzioni possono chiamarsi tra loro: `verifica_instabilita` usa `carico_critico`."
+    ],
+    "solution": "import math\n\n\ndef carico_critico(E, I, L, beta=1.0):\n    return math.pi**2 * E * I / (beta * L) ** 2\n\n\ndef snellezza(L, i, beta=1.0):\n    return beta * L / i\n\n\ndef verifica_instabilita(N, E, I, L, beta=1.0):\n    return N < carico_critico(E, I, L, beta)\n",
+    "testFile": {
+      "name": "test_eulero.py",
+      "code": "import math\nfrom pytest import approx\nfrom eulero import carico_critico, snellezza, verifica_instabilita\n\n\ndef test_carico_critico():\n    assert carico_critico(210_000, 1e6, 3000) == approx(math.pi**2 * 210_000 * 1e6 / 3000**2)\n    # incastro-libero: beta = 2 → un quarto del carico\n    assert carico_critico(210_000, 1e6, 3000, beta=2) == approx(carico_critico(210_000, 1e6, 3000) / 4)\n\n\ndef test_snellezza_e_verifica():\n    assert snellezza(3000, 30) == approx(100)\n    assert verifica_instabilita(1e5, 210_000, 1e6, 3000)\n    assert not verifica_instabilita(1e6, 210_000, 1e6, 3000)\n"
+    }
+  },
+  {
+    "id": "kata-bisezione",
+    "section": "00-03-03",
+    "title": "Diametro minimo per bisezione",
+    "minutes": 20,
+    "module": "bisezione.py",
+    "prompt": "Crea il file **`bisezione.py`**. Scrivi `bisezione(f, a, b, tol=1e-8)` che trova uno zero di `f` nell'intervallo `[a, b]` (dove `f(a)` e `f(b)` hanno segno opposto) con un ciclo `while`. Se i segni non sono opposti solleva `ValueError`. Poi `diametro_minimo(F, sigma_amm)` che usa la bisezione tra 0.1 e 1000 mm per trovare il diametro per cui `4F/(πd²) = sigma_amm`.\n\nScarica il test nella stessa cartella e lancia `pytest -q`.",
+    "hints": [
+      "Dimezza l'intervallo tenendo la metà in cui la funzione cambia segno.",
+      "La funzione da annullare è `tensione(d) − sigma_amm`: passala come `lambda`."
+    ],
+    "solution": "import math\n\n\ndef bisezione(f, a, b, tol=1e-8):\n    fa, fb = f(a), f(b)\n    if fa * fb > 0:\n        raise ValueError(\"f(a) e f(b) devono avere segno opposto\")\n    while b - a > tol:\n        m = (a + b) / 2\n        fm = f(m)\n        if fa * fm <= 0:\n            b, fb = m, fm\n        else:\n            a, fa = m, fm\n    return (a + b) / 2\n\n\ndef diametro_minimo(F, sigma_amm):\n    return bisezione(lambda d: 4 * F / (math.pi * d**2) - sigma_amm, 0.1, 1000)\n",
+    "testFile": {
+      "name": "test_bisezione.py",
+      "code": "import math\nimport pytest\nfrom bisezione import bisezione, diametro_minimo\n\n\ndef test_radice_di_due():\n    assert bisezione(lambda x: x * x - 2, 0, 2) == pytest.approx(math.sqrt(2), abs=1e-7)\n\n\ndef test_segni_uguali():\n    with pytest.raises(ValueError):\n        bisezione(lambda x: x * x + 1, 0, 2)\n\n\ndef test_diametro():\n    d = diametro_minimo(50_000, 160)\n    assert d == pytest.approx(math.sqrt(4 * 50_000 / (math.pi * 160)), rel=1e-6)\n"
+    }
+  },
+  {
+    "id": "kata-statistiche",
+    "section": "00-04-02",
+    "title": "Statistiche di una serie di misure",
+    "minutes": 20,
+    "module": "misure.py",
+    "prompt": "Crea il file **`misure.py`**. Senza importare librerie, scrivi `media(xs)`, `dev_std(xs)` (campionaria, con `n − 1`) e `fuori_soglia(xs, k=2)` che restituisce la lista delle misure che distano dalla media più di `k` deviazioni standard.\n\nScarica il test nella stessa cartella e lancia `pytest -q`.",
+    "hints": [
+      "La deviazione standard campionaria divide per `n - 1`.",
+      "Calcola media e deviazione una volta sola, fuori dalla comprehension."
+    ],
+    "solution": "def media(xs):\n    return sum(xs) / len(xs)\n\n\ndef dev_std(xs):\n    m = media(xs)\n    return (sum((x - m) ** 2 for x in xs) / (len(xs) - 1)) ** 0.5\n\n\ndef fuori_soglia(xs, k=2):\n    m, s = media(xs), dev_std(xs)\n    return [x for x in xs if abs(x - m) > k * s]\n",
+    "testFile": {
+      "name": "test_misure.py",
+      "code": "import statistics\nfrom pytest import approx\nfrom misure import dev_std, fuori_soglia, media\n\nDATI = [10.1, 10.0, 9.9, 10.2, 10.0, 9.8, 10.1, 13.5]\n\n\ndef test_come_statistics():\n    assert media(DATI) == approx(statistics.mean(DATI))\n    assert dev_std(DATI) == approx(statistics.stdev(DATI))\n\n\ndef test_outlier():\n    assert fuori_soglia(DATI) == [13.5]\n"
+    }
+  },
+  {
+    "id": "kata-distinta",
+    "section": "01-01-03",
+    "title": "Distinta base di un assieme",
+    "minutes": 20,
+    "module": "distinta.py",
+    "prompt": "Crea il file **`distinta.py`**. Una distinta base è un dizionario `componente → {\"massa\": kg, \"qta\": n}`; un componente può avere una chiave `\"sotto\"` con la sua distinta. Scrivi `massa_totale(distinta)` (ricorsiva) e `conta_pezzi(distinta)` che restituisce un dizionario `nome → quantità totale` (moltiplicando le quantità lungo i livelli).\n\nScarica il test nella stessa cartella e lancia `pytest -q`.",
+    "hints": [
+      "Una funzione ricorsiva chiama sé stessa sulla sotto-distinta.",
+      "Non usare un dizionario mutabile come default (`acc={}`): usa `None`."
+    ],
+    "solution": "def massa_totale(distinta):\n    tot = 0.0\n    for voce in distinta.values():\n        unit = voce.get(\"massa\", 0.0) + massa_totale(voce.get(\"sotto\", {}))\n        tot += voce[\"qta\"] * unit\n    return tot\n\n\ndef conta_pezzi(distinta, molt=1, acc=None):\n    acc = {} if acc is None else acc\n    for nome, voce in distinta.items():\n        n = molt * voce[\"qta\"]\n        acc[nome] = acc.get(nome, 0) + n\n        conta_pezzi(voce.get(\"sotto\", {}), n, acc)\n    return acc\n",
+    "testFile": {
+      "name": "test_distinta.py",
+      "code": "from pytest import approx\nfrom distinta import conta_pezzi, massa_totale\n\nRUOTA = {\n    \"cerchio\": {\"massa\": 2.0, \"qta\": 1},\n    \"bullone\": {\"massa\": 0.05, \"qta\": 5},\n}\nCARRELLO = {\n    \"telaio\": {\"massa\": 12.0, \"qta\": 1},\n    \"ruota\": {\"massa\": 0.0, \"qta\": 4, \"sotto\": RUOTA},\n    \"bullone\": {\"massa\": 0.05, \"qta\": 8},\n}\n\n\ndef test_massa():\n    assert massa_totale(CARRELLO) == approx(12 + 4 * (2 + 5 * 0.05) + 8 * 0.05)\n\n\ndef test_pezzi():\n    p = conta_pezzi(CARRELLO)\n    assert p[\"bullone\"] == 4 * 5 + 8\n    assert p[\"cerchio\"] == 4\n"
+    }
+  },
+  {
+    "id": "kata-integrazione",
+    "section": "01-02-03",
+    "title": "Integrare passando funzioni",
+    "minutes": 20,
+    "module": "integra.py",
+    "prompt": "Crea il file **`integra.py`**. Scrivi `trapezi(f, a, b, n=100)` e `simpson(f, a, b, n=100)` (con `n` pari; se dispari solleva `ValueError`) che integrano numericamente la funzione `f`. Poi `lavoro_molla(k, x1, x2)` che calcola il lavoro di una molla `F = k x` usando `simpson` con una `lambda`.\n\nScarica il test nella stessa cartella e lancia `pytest -q`.",
+    "hints": [
+      "Simpson: pesi 1, 4, 2, 4, …, 4, 1 moltiplicati per h/3.",
+      "`f` è un parametro come gli altri: chiamalo con `f(x)`."
+    ],
+    "solution": "def trapezi(f, a, b, n=100):\n    h = (b - a) / n\n    return h * (f(a) / 2 + sum(f(a + i * h) for i in range(1, n)) + f(b) / 2)\n\n\ndef simpson(f, a, b, n=100):\n    if n % 2:\n        raise ValueError(\"n deve essere pari\")\n    h = (b - a) / n\n    s = f(a) + f(b)\n    s += 4 * sum(f(a + i * h) for i in range(1, n, 2))\n    s += 2 * sum(f(a + i * h) for i in range(2, n, 2))\n    return s * h / 3\n\n\ndef lavoro_molla(k, x1, x2):\n    return simpson(lambda x: k * x, x1, x2)\n",
+    "testFile": {
+      "name": "test_integra.py",
+      "code": "import math\nimport pytest\nfrom integra import lavoro_molla, simpson, trapezi\n\n\ndef test_seno():\n    assert trapezi(math.sin, 0, math.pi) == pytest.approx(2, abs=1e-3)\n    assert simpson(math.sin, 0, math.pi) == pytest.approx(2, abs=1e-7)\n\n\ndef test_n_dispari():\n    with pytest.raises(ValueError):\n        simpson(math.sin, 0, 1, n=5)\n\n\ndef test_molla():\n    assert lavoro_molla(200, 0, 0.1) == pytest.approx(0.5 * 200 * 0.1**2)\n"
+    }
+  },
+  {
+    "id": "kata-csv-sporco",
+    "section": "01-03-02",
+    "title": "Pulire un file di prova",
+    "minutes": 25,
+    "module": "pulizia.py",
+    "prompt": "Crea il file **`pulizia.py`**. Scrivi `leggi_prova(testo)` che legge righe `tempo;forza` (prima riga di intestazione, virgola decimale ammessa) e restituisce `(dati, scartate)`: `dati` è la lista di tuple `(t, F)` valide, `scartate` il numero di righe non convertibili o con tempo non crescente. Usa `try/except`.\n\nScarica il test nella stessa cartella e lancia `pytest -q`.",
+    "hints": [
+      "`riga.split(\";\")` con un numero sbagliato di campi solleva `ValueError` nello unpacking.",
+      "Confronta il tempo con l'ultimo dato valido: `dati[-1][0]`."
+    ],
+    "solution": "def leggi_prova(testo):\n    dati, scartate = [], 0\n    righe = testo.strip().splitlines()[1:]\n    for riga in righe:\n        try:\n            t_s, f_s = riga.split(\";\")\n            t = float(t_s.replace(\",\", \".\"))\n            F = float(f_s.replace(\",\", \".\"))\n        except ValueError:\n            scartate += 1\n            continue\n        if dati and t <= dati[-1][0]:\n            scartate += 1\n            continue\n        dati.append((t, F))\n    return dati, scartate\n",
+    "testFile": {
+      "name": "test_pulizia.py",
+      "code": "from pulizia import leggi_prova\n\nTESTO = \"\"\"tempo;forza\n0;0\n0,5;120,5\n1;ERR\n1.5;240\n1.2;250\n2;300;extra\n2.5;355\n\"\"\"\n\n\ndef test_pulizia():\n    dati, scartate = leggi_prova(TESTO)\n    assert dati == [(0.0, 0.0), (0.5, 120.5), (1.5, 240.0), (2.5, 355.0)]\n    assert scartate == 3\n"
+    }
+  },
+  {
+    "id": "kata-vettore",
+    "section": "02-02-01",
+    "title": "Una classe Vettore2D",
+    "minutes": 25,
+    "module": "vettore.py",
+    "prompt": "Crea il file **`vettore.py`**. Scrivi la classe `Vettore2D(x, y)` con `__repr__`, `__eq__` (con tolleranza `1e-9`), `__add__`, `__sub__`, `__mul__` (per uno scalare), `__abs__` (modulo) e il metodo `angolo()` in gradi. Poi `risultante(forze)` che somma una lista di vettori.\n\nScarica il test nella stessa cartella e lancia `pytest -q`.",
+    "hints": [
+      "`math.hypot(x, y)` dà il modulo, `math.atan2(y, x)` l'angolo.",
+      "`__rmul__ = __mul__` permette anche `2 * v`."
+    ],
+    "solution": "import math\n\n\nclass Vettore2D:\n    def __init__(self, x, y):\n        self.x = float(x)\n        self.y = float(y)\n\n    def __repr__(self):\n        return f\"Vettore2D({self.x:g}, {self.y:g})\"\n\n    def __eq__(self, altro):\n        if not isinstance(altro, Vettore2D):\n            return NotImplemented\n        return abs(self.x - altro.x) < 1e-9 and abs(self.y - altro.y) < 1e-9\n\n    def __add__(self, altro):\n        return Vettore2D(self.x + altro.x, self.y + altro.y)\n\n    def __sub__(self, altro):\n        return Vettore2D(self.x - altro.x, self.y - altro.y)\n\n    def __mul__(self, k):\n        return Vettore2D(self.x * k, self.y * k)\n\n    __rmul__ = __mul__\n\n    def __abs__(self):\n        return math.hypot(self.x, self.y)\n\n    def angolo(self):\n        return math.degrees(math.atan2(self.y, self.x))\n\n\ndef risultante(forze):\n    tot = Vettore2D(0, 0)\n    for f in forze:\n        tot = tot + f\n    return tot\n",
+    "testFile": {
+      "name": "test_vettore.py",
+      "code": "from pytest import approx\nfrom vettore import Vettore2D, risultante\n\n\ndef test_operazioni():\n    a, b = Vettore2D(3, 4), Vettore2D(1, -1)\n    assert a + b == Vettore2D(4, 3)\n    assert a - b == Vettore2D(2, 5)\n    assert a * 2 == Vettore2D(6, 8)\n    assert abs(a) == approx(5)\n    assert repr(Vettore2D(1, 2)) == \"Vettore2D(1, 2)\"\n\n\ndef test_risultante():\n    r = risultante([Vettore2D(10, 0), Vettore2D(0, 10)])\n    assert abs(r) == approx(10 * 2**0.5)\n    assert r.angolo() == approx(45)\n"
+    }
+  },
+  {
+    "id": "kata-comandi",
+    "section": "02-03-02",
+    "title": "Interprete di comandi di carico",
+    "minutes": 25,
+    "module": "comandi.py",
+    "prompt": "Crea il file **`comandi.py`**. Scrivi `interpreta(riga)` che trasforma una riga di testo in una tupla di carico con `match` sulla lista di parole (`riga.split()`):\n\n- `\"F 10 a 2\"` → `(\"F\", 10.0, 2.0)`\n- `\"q 3 da 1 a 4\"` → `(\"q\", 3.0, 1.0, 4.0)`\n- `\"q 3\"` (su tutta la trave) → `(\"q\", 3.0, 0.0, None)`\n\nOgni altra riga solleva `ValueError`. Poi `leggi_carichi(testo)` che ignora righe vuote e commenti `#`.\n\nScarica il test nella stessa cartella e lancia `pytest -q`.",
+    "hints": [
+      "I pattern di sequenza confrontano le parole letterali e catturano le altre: `case [\"F\", F, \"a\", a]:`.",
+      "Per i commenti: `riga.split(\"#\")[0]`."
+    ],
+    "solution": "def interpreta(riga):\n    match riga.split():\n        case [\"F\", F, \"a\", a]:\n            return (\"F\", float(F), float(a))\n        case [\"q\", q, \"da\", a, \"a\", b]:\n            return (\"q\", float(q), float(a), float(b))\n        case [\"q\", q]:\n            return (\"q\", float(q), 0.0, None)\n        case _:\n            raise ValueError(f\"comando non valido: {riga!r}\")\n\n\ndef leggi_carichi(testo):\n    out = []\n    for riga in testo.splitlines():\n        riga = riga.split(\"#\")[0].strip()\n        if riga:\n            out.append(interpreta(riga))\n    return out\n",
+    "testFile": {
+      "name": "test_comandi.py",
+      "code": "import pytest\nfrom comandi import interpreta, leggi_carichi\n\n\ndef test_comandi():\n    assert interpreta(\"F 10 a 2\") == (\"F\", 10.0, 2.0)\n    assert interpreta(\"q 3 da 1 a 4\") == (\"q\", 3.0, 1.0, 4.0)\n    assert interpreta(\"q 3\") == (\"q\", 3.0, 0.0, None)\n    with pytest.raises(ValueError):\n        interpreta(\"M 5\")\n\n\ndef test_file():\n    testo = \"# carichi della trave\\nF 10 a 2\\n\\nq 1.5   # peso proprio\\n\"\n    assert leggi_carichi(testo) == [(\"F\", 10.0, 2.0), (\"q\", 1.5, 0.0, None)]\n"
+    }
+  },
+  {
+    "id": "kata-dimensionamento",
+    "section": "03-01-02",
+    "title": "Tabella di dimensionamento",
+    "minutes": 20,
+    "module": "dimensiona.py",
+    "prompt": "Crea il file **`dimensiona.py`**. Con NumPy e senza cicli scrivi `tabella_tau(diametri, forze)` che restituisce la tabella (righe = diametri, colonne = forze) della tensione tangenziale `4F/(πd²)` di un perno in taglio semplice, e `diametro_minimo(diametri, forze, tau_amm)` che per ogni forza restituisce il più piccolo diametro della lista che rispetta `tau_amm` (o `nan` se nessuno basta).\n\nScarica il test nella stessa cartella e lancia `pytest -q`.",
+    "hints": [
+      "`[:, None]` trasforma un vettore in una colonna.",
+      "`argmax` su una maschera booleana dà l'indice del primo `True`; controlla però con `any` che ce ne sia almeno uno."
+    ],
+    "solution": "import numpy as np\n\n\ndef tabella_tau(diametri, forze):\n    d = np.asarray(diametri, dtype=float)[:, None]\n    F = np.asarray(forze, dtype=float)[None, :]\n    return 4 * F / (np.pi * d**2)\n\n\ndef diametro_minimo(diametri, forze, tau_amm):\n    d = np.sort(np.asarray(diametri, dtype=float))\n    ok = tabella_tau(d, forze) <= tau_amm\n    primo = ok.argmax(axis=0)\n    return np.where(ok.any(axis=0), d[primo], np.nan)\n",
+    "testFile": {
+      "name": "test_dimensiona.py",
+      "code": "import numpy as np\nfrom dimensiona import diametro_minimo, tabella_tau\n\n\ndef test_tabella():\n    t = tabella_tau([10, 20], [1000, 2000, 3000])\n    assert t.shape == (2, 3)\n    assert np.isclose(t[1, 0], 4 * 1000 / (np.pi * 400))\n\n\ndef test_minimo():\n    d = diametro_minimo([8, 10, 12, 16, 20], [5_000, 20_000, 80_000], 100)\n    assert d[0] == 8 and d[1] == 16 and np.isnan(d[2])\n"
+    }
+  },
+  {
+    "id": "kata-gauss",
+    "section": "03-02-01",
+    "title": "Eliminazione di Gauss fatta a mano",
+    "minutes": 25,
+    "module": "gauss.py",
+    "prompt": "Crea il file **`gauss.py`**. Scrivi `gauss(A, b)` che risolve `A x = b` con l'eliminazione di Gauss **con pivoting parziale** (scambio di righe) e la sostituzione all'indietro, usando NumPy per le operazioni sulle righe. Non modificare gli array ricevuti. Se un pivot è (quasi) nullo solleva `ValueError(\"matrice singolare\")`.\n\nScarica il test nella stessa cartella e lancia `pytest -q`.",
+    "hints": [
+      "Copia gli input con `np.array(A, dtype=float)`.",
+      "Lo scambio di righe con NumPy: `A[[k, p]] = A[[p, k]]`."
+    ],
+    "solution": "import numpy as np\n\n\ndef gauss(A, b):\n    A = np.array(A, dtype=float)\n    b = np.array(b, dtype=float)\n    n = len(b)\n    for k in range(n):\n        p = k + np.argmax(np.abs(A[k:, k]))\n        if abs(A[p, k]) < 1e-12:\n            raise ValueError(\"matrice singolare\")\n        if p != k:\n            A[[k, p]] = A[[p, k]]\n            b[[k, p]] = b[[p, k]]\n        for i in range(k + 1, n):\n            m = A[i, k] / A[k, k]\n            A[i, k:] -= m * A[k, k:]\n            b[i] -= m * b[k]\n    x = np.zeros(n)\n    for i in range(n - 1, -1, -1):\n        x[i] = (b[i] - A[i, i + 1:] @ x[i + 1:]) / A[i, i]\n    return x\n",
+    "testFile": {
+      "name": "test_gauss.py",
+      "code": "import numpy as np\nimport pytest\nfrom gauss import gauss\n\n\ndef test_come_numpy():\n    rng = np.random.default_rng(1)\n    A = rng.random((5, 5)) + 5 * np.eye(5)\n    b = rng.random(5)\n    A0 = A.copy()\n    assert np.allclose(gauss(A, b), np.linalg.solve(A, b))\n    assert np.array_equal(A, A0), \"non modificare A\"\n\n\ndef test_serve_il_pivoting():\n    assert np.allclose(gauss([[0, 1], [1, 1]], [2, 3]), [1, 2])\n\n\ndef test_singolare():\n    with pytest.raises(ValueError):\n        gauss([[1, 2], [2, 4]], [1, 2])\n"
+    }
+  },
+  {
+    "id": "kata-carico-mobile",
+    "section": "03-03-02",
+    "title": "Inviluppo di un carico mobile",
+    "minutes": 25,
+    "module": "mobile.py",
+    "prompt": "Crea il file **`mobile.py`**. Una forza `F` attraversa una trave appoggiata di luce `L`. Con NumPy scrivi `inviluppo(L, F, n=201)` che restituisce `(x, Mmax)`: per ogni punto `x` il **massimo** momento flettente al variare della posizione del carico. Suggerimento: costruisci una matrice `M[i, j]` (posizione del carico `i`, punto `j`) con il broadcasting. Confronta con la formula `F x (L − x) / L`.\n\nScarica il test nella stessa cartella e lancia `pytest -q`.",
+    "hints": [
+      "`x[:, None]` contro `x[None, :]` dà una tabella di tutte le coppie.",
+      "Il massimo su ogni colonna: `M.max(axis=0)`."
+    ],
+    "solution": "import numpy as np\n\n\ndef inviluppo(L, F, n=201):\n    x = np.linspace(0, L, n)\n    a = x[:, None]          # posizione del carico (righe)\n    s = x[None, :]          # punto della trave (colonne)\n    RA = F * (L - a) / L\n    M = RA * s - F * np.maximum(s - a, 0)\n    return x, M.max(axis=0)\n",
+    "testFile": {
+      "name": "test_mobile.py",
+      "code": "import numpy as np\nfrom mobile import inviluppo\n\n\ndef test_formula():\n    x, M = inviluppo(6.0, 10.0)\n    assert np.allclose(M, 10 * x * (6 - x) / 6)\n    assert np.isclose(M.max(), 10 * 6 / 4)\n"
+    }
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "match con cattura",
+    "code": "cmd = (\"carico\", 12)\nmatch cmd:\n    case (\"vincolo\", n):\n        print(\"V\", n)\n    case (\"carico\", n):\n        print(\"C\", n)\n    case _:\n        print(\"?\")",
+    "options": [
+      "C 12",
+      "V 12",
+      "?",
+      "C n"
+    ],
+    "answer": 0,
+    "explain": "Il secondo pattern corrisponde: la stringa letterale combacia e `n` cattura 12."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Unità di misura con match",
+    "prompt": "Scrivi `in_newton(valore, unita)` che usa `match` su `unita` per convertire `\"N\"`, `\"kN\"` e `\"MN\"` in newton. Per un'unità sconosciuta solleva `ValueError`.",
+    "starter": "def in_newton(valore, unita):\n    match unita:\n        ...\n\nprint(in_newton(3, \"kN\"))",
+    "tests": "assert in_newton(5, \"N\") == 5, \"5 N restano 5\"\nassert in_newton(3, \"kN\") == 3000, \"3 kN = 3000 N\"\nassert in_newton(2, \"MN\") == 2_000_000, \"2 MN = 2 000 000 N\"\ntry:\n    in_newton(1, \"lbf\")\n    raise AssertionError(\"'lbf' deve sollevare ValueError\")\nexcept ValueError:\n    pass",
+    "solution": "def in_newton(valore, unita):\n    match unita:\n        case \"N\":\n            return valore\n        case \"kN\":\n            return valore * 1000\n        case \"MN\":\n            return valore * 1_000_000\n        case _:\n            raise ValueError(f\"unità sconosciuta: {unita}\")\n\nprint(in_newton(3, \"kN\"))",
+    "hints": [
+      "Un `case \"kN\":` per ogni unità.",
+      "`case _:` cattura tutto il resto."
+    ]
+  }
+]

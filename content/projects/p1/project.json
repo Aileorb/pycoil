@@ -1,0 +1,94 @@
+{
+  "id": "p1",
+  "title": "Formulario delle sezioni",
+  "stars": 1,
+  "unlockAfter": "p1",
+  "module": "formulario.py",
+  "summary": "Un modulo Python con area, baricentro e inerzia delle sezioni più comuni, composte con Steiner.",
+  "intro": "Costruisci **`formulario.py`**, un piccolo modulo che calcola le proprietà geometriche delle sezioni: area, baricentro, momento d'inerzia. Alla fine potrai usarlo per gli esercizi di Scienza delle costruzioni e Costruzione di macchine.\n\n**Come si lavora.** Ogni tappa è una micro-task da fare **sul computer**:\n\n1. crea una cartella `formulario/` e dentro il file `formulario.py`;\n2. a ogni tappa aggiungi le funzioni richieste;\n3. scarica il file di test della tappa nella stessa cartella e lancia `pytest` dal terminale.\n\nQuando tutti i test sono verdi, segna la tappa come fatta. Tutte le misure sono in **mm**; ogni sezione è un dizionario con le chiavi `\"A\"`, `\"yG\"` (baricentro dal bordo inferiore) e `\"Ix\"` (inerzia baricentrica).\n\n```bash\npip install pytest\npytest -q\n```",
+  "final": "## Cosa hai costruito\n\nUn modulo riutilizzabile, testato, con funzioni pure e un formato dati semplice. È esattamente come si scrivono le librerie vere: piccole funzioni verificate una alla volta.",
+  "sources": [
+    "pytest: primi passi | https://docs.pytest.org/en/stable/getting-started.html",
+    "Teorema di Huygens-Steiner | https://it.wikipedia.org/wiki/Teorema_di_Huygens-Steiner"
+  ],
+  "steps": [
+    {
+      "id": "rettangolo",
+      "title": "La sezione rettangolare",
+      "minutes": 15,
+      "prompt": "In `formulario.py` scrivi `rettangolo(b, h)` che restituisce un dizionario con `A = b·h`, `yG = h/2` e `Ix = b·h³/12`.",
+      "hints": [
+        "Il dizionario si scrive `{\"A\": ..., \"yG\": ..., \"Ix\": ...}`.",
+        "La potenza è `**`."
+      ],
+      "solution": "def rettangolo(b, h):\n    \"\"\"Rettangolo b × h: area, baricentro dal bordo inferiore, inerzia baricentrica.\"\"\"\n    return {\"A\": b * h, \"yG\": h / 2, \"Ix\": b * h**3 / 12}",
+      "testName": "test_rettangolo.py",
+      "test": "from pytest import approx\nfrom formulario import rettangolo\n\n\ndef test_rettangolo():\n    s = rettangolo(100, 200)\n    assert s[\"A\"] == approx(20_000)\n    assert s[\"yG\"] == approx(100)\n    assert s[\"Ix\"] == approx(100 * 200**3 / 12)\n"
+    },
+    {
+      "id": "circolari",
+      "title": "Cerchio e tubo",
+      "minutes": 15,
+      "prompt": "Aggiungi `cerchio(d)` e `tubo(D, t)` (diametro esterno `D`, spessore `t`). Restituiscono lo stesso formato di dizionario; usa `math.pi`.",
+      "hints": [
+        "Il diametro interno è `D - 2*t`.",
+        "Un tubo è un cerchio pieno meno il foro."
+      ],
+      "solution": "import math\n\n\ndef cerchio(d):\n    return {\"A\": math.pi * d**2 / 4, \"yG\": d / 2, \"Ix\": math.pi * d**4 / 64}\n\n\ndef tubo(D, t):\n    d = D - 2 * t\n    return {\"A\": math.pi * (D**2 - d**2) / 4, \"yG\": D / 2, \"Ix\": math.pi * (D**4 - d**4) / 64}",
+      "testName": "test_circolari.py",
+      "test": "import math\nfrom pytest import approx\nfrom formulario import cerchio, tubo\n\n\ndef test_cerchio():\n    s = cerchio(20)\n    assert s[\"A\"] == approx(math.pi * 100)\n    assert s[\"Ix\"] == approx(math.pi * 20**4 / 64)\n\n\ndef test_tubo_come_differenza():\n    s = tubo(60, 5)\n    assert s[\"A\"] == approx(cerchio(60)[\"A\"] - cerchio(50)[\"A\"])\n    assert s[\"Ix\"] == approx(cerchio(60)[\"Ix\"] - cerchio(50)[\"Ix\"])\n    assert s[\"yG\"] == approx(30)\n"
+    },
+    {
+      "id": "componi",
+      "title": "Sezioni composte con Steiner",
+      "minutes": 20,
+      "prompt": "Scrivi `componi(parti)`: `parti` è una lista di coppie `(sezione, y0)` dove `y0` è la quota del bordo inferiore della parte. Calcola area totale, baricentro `yG = Σ Aᵢ yᵢ / A` (con `yᵢ = y0 + yGᵢ`) e `Ix = Σ (Ixᵢ + Aᵢ (yᵢ − yG)²)`.",
+      "hints": [
+        "Prima calcola `A`, poi `yG`, solo dopo `Ix` (serve `yG`).",
+        "Il test più forte: due rettangoli impilati devono dare lo stesso risultato di uno solo."
+      ],
+      "solution": "def componi(parti):\n    \"\"\"Somma più sezioni: parti = [(sezione, quota del bordo inferiore), ...].\"\"\"\n    A = sum(s[\"A\"] for s, _ in parti)\n    yG = sum(s[\"A\"] * (y0 + s[\"yG\"]) for s, y0 in parti) / A\n    Ix = sum(s[\"Ix\"] + s[\"A\"] * (y0 + s[\"yG\"] - yG) ** 2 for s, y0 in parti)\n    return {\"A\": A, \"yG\": yG, \"Ix\": Ix}",
+      "testName": "test_componi.py",
+      "test": "from pytest import approx\nfrom formulario import componi, rettangolo\n\n\ndef test_due_rettangoli_uguali_un_rettangolo():\n    a = componi([(rettangolo(100, 50), 0), (rettangolo(100, 50), 50)])\n    r = rettangolo(100, 100)\n    assert a[\"A\"] == approx(r[\"A\"])\n    assert a[\"yG\"] == approx(r[\"yG\"])\n    assert a[\"Ix\"] == approx(r[\"Ix\"])\n\n\ndef test_baricentro_spostato():\n    s = componi([(rettangolo(10, 10), 0), (rettangolo(30, 10), 10)])\n    assert s[\"yG\"] == approx((100 * 5 + 300 * 15) / 400)\n"
+    },
+    {
+      "id": "profilo_T",
+      "title": "Il profilo a T",
+      "minutes": 15,
+      "prompt": "Usa `rettangolo` e `componi` per scrivere `sezione_T(b, tf, h, tw)`: ala larga `b` e spessa `tf` in alto, anima spessa `tw`; `h` è l'altezza totale.",
+      "hints": [
+        "L'anima parte da `y0 = 0`, l'ala da `y0 = h - tf`.",
+        "Non riscrivere le formule: riusa le tue funzioni."
+      ],
+      "solution": "def sezione_T(b, tf, h, tw):\n    anima = rettangolo(tw, h - tf)\n    ala = rettangolo(b, tf)\n    return componi([(anima, 0), (ala, h - tf)])",
+      "testName": "test_profilo_T.py",
+      "test": "from pytest import approx\nfrom formulario import sezione_T\n\n\ndef test_T_simmetrica_rispetto_a_un_rettangolo():\n    # se l'ala è larga quanto l'anima, è un rettangolo\n    s = sezione_T(20, 30, 100, 20)\n    assert s[\"Ix\"] == approx(20 * 100**3 / 12)\n\n\ndef test_T_classica():\n    s = sezione_T(120, 10, 150, 8)\n    assert s[\"A\"] == approx(120 * 10 + 8 * 140)\n    assert 75 < s[\"yG\"] < 150, \"il baricentro di una T sale verso l'ala\"\n"
+    },
+    {
+      "id": "verifica",
+      "title": "Tensioni e verifica a flessione",
+      "minutes": 15,
+      "prompt": "Aggiungi `sigma_max(M, sez, h)`: tensione massima di flessione `M · ymax / Ix`, con `ymax` la distanza maggiore tra il baricentro e i due bordi (0 e `h`). Poi `verifica(M, sez, h, fyd)` che restituisce la tupla `(sigma, ok)`.",
+      "hints": [
+        "Per un rettangolo `ymax = h/2` e ritrovi `M/W` con `W = b h²/6`.",
+        "`return s, s <= fyd` restituisce già una tupla."
+      ],
+      "solution": "def sigma_max(M, sez, h):\n    ymax = max(sez[\"yG\"], h - sez[\"yG\"])\n    return M * ymax / sez[\"Ix\"]\n\n\ndef verifica(M, sez, h, fyd):\n    s = sigma_max(M, sez, h)\n    return s, s <= fyd",
+      "testName": "test_verifica.py",
+      "test": "from pytest import approx\nfrom formulario import rettangolo, sigma_max, verifica\n\n\ndef test_sigma_rettangolo():\n    s = rettangolo(100, 200)\n    M = 20e6  # N·mm\n    assert sigma_max(M, s, 200) == approx(M / (100 * 200**2 / 6))\n\n\ndef test_verifica():\n    s = rettangolo(100, 200)\n    assert verifica(20e6, s, 200, 235)[1] is True\n    assert verifica(200e6, s, 200, 235)[1] is False\n"
+    },
+    {
+      "id": "tabella",
+      "title": "Una tabella da stampare",
+      "minutes": 20,
+      "prompt": "Scrivi `tabella(catalogo)`: `catalogo` è un dizionario `nome → sezione`. Restituisci una lista di righe di testo `f\"{nome:<10}{A:>10.0f}{Ix:>14.0f}\"` ordinate per `Ix` **decrescente**. Aggiungi in fondo al file un blocco `if __name__ == \"__main__\":` che stampa la tabella di qualche sezione.",
+      "hints": [
+        "`sorted(catalogo.items(), key=..., reverse=True)`.",
+        "Dentro la f-string usa gli apici singoli per le chiavi: `s['A']`."
+      ],
+      "solution": "def tabella(catalogo):\n    ordinate = sorted(catalogo.items(), key=lambda kv: kv[1][\"Ix\"], reverse=True)\n    return [f\"{nome:<10}{s['A']:>10.0f}{s['Ix']:>14.0f}\" for nome, s in ordinate]\n\n\nif __name__ == \"__main__\":\n    cat = {\n        \"R100x200\": rettangolo(100, 200),\n        \"T120\": sezione_T(120, 10, 150, 8),\n        \"tubo60x5\": tubo(60, 5),\n    }\n    print(f\"{'sezione':<10}{'A [mm²]':>10}{'Ix [mm⁴]':>14}\")\n    print(\"\\n\".join(tabella(cat)))",
+      "testName": "test_tabella.py",
+      "test": "from formulario import rettangolo, tabella, tubo\n\n\ndef test_ordine_e_formato():\n    righe = tabella({\"piccolo\": tubo(30, 3), \"grande\": rettangolo(100, 200)})\n    assert righe[0].startswith(\"grande\")\n    assert righe[1].startswith(\"piccolo\")\n    assert len(righe[0]) == 34\n"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+# Librerie per eseguire i contenuti in CI (scripts/verify_content.py)
+numpy
+scipy
+matplotlib
+pytest
+sympy
+uncertainties
+CoolProp

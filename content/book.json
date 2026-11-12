@@ -1,0 +1,161 @@
+{
+  "python": "3.14 (Pyodide) · riferimento 3.15",
+  "parts": [
+    {
+      "id": "p0", "roman": "0", "title": "Primi passi", "short": "Basi",
+      "chapters": [
+        { "id": "00-01", "title": "Iniziare", "sections": [
+          { "id": "00-01-01", "title": "Python, la console e il primo script" },
+          { "id": "00-01-02", "title": "Variabili e tipi numerici" }
+        ]},
+        { "id": "00-02", "title": "Calcolare", "sections": [
+          { "id": "00-02-01", "title": "Operatori e modulo math" },
+          { "id": "00-02-02", "title": "Stringhe e f-string con le unità" }
+        ]},
+        { "id": "00-03", "title": "Decidere e ripetere", "sections": [
+          { "id": "00-03-01", "title": "if, elif, else" },
+          { "id": "00-03-02", "title": "Cicli for e range" },
+          { "id": "00-03-03", "title": "Cicli while" }
+        ]},
+        { "id": "00-04", "title": "Riutilizzare", "sections": [
+          { "id": "00-04-01", "title": "Funzioni" },
+          { "id": "00-04-02", "title": "Liste" }
+        ]}
+      ]
+    },
+    {
+      "id": "p1", "roman": "I", "title": "Python solido", "short": "Python solido",
+      "chapters": [
+        { "id": "01-01", "title": "Nomi, oggetti e collezioni", "sections": [
+          { "id": "01-01-01", "title": "Nomi, oggetti e identità" },
+          { "id": "01-01-02", "title": "Tuple e unpacking" },
+          { "id": "01-01-03", "title": "Dizionari e insiemi" }
+        ]},
+        { "id": "01-02", "title": "Comprehension e funzioni", "sections": [
+          { "id": "01-02-01", "title": "Comprehension" },
+          { "id": "01-02-02", "title": "Argomenti di default e keyword" },
+          { "id": "01-02-03", "title": "Funzioni come valori e lambda" }
+        ]},
+        { "id": "01-03", "title": "File, errori e moduli", "sections": [
+          { "id": "01-03-01", "title": "Leggere un CSV di misure con pathlib" },
+          { "id": "01-03-02", "title": "Eccezioni: try, except, raise" },
+          { "id": "01-03-03", "title": "Moduli e import" }
+        ]}
+      ]
+    },
+    {
+      "id": "p2", "roman": "II", "title": "Python idiomatico", "short": "Idiomatico",
+      "chapters": [
+        { "id": "02-01", "title": "Il modello dei dati", "sections": [
+          { "id": "02-01-01", "title": "Metodi speciali (dunder)", "goals": ["Capire perché `len(x)` chiama `x.__len__()`", "Scrivere `__repr__` ed `__eq__` per un vettore forza"], "sources": ["Data model, Language Reference | https://docs.python.org/3/reference/datamodel.html"] }
+        ]},
+        { "id": "02-02", "title": "Classi e dataclass", "sections": [
+          { "id": "02-02-01", "title": "Classi, self e metodi" },
+          { "id": "02-02-02", "title": "dataclass per i materiali" },
+          { "id": "02-02-03", "title": "Confronti e ordinamento", "goals": ["`order=True` nelle dataclass", "Ordinare componenti per tensione con `key=`"], "sources": ["dataclasses | https://docs.python.org/3/library/dataclasses.html"] }
+        ]},
+        { "id": "02-03", "title": "match per i casi di carico", "sections": [
+          { "id": "02-03-01", "title": "Letterali e catture" },
+          { "id": "02-03-02", "title": "Guardie e pattern di classe" },
+          { "id": "02-03-03", "title": "Pattern su sequenze di misure", "goals": ["`case [primo, *resto]`", "Smontare righe di un log di prova"], "sources": ["PEP 636, tutorial sul pattern matching | https://peps.python.org/pep-0636/"] }
+        ]},
+        { "id": "02-04", "title": "Iteratori e generatori", "sections": [
+          { "id": "02-04-01", "title": "Protocollo di iterazione e yield", "goals": ["Leggere file enormi di misure riga per riga", "Generatori di passi di carico"], "sources": ["Tutorial: generatori | https://docs.python.org/3/tutorial/classes.html#generators"] }
+        ]},
+        { "id": "02-05", "title": "Decoratori", "sections": [
+          { "id": "02-05-01", "title": "Decoratori e functools", "goals": ["Un decoratore che misura il tempo di un calcolo", "`functools.cache` per calcoli ripetuti"], "sources": ["functools | https://docs.python.org/3/library/functools.html"] }
+        ]},
+        { "id": "02-06", "title": "Type hint", "sections": [
+          { "id": "02-06-01", "title": "Annotazioni e controllo dei tipi", "goals": ["Annotare funzioni di calcolo", "Generici con la sintassi PEP 695"], "sources": ["typing | https://docs.python.org/3/library/typing.html"] }
+        ]},
+        { "id": "02-07", "title": "Strumenti: Jupyter, pytest, Git", "sections": [
+          { "id": "02-07-01", "title": "Ambienti virtuali, Jupyter e pytest", "desktop": true, "goals": ["Creare un ambiente con `venv` o `uv`", "Un notebook di calcolo", "Test automatici con pytest"], "sources": ["Python Packaging User Guide | https://packaging.python.org/", "pytest | https://docs.pytest.org/"] }
+        ]}
+      ]
+    },
+    {
+      "id": "p3", "roman": "III", "title": "NumPy e Matplotlib", "short": "NumPy e grafici",
+      "chapters": [
+        { "id": "03-01", "title": "Array", "sections": [
+          { "id": "03-01-01", "title": "Dalla lista all'array" },
+          { "id": "03-01-02", "title": "Vettorizzazione e broadcasting" },
+          { "id": "03-01-03", "title": "Indicizzazione e maschere" }
+        ]},
+        { "id": "03-02", "title": "Algebra lineare", "sections": [
+          { "id": "03-02-01", "title": "Sistemi lineari: una travatura reticolare" },
+          { "id": "03-02-02", "title": "Autovalori: i modi propri" }
+        ]},
+        { "id": "03-03", "title": "Grafici", "sections": [
+          { "id": "03-03-01", "title": "Il primo grafico con Matplotlib" },
+          { "id": "03-03-02", "title": "Diagrammi di taglio e momento" },
+          { "id": "03-03-03", "title": "Subplot e annotazioni" }
+        ]}
+      ]
+    },
+    {
+      "id": "p4", "roman": "IV", "title": "Metodi numerici con SciPy", "short": "Metodi numerici",
+      "sources": ["Python Programming and Numerical Methods (Berkeley) | https://pythonnumericalmethods.studentorg.berkeley.edu/notebooks/Index.html", "SciPy | https://docs.scipy.org/doc/scipy/"],
+      "chapters": [
+        { "id": "04-01", "title": "Equazioni e integrali", "sections": [
+          { "id": "04-01-01", "title": "Radici di equazioni non lineari", "goals": ["`scipy.optimize.brentq` e `fsolve`", "Il carico critico di una colonna"] },
+          { "id": "04-01-02", "title": "Integrazione e derivazione numerica", "goals": ["`quad` e `trapezoid`", "Lavoro di una forza variabile"] },
+          { "id": "04-01-03", "title": "Interpolazione e curve fitting", "goals": ["`interp1d` / `make_interp_spline`", "Curva di taratura di un sensore con `curve_fit`"] }
+        ]},
+        { "id": "04-02", "title": "Dinamica e ottimizzazione", "sections": [
+          { "id": "04-02-01", "title": "ODE con solve_ivp", "goals": ["Oscillatore massa-molla-smorzatore", "Risposta a un gradino"] },
+          { "id": "04-02-02", "title": "Ottimizzazione con vincoli", "goals": ["`minimize` con vincoli", "Peso minimo di una trave con tensione ammissibile"] },
+          { "id": "04-02-03", "title": "FFT e vibrazioni", "goals": ["Spettro di un segnale di accelerometro", "Trovare la frequenza dominante"] }
+        ]}
+      ]
+    },
+    {
+      "id": "p5", "roman": "V", "title": "Dati sperimentali con pandas", "short": "Dati sperimentali",
+      "sources": ["pandas | https://pandas.pydata.org/docs/", "Scientific Python Lectures | https://lectures.scientific-python.org/"],
+      "chapters": [
+        { "id": "05-01", "title": "DataFrame", "sections": [
+          { "id": "05-01-01", "title": "Leggere CSV ed Excel di prova", "goals": ["`read_csv`, colonne, unità", "Pulizia di valori mancanti"] },
+          { "id": "05-01-02", "title": "groupby e statistiche", "goals": ["Confronto tra lotti di provini", "Media, deviazione standard, percentili"] },
+          { "id": "05-01-03", "title": "Serie temporali e filtri", "goals": ["Log di temperatura di un motore", "`scipy.signal` per filtrare il rumore"] }
+        ]}
+      ]
+    },
+    {
+      "id": "p6", "roman": "VI", "title": "Simbolico, unità e incertezza", "short": "Simbolico",
+      "sources": ["SymPy | https://docs.sympy.org/", "pint | https://pint.readthedocs.io/", "uncertainties | https://uncertainties.readthedocs.io/"],
+      "chapters": [
+        { "id": "06-01", "title": "Calcolo simbolico e grandezze", "sections": [
+          { "id": "06-01-01", "title": "SymPy: derivate ed equazioni del moto", "goals": ["Derivare e integrare simbolicamente", "Equazioni di Lagrange del pendolo"] },
+          { "id": "06-01-02", "title": "pint: calcoli a prova di unità", "goals": ["N/mm² contro MPa senza errori", "Conversioni automatiche"] },
+          { "id": "06-01-03", "title": "Propagazione dell'incertezza", "goals": ["`uncertainties.ufloat`", "Incertezza su un rendimento misurato"] }
+        ]}
+      ]
+    },
+    {
+      "id": "p7", "roman": "VII", "title": "Applicazioni meccaniche", "short": "Applicazioni",
+      "sources": ["CoolProp | http://www.coolprop.org/", "scikit-fem | https://scikit-fem.readthedocs.io/", "CadQuery | https://cadquery.readthedocs.io/"],
+      "chapters": [
+        { "id": "07-01", "title": "Termodinamica e meccanismi", "sections": [
+          { "id": "07-01-01", "title": "Cicli termodinamici con CoolProp", "goals": ["Proprietà dell'acqua e dei refrigeranti", "Diagramma T-s di un ciclo Rankine"] },
+          { "id": "07-01-02", "title": "Cinematica del quadrilatero articolato", "goals": ["Posizioni con la chiusura dei vettori", "Animazione del meccanismo"] }
+        ]},
+        { "id": "07-02", "title": "Elementi finiti e CAD", "sections": [
+          { "id": "07-02-01", "title": "FEM 1D: una barra caricata", "goals": ["Matrice di rigidezza e assemblaggio", "Confronto con la soluzione analitica"] },
+          { "id": "07-02-02", "title": "FEM 2D: piastra forata con scikit-fem", "desktop": true, "goals": ["Mesh triangolari", "Concentrazione delle tensioni attorno al foro"] },
+          { "id": "07-02-03", "title": "CAD parametrico con CadQuery", "desktop": true, "goals": ["Una flangia parametrica", "Export STEP e STL"] }
+        ]}
+      ]
+    },
+    {
+      "id": "p8", "roman": "VIII", "title": "Automazione e lavoro vero", "short": "Automazione",
+      "sources": ["openpyxl | https://openpyxl.readthedocs.io/", "scikit-learn | https://scikit-learn.org/stable/", "pyserial | https://pyserial.readthedocs.io/"],
+      "chapters": [
+        { "id": "08-01", "title": "Strumenti per il lavoro", "sections": [
+          { "id": "08-01-01", "title": "Script a riga di comando e report automatici", "desktop": true, "goals": ["`argparse`", "Report HTML da un notebook"] },
+          { "id": "08-01-02", "title": "Excel con openpyxl", "desktop": true, "goals": ["Leggere e scrivere fogli di calcolo aziendali"] },
+          { "id": "08-01-03", "title": "Acquisizione dati da Arduino", "desktop": true, "goals": ["pyserial", "Grafico in tempo reale di un sensore"] },
+          { "id": "08-01-04", "title": "Prestazioni e primi modelli predittivi", "desktop": true, "goals": ["Profiling e Numba", "Una regressione con scikit-learn sull'usura"] }
+        ]}
+      ]
+    }
+  ]
+}

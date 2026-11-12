@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Default e argomenti per nome",
+    "code": "def sigma(N, A=100, gamma=1.0):\n    return N / A * gamma\n\nprint(sigma(500, gamma=2))",
+    "options": [
+      "10.0",
+      "5.0",
+      "2.5",
+      "TypeError"
+    ],
+    "answer": 0,
+    "explain": "`A` resta 100 (default), `gamma` diventa 2: 500/100·2 = 10.0."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Coefficienti di sicurezza per nome",
+    "prompt": "Scrivi `resistenza_progetto(fk, *, gamma_m=1.05)` che restituisce `fk / gamma_m`. Il coefficiente deve essere passabile **solo per nome**.",
+    "starter": "def resistenza_progetto(...):\n    ...\n\nprint(resistenza_progetto(355), resistenza_progetto(355, gamma_m=1.25))",
+    "tests": "assert abs(resistenza_progetto(355) - 355 / 1.05) < 1e-9, \"il default di gamma_m è 1.05\"\nassert abs(resistenza_progetto(355, gamma_m=1.25) - 284) < 1e-9, \"gamma_m=1.25 dà 284\"\ntry:\n    resistenza_progetto(355, 1.25)\n    ok = False\nexcept TypeError:\n    ok = True\nassert ok, \"gamma_m deve essere solo per nome: usa * nella firma\"",
+    "solution": "def resistenza_progetto(fk, *, gamma_m=1.05):\n    return fk / gamma_m\n\nprint(resistenza_progetto(355), resistenza_progetto(355, gamma_m=1.25))",
+    "hints": [
+      "Un `*` nella firma rende per nome tutto quello che segue.",
+      "Firma: `(fk, *, gamma_m=1.05)`."
+    ]
+  }
+]

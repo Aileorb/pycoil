@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Precedenza degli operatori",
+    "code": "print(2 + 3 * 2 ** 2)",
+    "options": [
+      "14",
+      "100",
+      "20",
+      "36"
+    ],
+    "answer": 0,
+    "explain": "Prima la potenza (`2**2 = 4`), poi il prodotto (`3*4 = 12`), infine la somma: `14`."
+  },
+  {
+    "kind": "prevedi",
+    "title": "Gradi e radianti",
+    "code": "import math\nprint(round(math.sin(math.radians(30)), 2))",
+    "options": [
+      "0.5",
+      "-0.99",
+      "0.52",
+      "0.87"
+    ],
+    "answer": 0,
+    "explain": "Le funzioni di `math` lavorano in **radianti**: convertendo 30° con `radians` si ottiene sin 30° = 0.5. Senza conversione `sin(30)` darebbe −0.99."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Componenti di una forza",
+    "prompt": "Una forza `F = 500` N è inclinata di `alpha = 35` gradi sull'orizzontale. Calcola le componenti `Fx` e `Fy` usando il modulo `math`.",
+    "starter": "import math\nF = 500\nalpha = 35\nFx = ...\nFy = ...\nprint(Fx, Fy)",
+    "tests": "import math\nassert abs(Fx - 500 * math.cos(math.radians(35))) < 1e-9, \"Fx = F·cos(α), con α in radianti\"\nassert abs(Fy - 500 * math.sin(math.radians(35))) < 1e-9, \"Fy = F·sin(α), con α in radianti\"",
+    "solution": "import math\nF = 500\nalpha = 35\nFx = F * math.cos(math.radians(alpha))\nFy = F * math.sin(math.radians(alpha))\nprint(Fx, Fy)",
+    "hints": [
+      "Converti i gradi con `math.radians`.",
+      "Fx usa il coseno, Fy il seno."
+    ]
+  }
+]

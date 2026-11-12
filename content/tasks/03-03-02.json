@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Momento massimo",
+    "code": "import numpy as np\nL, q = 6.0, 2.0\nx = np.linspace(0, L, 7)\nM = q * x * (L - x) / 2\nprint(x[M.argmax()], M.max())",
+    "options": [
+      "3.0 9.0",
+      "3.0 36.0",
+      "6.0 9.0",
+      "3 9"
+    ],
+    "answer": 0,
+    "explain": "Il massimo è in mezzeria (x = 3) e vale qL²/8 = 2·36/8 = 9."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Taglio con due carichi",
+    "prompt": "Trave appoggiata di luce `L = 6` m con due forze `F1 = 10` kN a `a1 = 2` m e `F2 = 5` kN a `a2 = 4` m. Calcola `RA`, poi l'array `T` del taglio su `x` (vale `RA` prima di a1, `RA − F1` tra a1 e a2, `RA − F1 − F2` dopo a2).",
+    "starter": "import numpy as np\nL, F1, a1, F2, a2 = 6.0, 10.0, 2.0, 5.0, 4.0\nx = np.linspace(0, L, 601)\nRA = ...\nT = ...\nprint(RA, T[0], T[300], T[-1])",
+    "tests": "import numpy as np\nRB = (10 * 2 + 5 * 4) / 6\nassert abs(RA - (15 - RB)) < 1e-9, f\"RA atteso {15 - RB:.4f}\"\nassert abs(T[100] - RA) < 1e-9, \"prima di a1 il taglio vale RA\"\nassert abs(T[300] - (RA - 10)) < 1e-9, \"tra a1 e a2 vale RA − F1\"\nassert abs(T[-1] - (RA - 15)) < 1e-9, \"dopo a2 vale RA − F1 − F2 = −RB\"",
+    "solution": "import numpy as np\nL, F1, a1, F2, a2 = 6.0, 10.0, 2.0, 5.0, 4.0\nx = np.linspace(0, L, 601)\nRB = (F1 * a1 + F2 * a2) / L\nRA = F1 + F2 - RB\nT = RA - F1 * (x >= a1) - F2 * (x >= a2)\nprint(RA, T[0], T[300], T[-1])",
+    "hints": [
+      "RB dall'equilibrio dei momenti in A, poi RA = F1 + F2 − RB.",
+      "Trucco: `(x >= a1)` è un array di 0 e 1 da moltiplicare per F1."
+    ]
+  }
+]

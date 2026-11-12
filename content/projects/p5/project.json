@@ -1,0 +1,12 @@
+{
+  "id": "p5",
+  "title": "Prova di trazione: dai dati al report",
+  "stars": 4,
+  "unlockAfter": "p5",
+  "summary": "Dal file grezzo della macchina di prova al report: pulizia con pandas, modulo elastico per regressione, Rp0,2, Rm, allungamento a rottura e grafici pronti per la relazione.",
+  "intro": "Dal file grezzo della macchina di prova al report: pulizia con pandas, modulo elastico per regressione, Rp0,2, Rm, allungamento a rottura e grafici pronti per la relazione.\n\n> [!nota] Questo progetto arriva con i prossimi aggiornamenti dei contenuti, insieme alla Parte che lo sblocca.\n\n## Le tappe previste\n\n1. Lettura e pulizia del CSV della macchina\n2. Conversione in tensioni e deformazioni\n3. Modulo elastico per regressione lineare\n4. Rp0,2 e Rm\n5. Report con grafico e tabella",
+  "sources": [
+    "pandas: guida | https://pandas.pydata.org/docs/user_guide/index.html"
+  ],
+  "steps": []
+}

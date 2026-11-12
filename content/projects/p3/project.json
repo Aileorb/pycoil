@@ -1,0 +1,81 @@
+{
+  "id": "p3",
+  "title": "Trave appoggiata: diagrammi e freccia",
+  "stars": 3,
+  "unlockAfter": "p3",
+  "module": "trave.py",
+  "summary": "Reazioni, taglio, momento e freccia per carichi qualsiasi, con NumPy, SciPy e un grafico finale.",
+  "intro": "Costruisci **`trave.py`**: dato un insieme di carichi su una trave appoggiata, calcola reazioni, diagrammi di taglio e momento, la deformata per integrazione numerica e disegna tutto in una figura.\n\nI carichi sono tuple: `(\"F\", F, a)` forza concentrata `F` a distanza `a`, `(\"q\", q, a, b)` carico distribuito `q` tra `a` e `b`. Unità: m, kN, kN·m. Usa NumPy ovunque: niente cicli sui punti della trave.",
+  "final": "## Cosa hai costruito\n\nUno strumento vero per controllare gli esercizi di Scienza delle costruzioni. Prossimo passo naturale: aggiungere sbalzi e incastri, oppure una piccola interfaccia a riga di comando con `argparse`.",
+  "sources": [
+    "scipy.integrate.cumulative_trapezoid | https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.cumulative_trapezoid.html",
+    "Matplotlib: subplots | https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html"
+  ],
+  "steps": [
+    {
+      "id": "reazioni",
+      "title": "Le reazioni vincolari",
+      "minutes": 15,
+      "prompt": "Scrivi `reazioni(L, carichi)` che restituisce `(RA, RB)`. Ogni carico ha una risultante e un punto di applicazione (per il distribuito, `q·(b−a)` nel punto medio). Usa l'equilibrio dei momenti in A.",
+      "hints": [
+        "Prima trasforma ogni carico in `(risultante, braccio)`.",
+        "RB · L = Σ F·x, poi RA = ΣF − RB."
+      ],
+      "solution": "import numpy as np\n\n\ndef _risultante(c):\n    if c[0] == \"F\":\n        _, F, a = c\n        return F, a\n    _, q, a, b = c\n    return q * (b - a), (a + b) / 2\n\n\ndef reazioni(L, carichi):\n    R = [_risultante(c) for c in carichi]\n    tot = sum(F for F, _ in R)\n    RB = sum(F * x for F, x in R) / L\n    return tot - RB, RB",
+      "testName": "test_reazioni.py",
+      "test": "from pytest import approx\nfrom trave import reazioni\n\n\ndef test_concentrato():\n    assert reazioni(4, [(\"F\", 10, 1)]) == (approx(7.5), approx(2.5))\n\n\ndef test_distribuito_simmetrico():\n    RA, RB = reazioni(6, [(\"q\", 2, 0, 6)])\n    assert RA == approx(6) and RB == approx(6)\n"
+    },
+    {
+      "id": "taglio",
+      "title": "Il diagramma del taglio",
+      "minutes": 20,
+      "prompt": "Scrivi `taglio(x, L, carichi)`: restituisce un array con il taglio in ogni punto di `x`. Parti da `RA` e sottrai, per ogni carico, la parte che sta **a sinistra** del punto: `F·(x ≥ a)` per i concentrati, `q·clip(x − a, 0, b − a)` per i distribuiti.",
+      "hints": [
+        "`np.full_like(x, RA)` crea l'array iniziale.",
+        "`(x >= a)` è un array di booleani: moltiplicato per F diventa 0 o F."
+      ],
+      "solution": "def taglio(x, L, carichi):\n    x = np.asarray(x, dtype=float)\n    RA, _ = reazioni(L, carichi)\n    T = np.full_like(x, RA)\n    for c in carichi:\n        if c[0] == \"F\":\n            _, F, a = c\n            T -= F * (x >= a)\n        else:\n            _, q, a, b = c\n            T -= q * np.clip(x - a, 0, b - a)\n    return T",
+      "testName": "test_taglio.py",
+      "test": "import numpy as np\nfrom trave import reazioni, taglio\n\n\ndef test_taglio_distribuito():\n    x = np.linspace(0, 5, 11)\n    T = taglio(x, 5, [(\"q\", 4, 0, 5)])\n    assert np.allclose(T, 10 - 4 * x)\n\n\ndef test_salto_sotto_il_carico():\n    x = np.array([0.99, 1.01])\n    T = taglio(x, 4, [(\"F\", 10, 1)])\n    assert np.allclose(T, [7.5, -2.5])\n"
+    },
+    {
+      "id": "momento",
+      "title": "Il diagramma del momento",
+      "minutes": 20,
+      "prompt": "Scrivi `momento(x, L, carichi)` con la stessa idea: `RA·x` meno, per ogni carico, il momento della parte a sinistra. Concentrato: `F·max(x − a, 0)`. Distribuito: con `s = clip(x − a, 0, b − a)` vale `q·s·(x − a − s/2)`.",
+      "hints": [
+        "Per il distribuito, `s` è la lunghezza caricata a sinistra del punto e la sua risultante sta a `s/2`.",
+        "Il test sugli appoggi è un ottimo controllo di tutto il resto."
+      ],
+      "solution": "def momento(x, L, carichi):\n    x = np.asarray(x, dtype=float)\n    RA, _ = reazioni(L, carichi)\n    M = RA * x\n    for c in carichi:\n        if c[0] == \"F\":\n            _, F, a = c\n            M -= F * np.maximum(x - a, 0)\n        else:\n            _, q, a, b = c\n            s = np.clip(x - a, 0, b - a)\n            M -= q * s * (x - a - s / 2)\n    return M",
+      "testName": "test_momento.py",
+      "test": "import numpy as np\nfrom pytest import approx\nfrom trave import momento\n\n\ndef test_parabola():\n    x = np.linspace(0, 6, 61)\n    M = momento(x, 6, [(\"q\", 2, 0, 6)])\n    assert np.allclose(M, 2 * x * (6 - x) / 2)\n    assert M.max() == approx(2 * 36 / 8)\n\n\ndef test_zero_agli_appoggi():\n    x = np.linspace(0, 7, 71)\n    M = momento(x, 7, [(\"F\", 3, 2), (\"q\", 1, 4, 6)])\n    assert M[0] == approx(0, abs=1e-12) and M[-1] == approx(0, abs=1e-12)\n"
+    },
+    {
+      "id": "freccia",
+      "title": "La deformata per integrazione",
+      "minutes": 25,
+      "prompt": "Scrivi `freccia(x, M, EI)`: integra due volte la curvatura `M/EI` con `scipy.integrate.cumulative_trapezoid(..., initial=0)`, poi correggi con una retta perché lo spostamento sia nullo su entrambi gli appoggi. Restituisci la freccia **positiva verso il basso**.",
+      "hints": [
+        "La doppia integrazione dà `w` a meno di una retta `C1·x + C2`: `C2 = 0` grazie a `initial=0`, `C1` lo trovi imponendo `w(L) = 0`.",
+        "Con `w` verso l'alto, `EI·w'' = M`: la freccia verso il basso è `−w`."
+      ],
+      "solution": "from scipy.integrate import cumulative_trapezoid\n\n\ndef freccia(x, M, EI):\n    x = np.asarray(x, dtype=float)\n    phi = cumulative_trapezoid(M / EI, x, initial=0)\n    w = cumulative_trapezoid(phi, x, initial=0)\n    w = w - w[-1] * (x - x[0]) / (x[-1] - x[0])\n    return -w",
+      "testName": "test_freccia.py",
+      "test": "import numpy as np\nfrom pytest import approx\nfrom trave import freccia, momento\n\n\ndef test_formula_classica():\n    L, q, EI = 5.0, 4.0, 2.0e4\n    x = np.linspace(0, L, 2001)\n    v = freccia(x, momento(x, L, [(\"q\", q, 0, L)]), EI)\n    assert v.max() == approx(5 * q * L**4 / (384 * EI), rel=1e-3)\n    assert v[0] == approx(0, abs=1e-12) and v[-1] == approx(0, abs=1e-12)\n"
+    },
+    {
+      "id": "figura",
+      "title": "La figura finale",
+      "minutes": 20,
+      "prompt": "Scrivi `disegna(L, carichi, EI, n=501)`: crea `x`, calcola taglio, momento e freccia e restituisce una figura Matplotlib con **tre** assi uno sotto l'altro (taglio, momento con asse invertito, freccia), etichette con le unità. Aggiungi un `if __name__ == \"__main__\":` che salva `trave.png`.",
+      "hints": [
+        "`plt.subplots(3, 1, sharex=True)`.",
+        "Restituisci `fig`, così puoi salvarla o mostrarla a piacere."
+      ],
+      "solution": "import matplotlib.pyplot as plt\n\n\ndef disegna(L, carichi, EI, n=501):\n    x = np.linspace(0, L, n)\n    T = taglio(x, L, carichi)\n    M = momento(x, L, carichi)\n    v = freccia(x, M, EI)\n    fig, (a1, a2, a3) = plt.subplots(3, 1, figsize=(6, 6), sharex=True)\n    a1.fill_between(x, T, alpha=0.4)\n    a1.set_ylabel(\"T [kN]\")\n    a2.fill_between(x, M, alpha=0.4, color=\"tab:orange\")\n    a2.invert_yaxis()\n    a2.set_ylabel(\"M [kN·m]\")\n    a3.plot(x, v * 1000, color=\"tab:green\")\n    a3.invert_yaxis()\n    a3.set_ylabel(\"v [mm]\")\n    a3.set_xlabel(\"x [m]\")\n    for a in (a1, a2, a3):\n        a.axhline(0, color=\"k\", lw=0.6)\n        a.grid(alpha=0.3)\n    fig.tight_layout()\n    return fig\n\n\nif __name__ == \"__main__\":\n    disegna(6, [(\"F\", 10, 2), (\"q\", 3, 3, 6)], EI=2.1e4).savefig(\"trave.png\", dpi=200)",
+      "testName": "test_figura.py",
+      "test": "import matplotlib\n\nmatplotlib.use(\"agg\")\nfrom trave import disegna\n\n\ndef test_figura():\n    fig = disegna(4, [(\"F\", 5, 1)], 1e4)\n    assert len(fig.axes) == 3\n    assert all(ax.get_ylabel() for ax in fig.axes)\n    assert fig.axes[1].yaxis_inverted()\n"
+    }
+  ]
+}

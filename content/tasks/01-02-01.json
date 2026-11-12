@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Comprehension con filtro",
+    "code": "print([x ** 2 for x in range(6) if x % 2 == 0])",
+    "options": [
+      "[0, 4, 16]",
+      "[4, 16]",
+      "[0, 1, 4, 9, 16, 25]",
+      "[1, 9, 25]"
+    ],
+    "answer": 0,
+    "explain": "Si tengono solo 0, 2, 4 (pari) e si elevano al quadrato."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Filtrare le tensioni",
+    "prompt": "Usa una comprehension per creare `critiche`: le tensioni di `sigma` che superano `soglia`, **arrotondate** a un decimale.",
+    "starter": "sigma = [120.44, 230.18, 98.0, 251.96, 199.99]\nsoglia = 200\ncritiche = ...\nprint(critiche)",
+    "tests": "assert critiche == [230.2, 252.0], f\"atteso [230.2, 252.0], ottenuto {critiche}\"",
+    "solution": "sigma = [120.44, 230.18, 98.0, 251.96, 199.99]\nsoglia = 200\ncritiche = [round(s, 1) for s in sigma if s > soglia]\nprint(critiche)",
+    "hints": [
+      "Forma: `[espressione for s in sigma if condizione]`.",
+      "`round(s, 1)` arrotonda a un decimale."
+    ]
+  }
+]

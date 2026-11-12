@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Virgola decimale",
+    "code": "riga = \"12,5;300\"\nx, F = riga.split(\";\")\nprint(float(x.replace(\",\", \".\")) * 2)",
+    "options": [
+      "25.0",
+      "ValueError",
+      "12,512,5",
+      "25"
+    ],
+    "answer": 0,
+    "explain": "Si separa con `;`, poi si sostituisce la virgola con il punto prima di `float`."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Forza massima da un CSV",
+    "prompt": "Il file `prova.csv` (già creato nello starter) ha le colonne `tempo_s;forza_N`. Leggilo con `csv.DictReader` e metti in `Fmax` la forza massima come `float`.",
+    "starter": "from pathlib import Path\nimport csv\nPath(\"prova.csv\").write_text(\"tempo_s;forza_N\\n0;0\\n1;120.5\\n2;245.0\\n3;238.2\\n\")\n\nFmax = ...\nprint(Fmax)",
+    "tests": "assert Fmax == 245.0, f\"Fmax deve essere 245.0, ottenuto {Fmax!r}\"",
+    "solution": "from pathlib import Path\nimport csv\nPath(\"prova.csv\").write_text(\"tempo_s;forza_N\\n0;0\\n1;120.5\\n2;245.0\\n3;238.2\\n\")\n\nwith open(\"prova.csv\", newline=\"\") as f:\n    righe = csv.DictReader(f, delimiter=\";\")\n    Fmax = max(float(r[\"forza_N\"]) for r in righe)\nprint(Fmax)",
+    "hints": [
+      "`csv.DictReader(f, delimiter=\";\")`.",
+      "Converti con `float(r[\"forza_N\"])` prima di confrontare."
+    ]
+  }
+]

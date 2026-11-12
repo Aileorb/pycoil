@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Forma dopo il broadcasting",
+    "code": "import numpy as np\na = np.arange(3)[:, None]\nb = np.arange(4)\nprint((a + b).shape)",
+    "options": [
+      "(3, 4)",
+      "(4, 3)",
+      "(3,)",
+      "ValueError"
+    ],
+    "answer": 0,
+    "explain": "Una colonna `(3, 1)` contro una riga `(4,)` si espande in una tabella `(3, 4)`."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Tabella di von Mises",
+    "prompt": "Dati gli array `sx` e `txy` (MPa), calcola senza cicli la tensione equivalente `svm = sqrt(sx² + 3 txy²)` per ogni coppia di valori **corrispondenti**.",
+    "starter": "import numpy as np\nsx = np.array([100.0, 150.0, 80.0])\ntxy = np.array([20.0, 40.0, 60.0])\nsvm = ...\nprint(svm.round(1))",
+    "tests": "import numpy as np\nassert isinstance(svm, np.ndarray) and svm.shape == (3,), \"svm deve essere un array di 3 elementi\"\nassert np.allclose(svm, np.sqrt(sx**2 + 3 * txy**2)), \"svm = sqrt(sx² + 3·txy²)\"",
+    "solution": "import numpy as np\nsx = np.array([100.0, 150.0, 80.0])\ntxy = np.array([20.0, 40.0, 60.0])\nsvm = np.sqrt(sx**2 + 3 * txy**2)\nprint(svm.round(1))",
+    "hints": [
+      "Le operazioni aritmetiche lavorano elemento per elemento.",
+      "`np.sqrt` agisce su tutto l'array."
+    ]
+  }
+]

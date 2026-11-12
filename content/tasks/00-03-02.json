@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "range con passo",
+    "code": "print(list(range(0, 10, 3)))",
+    "options": [
+      "[0, 3, 6, 9]",
+      "[0, 3, 6]",
+      "[3, 6, 9]",
+      "[0, 3, 6, 9, 12]"
+    ],
+    "answer": 0,
+    "explain": "`range(inizio, fine, passo)` si ferma **prima** di `fine`: 0, 3, 6, 9."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Sommare le forze",
+    "prompt": "Con un ciclo `for`, somma le forze della lista `forze` nella variabile `totale` (senza usare `sum`).",
+    "starter": "forze = [120.0, -45.5, 300.0, 12.5]\ntotale = 0\n...\nprint(totale)",
+    "tests": "assert abs(totale - 387.0) < 1e-9, f\"totale deve valere 387.0, ottenuto {totale}\"",
+    "solution": "forze = [120.0, -45.5, 300.0, 12.5]\ntotale = 0\nfor f in forze:\n    totale += f\nprint(totale)",
+    "hints": [
+      "`for f in forze:` scorre gli elementi.",
+      "Accumula con `totale += f`."
+    ]
+  }
+]

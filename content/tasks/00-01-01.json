@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Divisione in Python",
+    "code": "print(7 / 2, 7 // 2, 7 % 2)",
+    "options": [
+      "3.5 3 1",
+      "3 3 1",
+      "3.5 3.5 1",
+      "3 4 1"
+    ],
+    "answer": 0,
+    "explain": "`/` dà sempre un float, `//` è la divisione intera (verso il basso), `%` il resto."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Area di una sezione circolare",
+    "prompt": "Calcola l'area `A` (in mm²) di un tondino di diametro `d = 20` mm. Usa `3.14159` come π.",
+    "starter": "d = 20\nA = ...\nprint(A)",
+    "tests": "assert abs(A - 314.159) < 0.01, \"A deve valere π·d²/4 ≈ 314.16 mm²\"",
+    "solution": "d = 20\nA = 3.14159 * d**2 / 4\nprint(A)",
+    "hints": [
+      "L'area del cerchio è π·d²/4.",
+      "La potenza in Python si scrive `**`."
+    ]
+  }
+]

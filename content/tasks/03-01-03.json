@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Maschera booleana",
+    "code": "import numpy as np\na = np.array([3, 8, 1, 9, 4])\nprint(a[a > 3].sum())",
+    "options": [
+      "21",
+      "25",
+      "17",
+      "3"
+    ],
+    "answer": 0,
+    "explain": "La maschera tiene 8, 9 e 4: la somma è 21."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Tratto elastico di una prova",
+    "prompt": "Dagli array `eps` e `sigma` di una prova di trazione, estrai in `sig_el` le tensioni del tratto con `eps` tra 0.0005 e 0.0015 (estremi inclusi) e stima il modulo `E` come media di `sig_el / eps_el`.",
+    "starter": "import numpy as np\neps = np.array([0.0, 0.0005, 0.001, 0.0015, 0.002, 0.003])\nsigma = np.array([0.0, 104.0, 209.0, 316.0, 355.0, 360.0])\nmask = ...\neps_el = eps[mask]\nsig_el = sigma[mask]\nE = ...\nprint(round(E))",
+    "tests": "import numpy as np\nassert list(sig_el) == [104.0, 209.0, 316.0], f\"sig_el sbagliato: {sig_el}\"\nassert abs(E - np.mean(np.array([104, 209, 316]) / np.array([0.0005, 0.001, 0.0015]))) < 1e-6, \"E = media di sig_el / eps_el\"",
+    "solution": "import numpy as np\neps = np.array([0.0, 0.0005, 0.001, 0.0015, 0.002, 0.003])\nsigma = np.array([0.0, 104.0, 209.0, 316.0, 355.0, 360.0])\nmask = (eps >= 0.0005) & (eps <= 0.0015)\neps_el = eps[mask]\nsig_el = sigma[mask]\nE = np.mean(sig_el / eps_el)\nprint(round(E))",
+    "hints": [
+      "Combina le condizioni con `&` e le parentesi.",
+      "`np.mean(...)` fa la media."
+    ]
+  }
+]

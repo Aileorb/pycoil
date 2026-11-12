@@ -1,0 +1,8 @@
+[
+  { "level": "base", "code": "x = 7\ny = 2\nprint(x / y, x // y)", "options": ["3.5 3", "3 3", "3.5 3.5", "3 3.5"], "answer": 0 },
+  { "level": "base", "code": "tot = 0\nfor i in range(1, 4):\n    tot += i\nprint(tot)", "options": ["6", "10", "3", "4"], "answer": 0 },
+  { "level": "intermedio", "code": "a = [1, 2, 3]\nb = a\nb.append(4)\nprint(len(a))", "options": ["4", "3", "Errore", "None"], "answer": 0 },
+  { "level": "intermedio", "code": "d = {k: k * k for k in range(4) if k % 2}\nprint(d)", "options": ["{1: 1, 3: 9}", "{0: 0, 2: 4}", "{1, 9}", "[1, 9]"], "answer": 0 },
+  { "level": "avanzato", "code": "from dataclasses import dataclass\n\n@dataclass(order=True)\nclass P:\n    u: float\n    nome: str\n\nprint(min(P(0.9, 'a'), P(0.4, 'b')).nome)", "options": ["b", "a", "TypeError", "0.4"], "answer": 0 },
+  { "level": "avanzato", "code": "def gen(n):\n    for i in range(n):\n        yield i * 2\n\ng = gen(3)\nnext(g)\nprint(list(g))", "options": ["[2, 4]", "[0, 2, 4]", "[4]", "[]"], "answer": 0 }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Griglia di subplot",
+    "code": "import matplotlib.pyplot as plt\nfig, axs = plt.subplots(2, 3)\nprint(axs.shape, len(fig.axes))",
+    "options": [
+      "(2, 3) 6",
+      "(3, 2) 6",
+      "(2, 3) 1",
+      "(6,) 6"
+    ],
+    "answer": 0,
+    "explain": "`subplots(2, 3)` restituisce un array di assi 2×3: sei assi in tutto."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Due grafici affiancati",
+    "prompt": "Crea una figura con **due** assi affiancati `(a1, a2)`. In `a1` disegna `x` contro `t`, in `a2` disegna `v` contro `t`. Annota in `a1` il massimo di `x` con `a1.annotate` (testo libero).",
+    "starter": "import numpy as np\nimport matplotlib.pyplot as plt\nt = np.linspace(0, 1, 200)\nx = np.sin(2 * np.pi * t) * np.exp(-t)\nv = np.gradient(x, t)\n...",
+    "tests": "assert len(fig.axes) == 2, \"servono due assi: plt.subplots(1, 2)\"\nassert len(a1.lines) >= 1 and len(a2.lines) >= 1, \"disegna una curva in ciascun asse\"\nassert len(a1.texts) >= 1, \"aggiungi un'annotazione in a1 con a1.annotate\"",
+    "solution": "import numpy as np\nimport matplotlib.pyplot as plt\nt = np.linspace(0, 1, 200)\nx = np.sin(2 * np.pi * t) * np.exp(-t)\nv = np.gradient(x, t)\nfig, (a1, a2) = plt.subplots(1, 2, figsize=(7, 2.8))\na1.plot(t, x)\na2.plot(t, v)\ni = x.argmax()\na1.annotate(f\"max {x[i]:.2f}\", (t[i], x[i]), textcoords=\"offset points\", xytext=(8, -12))\nfig.tight_layout()",
+    "hints": [
+      "`fig, (a1, a2) = plt.subplots(1, 2)`.",
+      "`a1.annotate(testo, (x, y))`."
+    ]
+  }
+]
