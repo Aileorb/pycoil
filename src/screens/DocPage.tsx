@@ -108,6 +108,10 @@ export function DocPage({ kind, id }: { kind: Kind; id: string }) {
   // sezioni precedente e successiva (in tutto il libro)
   const all = index?.parts.flatMap((p) => p.chapters.flatMap((c) => c.sections)) ?? [];
   const pos = all.findIndex((s) => s.id === id);
+  // «Successiva» sta in fondo alla pagina: premerlo vuol dire che la sezione è finita, spunta subito
+  const finishHere = () => {
+    if (kind === 'percorso' && doc && !doc.stub && !isRead) readSection(id);
+  };
   const prev = kind === 'percorso' && pos > 0 ? all[pos - 1] : null;
   const next = kind === 'percorso' && pos >= 0 && pos < all.length - 1 ? all[pos + 1] : null;
   const part = index?.parts.find((p) => p.id === doc?.part);
@@ -146,11 +150,11 @@ export function DocPage({ kind, id }: { kind: Kind; id: string }) {
               </div>
             )}
             <div ref={sentinel} style={{ height: 1 }} />
-            {kind === 'percorso' && !doc.stub && (isRead ? <div style={{ textAlign: 'center' }}><span className="done-pill"><Check size={18} />Sezione completata</span></div> : <p style={{ textAlign: 'center', color: 'var(--text2)', fontSize: 13 }}>La spunta verde arriva quando hai letto fino in fondo.</p>)}
+            {kind === 'percorso' && !doc.stub && (isRead ? <div style={{ textAlign: 'center' }}><span className="done-pill"><Check size={18} />Sezione completata</span></div> : <p style={{ textAlign: 'center', color: 'var(--text2)', fontSize: 13 }}>La spunta verde arriva quando hai letto fino in fondo o passi alla sezione successiva.</p>)}
             {(prev || next) && (
               <nav className="prevnext" aria-label="Sezioni vicine">
                 {prev ? <a href={`#/percorso/${prev.id}`}><small>‹ Precedente</small><b>{prev.title}</b></a> : <span />}
-                {next ? <a className="next" href={`#/percorso/${next.id}`}><small>Successiva ›</small><b>{next.title}</b></a> : <span />}
+                {next ? <a className="next" href={`#/percorso/${next.id}`} onClick={finishHere}><small>Successiva ›</small><b>{next.title}</b></a> : <span />}
               </nav>
             )}
           </>
