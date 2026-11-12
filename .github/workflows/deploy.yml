@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: pages-${{ github.ref }}
+  group: publish-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -47,52 +47,42 @@ jobs:
       - name: Build (tipi, bundle, budget di peso)
         run: npm run build
 
-      - uses: actions/upload-pages-artifact@v3
-        if: github.ref == 'refs/heads/main'
-        with:
-          path: dist
-
       - uses: actions/upload-artifact@v4
-        if: github.ref == 'refs/heads/main'
+        if: github.event_name != 'pull_request'
         with:
-          name: content
-          path: dist/content
+          name: dist
+          path: dist
           retention-days: 1
 
-  deploy:
+  # Pubblica l'app sul branch gh-pages (servito da GitHub Pages) e una copia
+  # dei soli contenuti sul branch content, che jsDelivr usa come riserva
+  # se Pages non risponde (vedi src/engine/content.ts).
+  publish:
     needs: build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
-
-  # Copia dei contenuti sul branch `content`: jsDelivr la serve come riserva
-  # se GitHub Pages non risponde (vedi src/engine/content.ts).
-  content-branch:
-    needs: build
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: content
-          path: content
-      - name: Pubblica sul branch content
-        working-directory: content
+          name: dist
+          path: dist
+      - name: Pubblica sui branch gh-pages e content
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git init -q -b content
-          git add -A
-          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-            commit -qm "Contenuti di ${GITHUB_SHA::7}"
-          git push -qf "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" content
+          remote="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          publish() {
+            cd "$1"
+            git init -q -b "$2"
+            git add -A
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -qm "Pubblicazione di ${GITHUB_SHA::7}"
+            git push -qf "$remote" "$2"
+            cd - > /dev/null
+          }
+          cp -r dist/content content
+          touch dist/.nojekyll
+          publish dist gh-pages
+          publish content content
