@@ -15,7 +15,9 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['icons/*.png', 'icons/*.svg'],
       manifest: {
-        name: 'PyCoil — Python per ingegneri',
+        // Il nome proposto da «Aggiungi alla schermata Home»: iOS usa `name`, quindi solo «PyCoil».
+        name: 'PyCoil',
+        id: base,
         short_name: 'PyCoil',
         description: 'Python per ingegneri, una spira al giorno: 3 micro-task da 10 minuti dal telefono.',
         lang: 'it',
@@ -26,15 +28,17 @@ export default defineConfig({
         background_color: '#F2F2F7',
         theme_color: '#F2F2F7',
         icons: [
-          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          { src: 'icons/pycoil-v2-180.png', sizes: '180x180', type: 'image/png', purpose: 'any' },
+          { src: 'icons/pycoil-v2-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icons/pycoil-v2-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icons/pycoil-v2-1024.png', sizes: '1024x1024', type: 'image/png', purpose: 'any' },
+          { src: 'icons/pycoil-v2-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: {
         // Requisito vincolante: solo la shell dell'app in cache. I contenuti didattici
         // restano su GitHub e si leggono a runtime, senza essere salvati.
-        globPatterns: ['**/*.{js,css,html,webmanifest}', 'icons/icon-192.png', 'icons/apple-touch-icon.png'],
+        globPatterns: ['**/*.{js,css,html,webmanifest}', 'icons/pycoil-v2-180.png', 'icons/pycoil-v2-192.png'],
         globIgnores: ['content/**'],
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/\/content\//],

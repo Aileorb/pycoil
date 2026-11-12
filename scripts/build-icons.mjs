@@ -23,9 +23,13 @@ writeFileSync('assets/icon-maskable.svg', svg(body, { rounded: false, scale: 0.7
 const png = (src, size, dest) =>
   execFileSync('rsvg-convert', ['-w', String(size), '-h', String(size), '-o', dest, src]);
 
-png(`${out}/icon.svg`, 192, `${out}/icon-192.png`);
-png(`${out}/icon.svg`, 512, `${out}/icon-512.png`);
-png('assets/icon-full.svg', 180, `${out}/apple-touch-icon.png`);
-png('assets/icon-maskable.svg', 512, `${out}/icon-maskable-512.png`);
+// Icone per la schermata Home: quadrate e piene (niente trasparenza), perché iOS e Android
+// applicano da soli la loro maschera e riempiono di nero gli angoli trasparenti.
+// I nomi includono la versione: cambiandoli, i telefoni non riusano icone vecchie in cache.
+png('assets/icon-full.svg', 180, `${out}/pycoil-v2-180.png`);
+png('assets/icon-full.svg', 192, `${out}/pycoil-v2-192.png`);
+png('assets/icon-full.svg', 512, `${out}/pycoil-v2-512.png`);
+png('assets/icon-full.svg', 1024, `${out}/pycoil-v2-1024.png`);
+png('assets/icon-maskable.svg', 512, `${out}/pycoil-v2-maskable-512.png`);
 png('assets/icon-full.svg', 1024, 'assets/icon-1024.png');
 console.log('Icone generate in', out);
