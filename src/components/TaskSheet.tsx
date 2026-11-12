@@ -414,7 +414,7 @@ function Advanced({ task, done, draft, register }: { task: AdvancedTask; done: b
         <DoneBanner text={passed ? 'Test superati' : 'Completata'} />
       ) : (
         <button className="pill-btn" onClick={markDone}>
-          {exhausted ? 'Ho capito, segna come fatta' : 'Test verdi al computer: segna come fatta'}
+          {exhausted ? 'Ho capito, segna come fatta' : 'Completata'}
         </button>
       )}
     </>
