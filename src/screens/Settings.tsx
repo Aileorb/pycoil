@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Sheet } from '../components/Sheet';
+import { PageScreen } from '../components/PageScreen';
 import { useStore } from '../store';
 import { exportState, clearToday } from '../engine/storage';
 import { normalize } from '../engine/state';
@@ -33,7 +33,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Sheet title="Impostazioni" onClose={onClose}>
+    <PageScreen title="Impostazioni" backLabel="Statistiche" onClose={onClose}>
       <div className="group">
         <button className="row" onClick={() => { update((s) => ({ ...s, level: null })); void clearToday(); onClose(); }}>
           <span className="grow"><span className="t">Rifai il test di livello</span><span className="st">Livello attuale: {state.level}</span></span>
@@ -61,10 +61,10 @@ export function Settings({ onClose }: { onClose: () => void }) {
           </button>
         )}
       </div>
-      <p style={{ fontSize: 13, color: 'var(--text2)', margin: '0 16px', lineHeight: 1.5 }}>
+      <p style={{ fontSize: 13, color: 'var(--text2)', margin: '0 4px', lineHeight: 1.5 }}>
         Sul dispositivo restano solo i contatori, i preferiti e le task di oggi: libro, documentazione e soluzioni stanno su GitHub.
         Python {index?.python ?? '3.14'} nel browser con Pyodide {PYODIDE_VERSION}. Le novità di Python 3.15 sono segnate «Desktop».
       </p>
-    </Sheet>
+    </PageScreen>
   );
 }

@@ -467,3 +467,15 @@ body:has(.task-screen) .toast { top: calc(var(--safe-t) + 70px); bottom: auto; }
 .space-total { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; font-size: 15px; border-bottom: 0.5px solid var(--sep); }
 .space-total b { font-size: 17px; }
 .space-note { margin: 4px 16px 10px; font-size: 13px; color: var(--text2); line-height: 1.45; }
+
+/* ---------- pagine a schermo intero (Impostazioni) ---------- */
+.page-screen { position: fixed; inset: 0; z-index: 44; background: var(--bg); display: flex; flex-direction: column; animation: page-in 0.32s var(--spring); }
+@keyframes page-in { from { transform: translateX(28px); opacity: 0; } to { transform: none; opacity: 1; } }
+.page-screen .nav-bar { position: static; flex: none; }
+.page-screen .nav-bar .back { background: none; border: 0; padding: 0 4px; cursor: pointer; font-family: inherit; }
+.page-screen .nav-bar .back:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 8px; }
+.page-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.page-inner { max-width: 720px; margin: 0 auto; padding: 4px max(16px, env(safe-area-inset-right, 0px)) calc(32px + var(--safe-b)) max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 14px; }
+.page-inner > * { flex-shrink: 0; }
+.page-inner .large-title { margin: 6px 0 2px; }
+@media (prefers-reduced-motion: reduce) { .page-screen { animation: none; } }
