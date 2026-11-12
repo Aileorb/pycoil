@@ -83,8 +83,11 @@ a { color: var(--blue); }
 .hid { visibility: hidden; }
 
 /* ---------------------------------------------------------------- layout */
-.app { max-width: 720px; margin: 0 auto; min-height: 100dvh; }
-.screen { padding: calc(16px + var(--safe-t)) 16px calc(110px + var(--safe-b)); display: flex; flex-direction: column; gap: 14px; }
+.app { min-height: 100dvh; }
+/* Colonna dei tab e colonna di lettura (più larga sugli schermi grandi) */
+:root { --read-w: 720px; }
+@media (min-width: 1000px) { :root { --read-w: 920px; } .doc .prose, .task-inner .prose { font-size: 18px; } }
+.screen { max-width: 720px; margin: 0 auto; padding: calc(16px + var(--safe-t)) 16px calc(110px + var(--safe-b)); display: flex; flex-direction: column; gap: 14px; }
 .large-title { margin: 0; font-size: 34px; font-weight: 700; letter-spacing: 0.37px; }
 .title-row { display: flex; align-items: flex-end; justify-content: space-between; padding-top: 16px; }
 .section-label { font-size: 13px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.3px; padding: 0 16px; display: flex; align-items: center; gap: 6px; justify-content: space-between; }
@@ -253,7 +256,7 @@ pre.code.out { background: transparent; border-style: dashed; color: var(--text2
 .nav-bar .ttl { font-size: 17px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .readbar { height: 3px; background: var(--fill2); position: sticky; top: calc(60px + var(--safe-t)); z-index: 9; }
 .readbar span { display: block; height: 3px; background: var(--green); }
-.doc { padding: 14px 20px calc(120px + var(--safe-b)); max-width: 720px; margin: 0 auto; }
+.doc { padding: 14px 20px calc(120px + var(--safe-b)); max-width: var(--read-w); margin: 0 auto; }
 .doc h1 { font-size: 28px; margin: 6px 0 2px; }
 .doc .meta { color: var(--text2); font-size: 14px; margin-bottom: 8px; }
 .done-pill { align-self: center; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px; border-radius: 16px; background: rgba(52, 199, 89, 0.14); color: var(--green-text); font-size: 15px; font-weight: 600; margin: 8px auto; animation: pop 0.5s var(--spring); }
@@ -417,13 +420,13 @@ pre.code.out { background: transparent; border-style: dashed; color: var(--text2
 .task-progress i { flex: 1; height: 4px; border-radius: 2px; background: var(--fill); transition: background 0.3s; }
 .task-progress i.on { background: var(--green); }
 .task-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
-.task-inner { max-width: 720px; margin: 0 auto; padding: 4px max(16px, env(safe-area-inset-right, 0px)) 28px max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 14px; }
+.task-inner { max-width: var(--read-w); margin: 0 auto; padding: 4px max(16px, env(safe-area-inset-right, 0px)) 28px max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 14px; }
 .task-inner > * { flex-shrink: 0; }
 .task-title { margin: 2px 0 0; font-size: 24px; line-height: 1.2; text-wrap: balance; }
 .paused-note { font-size: 14px; color: var(--orange-text); }
 .paused-chip { display: inline-block; font-size: 11px; font-weight: 700; color: var(--orange-text); background: rgba(255, 149, 0, 0.14); border-radius: 6px; padding: 1px 6px; margin-right: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
 .task-foot { flex: none; display: flex; flex-direction: column; gap: 2px; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(12px + var(--safe-b)) max(16px, env(safe-area-inset-left, 0px)); border-top: 0.5px solid var(--sep); background: var(--bg); animation: foot-in 0.4s var(--spring); }
-.task-foot > * { width: 100%; max-width: 688px; margin: 0 auto; }
+.task-foot > * { width: 100%; max-width: calc(var(--read-w) - 32px); margin: 0 auto; }
 @keyframes foot-in { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
 .big-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--blue); color: #fff; border-radius: 16px; padding: 17px; font-size: 18px; font-weight: 600; }
 .big-btn:active { opacity: 0.85; }
