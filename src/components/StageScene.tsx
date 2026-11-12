@@ -10,6 +10,11 @@ const Stars = () => (
     <circle className="twinkle" cx="180" cy="28" r="1.2" fill="#fff" style={{ animationDelay: '.7s' }} />
     <circle className="twinkle" cx="150" cy="80" r="1" fill="#fff" style={{ animationDelay: '1.4s' }} />
     <circle className="twinkle" cx="60" cy="96" r="1.1" fill="#fff" style={{ animationDelay: '2s' }} />
+    {/* visibili solo sugli schermi larghi, dove la scena si allarga oltre il riquadro 220×300 */}
+    <circle className="twinkle" cx="-60" cy="58" r="1.3" fill="#fff" style={{ animationDelay: '1s' }} />
+    <circle className="twinkle" cx="-20" cy="120" r="1" fill="#fff" style={{ animationDelay: '2.4s' }} />
+    <circle className="twinkle" cx="260" cy="70" r="1.4" fill="#fff" style={{ animationDelay: '.3s' }} />
+    <circle className="twinkle" cx="300" cy="130" r="1" fill="#fff" style={{ animationDelay: '1.8s' }} />
   </>
 );
 
@@ -151,8 +156,10 @@ export function StageScene({ stage }: { stage: Stage }) {
       aria-label={`Livello ${lvl}, ${stage.name}: tocca, ${stage.touch}`}
       style={{ background: `linear-gradient(0deg, ${stage.sky[0]} 0%, ${stage.sky[1]} 100%)` }}
     >
-      <svg viewBox="0 0 220 300" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style={{ inset: 0 }}>
+      <svg viewBox="0 0 220 300" width="100%" height="100%" preserveAspectRatio="xMidYMax meet" overflow="visible" aria-hidden="true" style={{ inset: 0 }}>
         {lvl <= 4 && <Stars />}
+        {/* collina larga: sugli schermi larghi la scena non si ingrandisce, si allarga ai lati */}
+        <ellipse cx="110" cy={hillCy + 34} rx="460" ry="104" fill={stage.hill} />
         <ellipse cx="110" cy={hillCy} rx="190" ry="90" fill={stage.hill} />
         {lvl === 1 && (
           <g transform="translate(10 60)">
