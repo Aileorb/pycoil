@@ -1,3 +1,4 @@
+import type React from 'react';
 import { StoreProvider, useStore } from './store';
 import { useRoute } from './router';
 import { Today } from './screens/Today';
@@ -34,7 +35,7 @@ function Shell() {
   return (
     <div className="app">
       {screen}
-      <nav className="tabbar" aria-label="Sezioni dell'app">
+      <nav className="tabbar" aria-label="Sezioni dell'app" style={{ '--i': ['oggi', 'percorso', 'statistiche'].indexOf(tab) } as React.CSSProperties}>
         {(['oggi', 'percorso', 'statistiche'] as const).map((t) => (
           <a key={t} href={`#/${t}`} aria-current={tab === t ? 'page' : undefined}>
             {TabIcons[t](tab === t)}

@@ -65,6 +65,7 @@ export default defineConfig({
     })
   ],
   worker: { format: 'es' },
-  build: { target: 'es2022', sourcemap: false, assetsInlineLimit: 0 },
+  // cssTarget esplicito: con il solo es2022 il minificatore toglieva backdrop-filter senza prefisso (niente vetro su Chrome)
+  build: { target: 'es2022', cssTarget: ['chrome111', 'edge111', 'firefox115', 'safari16'], sourcemap: false, assetsInlineLimit: 0 },
   test: { environment: 'node', include: ['tests/**/*.test.ts'] }
 });
