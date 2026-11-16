@@ -5,6 +5,7 @@ import { exportState, clearToday } from '../engine/storage';
 import { normalize } from '../engine/state';
 import { PYODIDE_VERSION } from '../py/version';
 import { SpaceUsage } from '../components/SpaceUsage';
+import { ReminderSettings } from '../components/ReminderSettings';
 
 export function Settings({ onClose }: { onClose: () => void }) {
   const { state, today, update, reloadToday, resetToday, showToast, index } = useStore();
@@ -70,6 +71,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
           </button>
         )}
       </div>
+      <ReminderSettings />
       <SpaceUsage />
       <div className="group">
         {!confirmReset ? (

@@ -1,9 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { AppState, ContentIndex, Favorite } from './engine/types';
 import { dayKey, weekStart } from './engine/dates';
-import { compactHistory, completeAdvanced, completeTask, learnIntroToday, markSectionRead, resetDay, refreshStreak, emptyState } from './engine/state';
+import { compactHistory, completeAdvanced, completeTask, isDayComplete, learnIntroToday, markSectionRead, resetDay, refreshStreak, emptyState } from './engine/state';
 import { buildToday, ensureToday, loadState, saveState, saveToday, clearToday, type TaskDraft, type TodayRecord } from './engine/storage';
 import { loadIndex } from './engine/content';
+import { syncDay, syncPush } from './push';
 
 export interface Completion {
   id: string;
@@ -103,6 +104,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       alive = false;
     };
   }, [ready, today, state.level, getIndex]);
+
+  // promemoria: all'apertura rinnova abbonamento e orario sul server; poi comunica quando la giornata è completa
+  const pushSynced = useRef(false);
+  const dayDone = ready && state.level ? isDayComplete(state, today) : false;
+  useEffect(() => {
+    const r = state.reminder;
+    if (!ready || !r?.enabled) return;
+    const day = { today, done: dayDone, streak: state.streak.current, lastFullDay: state.streak.lastFullDay };
+    if (!pushSynced.current) {
+      pushSynced.current = true;
+      void syncPush(r.time, day);
+    } else void syncDay(day);
+  }, [ready, today, dayDone, state.reminder, state.streak.current, state.streak.lastFullDay]);
 
   // controllo del cambio di giorno quando l'app torna in primo piano
   useEffect(() => {

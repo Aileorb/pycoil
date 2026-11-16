@@ -1,0 +1,20 @@
+// PyCoil su Cloudflare Workers: l'app statica (cartella dist di `npm run build`) + /api per il promemoria giornaliero.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pycoil",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-11-01",
+  // indirizzo pubblico pycoil.<account>.workers.dev; niente indirizzi di anteprima per ogni versione
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "PROMEMORIA", "class_name": "Promemoria" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Promemoria"] }],
+  "observability": { "enabled": true }
+}

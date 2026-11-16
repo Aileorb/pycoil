@@ -50,16 +50,31 @@ jobs:
       - name: Build (tipi, bundle, budget di peso)
         run: npm run build
 
+      # L'app vera sta su Cloudflare (collegato al repository, vedi README). Al vecchio indirizzo GitHub Pages
+      # va la pagina di trasloco quando la variabile PYCOIL_URL del repository contiene il nuovo indirizzo;
+      # finché è vuota, lì resta una copia dell'app (senza notifiche).
+      - name: Vecchio indirizzo GitHub Pages
+        env:
+          PYCOIL_URL: ${{ vars.PYCOIL_URL }}
+        run: |
+          if [ -n "$PYCOIL_URL" ]; then
+            node scripts/build-moved.mjs pages
+          else
+            PYCOIL_BASE=/pycoil/ npx vite build --outDir pages --emptyOutDir
+            touch pages/.nojekyll
+          fi
+
       - uses: actions/upload-artifact@v4
         if: github.event_name != 'pull_request'
         with:
           name: dist
-          path: dist
+          path: |
+            dist
+            pages
           retention-days: 1
 
-  # Pubblica l'app sul branch gh-pages (servito da GitHub Pages) e una copia
-  # dei soli contenuti sul branch content, che jsDelivr usa come riserva
-  # se Pages non risponde (vedi src/engine/content.ts).
+  # Pubblica il vecchio indirizzo sul branch gh-pages (GitHub Pages) e una copia dei soli contenuti
+  # sul branch content, che jsDelivr usa come riserva (vedi src/engine/content.ts).
   publish:
     needs: build
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -70,7 +85,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: dist
-          path: dist
+          path: .
       - name: Pubblica sui branch gh-pages e content
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -86,6 +101,5 @@ jobs:
             cd - > /dev/null
           }
           cp -r dist/content content
-          touch dist/.nojekyll
-          publish dist gh-pages
+          publish pages gh-pages
           publish content content

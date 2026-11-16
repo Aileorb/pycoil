@@ -36,5 +36,6 @@ Ogni giorno di streak aggiunge l'1% ai punti, fino al +50%. Un progetto si sbloc
 
 - I testi del libro e degli esercizi **non** sono salvati sul telefono: si scaricano da GitHub quando li apri.
 - Sul dispositivo restano solo i testi e le soluzioni delle task **di oggi**, cancellati il giorno dopo, e i tuoi contatori (task fatte, punti, streak, preferiti).
-- Non ci sono account né server: niente lascia il tuo dispositivo. Puoi esportare e importare i progressi dalle Impostazioni.
+- Non ci sono account: i progressi restano sul dispositivo. Puoi esportarli e importarli dalle Impostazioni.
+- Il **promemoria giornaliero** è facoltativo e si regola in *Impostazioni › Promemoria*. Se lo attivi, il server dell'app (un Worker Cloudflare) conosce solo un codice casuale del dispositivo, l'indirizzo a cui mandare la notifica, l'orario e il fuso, la streak e l'ultimo giorno in cui hai finito le 3 task: così, se hai già finito, non ti scrive. Su iPhone le notifiche funzionano con PyCoil aperta dall'icona sulla schermata Home.
 - Python gira nel browser con **Pyodide**, scaricato la prima volta che esegui del codice (circa 13 MB, più le librerie che gli esercizi usano). In **Impostazioni › Spazio usato** vedi quanto occupa ogni parte e puoi liberare le librerie che non servono più per la Parte in cui sei arrivato.

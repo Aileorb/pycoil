@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ReminderBanner } from '../components/ReminderBanner';
 import { useStore } from '../store';
 import { Mascot, Flame, Logo } from '../components/Snake';
 import { TaskSheet } from '../components/TaskSheet';
@@ -107,6 +108,8 @@ export function Today() {
         </div>
         <p className="challenge">{phrase}</p>
       </div>
+
+      <ReminderBanner />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <div className="section-label">

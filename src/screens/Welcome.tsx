@@ -13,7 +13,7 @@ const LEVELS: { id: LevelId; name: string; desc: string; start: string }[] = [
 ];
 const ORDER: LevelId[] = ['principiante', 'base', 'intermedio', 'avanzato'];
 
-export function Welcome() {
+export function Welcome({ onImport }: { onImport?: () => void }) {
   const { index, update, today } = useStore();
   const [level, setLevel] = useState<LevelId>('base');
   const [quiz, setQuiz] = useState<{ i: number; score: Record<string, number>; picked: number | null } | null>(null);
@@ -101,6 +101,7 @@ export function Welcome() {
         <button className="pill-btn" onClick={() => start(level)}>Inizia</button>
       )}
       <button className="ghost-btn" onClick={() => start(level)}>Salta il test e inizia dalla Parte {['0', 'I', 'II', 'III'][ORDER.indexOf(level)]}</button>
+      {onImport && <button className="ghost-btn" style={{ color: 'var(--text2)', fontSize: 15 }} onClick={onImport}>Hai già usato PyCoil? Importa i progressi</button>}
     </main>
   );
 }

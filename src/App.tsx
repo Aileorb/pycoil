@@ -6,14 +6,24 @@ import { PathIndex } from './screens/PathIndex';
 import { DocPage } from './screens/DocPage';
 import { Stats } from './screens/Stats';
 import { Welcome } from './screens/Welcome';
+import { ReminderAsk } from './screens/ReminderAsk';
+import { ImportProgress } from './screens/ImportProgress';
+import { useState } from 'react';
 import { Toast } from './components/Sheet';
 import { TabIcons } from './components/icons';
+
+// Link di trasferimento dal vecchio indirizzo: «…/#importa=CODICE». Si legge una volta e si toglie dall'indirizzo.
+const linkCode = /^#importa=/.test(location.hash) ? location.hash.slice(1) : null;
+if (linkCode) history.replaceState(null, '', location.pathname + location.search);
 
 function Shell() {
   const { ready, state, toast } = useStore();
   const route = useRoute();
+  const [importing, setImporting] = useState<string | null>(linkCode);
   if (!ready) return <div className="empty" style={{ paddingTop: '40vh' }}>PyCoil</div>;
-  if (!state.level) return <div className="app"><Welcome /><Toast text={toast} /></div>;
+  if (importing !== null) return <div className="app"><ImportProgress code={importing || undefined} onClose={() => setImporting(null)} /><Toast text={toast} /></div>;
+  if (!state.level) return <div className="app"><Welcome onImport={() => setImporting('')} /><Toast text={toast} /></div>;
+  if (!state.reminder?.asked) return <div className="app"><ReminderAsk /><Toast text={toast} /></div>;
 
   const [head, id] = route;
   let tab: 'oggi' | 'percorso' | 'statistiche' = 'oggi';

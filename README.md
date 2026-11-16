@@ -6,7 +6,7 @@
 
 PyCoil è una web app installabile (PWA) che insegna Python a chi studia ingegneria meccanica: tre micro-task al giorno da circa dieci minuti dal telefono, più due task avanzate facoltative da fare al computer.
 
-**App:** https://aileorb.github.io/pycoil/ · su iPhone: Condividi → *Aggiungi alla schermata Home*.
+**App:** su Cloudflare (`https://pycoil.<account>.workers.dev`) · su iPhone: Condividi → *Aggiungi alla schermata Home*. Il vecchio indirizzo https://aileorb.github.io/pycoil/ porta al nuovo con i progressi (vedi sotto).
 
 ## Cosa fa
 
@@ -28,7 +28,8 @@ Il codice Python gira **nel browser** con [Pyodide](https://pyodide.org/) (Pytho
   - `pycoil:state`: ID e contatori (task fatte, XP, streak, sezioni lette, progetti, preferiti);
   - `pycoil:today`: testi e soluzioni delle task **di oggi**, cancellati al cambio di giorno.
 - Il motore Python (Pyodide, ~13 MB) e le librerie si salvano nella cache `pycoil-python` solo quando servono. **Impostazioni › Spazio usato** mostra i valori reali del dispositivo e libera le librerie che non servono più dalla Parte attuale in poi (né ai ripassi o al progetto in corso); se servono di nuovo si riscaricano da sole.
-- Nessun account, nessun server, nessun tracciamento. Esporta e importa i progressi dalle Impostazioni.
+- Nessun account e nessun tracciamento. Esporta e importa i progressi dalle Impostazioni (file, oppure link/codice).
+- **Promemoria giornaliero** (facoltativo): alla prima apertura l'app chiede a che ora ricordarti le 3 task; si cambia in *Impostazioni › Promemoria*. Lo manda il Worker Cloudflare con Web Push (su iPhone serve iOS 16.4+ e l'app aperta dalla schermata Home). Sul server restano solo un id casuale del dispositivo, l'abbonamento push, orario e fuso, la streak e l'ultimo giorno completato: se le task di oggi sono già fatte, la notifica non parte. Le chiavi VAPID le genera il Durable Object di ogni dispositivo: nel repository non ci sono segreti.
 
 ## Struttura
 
@@ -48,11 +49,15 @@ scripts/
   check_order.py    controlla che nulla usi costrutti spiegati più avanti
   check-budget.mjs  controlla il peso del bundle e che i contenuti non finiscano in cache
   build-icons.mjs   genera le icone dall'SVG dell'uroboro
+  build-moved.mjs   pagina di trasloco per il vecchio indirizzo GitHub Pages
 src/
   engine/           logica pura e testata: date, streak, XP, livelli, pianificazione, ripasso
   py/, workers/     esecuzione Python con Pyodide
   components/       mascotte e scene animate (SVG), sheet delle task, editor, preferiti
-  screens/          Oggi, Percorso, pagina di lettura, Statistiche, Benvenuto, Impostazioni
+  screens/          Oggi, Percorso, pagina di lettura, Statistiche, Benvenuto, Promemoria, Impostazioni
+  push.ts           abbonamento alle notifiche e sincronizzazione con il Worker
+worker/             Worker Cloudflare: /api del promemoria giornaliero (Durable Object + Web Push)
+wrangler.jsonc      configurazione Cloudflare (cartella dist + Worker)
 tests/              Vitest: motore + simulazione di 60 giorni sui contenuti veri
 ```
 
@@ -69,9 +74,13 @@ pip install -r requirements-content.txt
 npm run verify:content    # esegue davvero tutto il codice dei contenuti
 ```
 
-Ogni push su `main` esegue la stessa pipeline in GitHub Actions e, se tutto è verde, pubblica la build sul branch `gh-pages` e i soli contenuti sul branch `content`.
+Ogni push su `main` esegue la stessa pipeline in GitHub Actions (verifica dei contenuti, test, build). Cloudflare, collegato al repository, ricostruisce e pubblica l'app; GitHub Actions pubblica i soli contenuti sul branch `content` (riserva via jsDelivr) e il vecchio indirizzo sul branch `gh-pages`.
 
-**Attivazione di GitHub Pages (una volta sola):** *Settings → Pages → Build and deployment → Source: Deploy from a branch → `gh-pages` / `(root)` → Save*. Dopo un minuto l'app è su https://aileorb.github.io/pycoil/.
+**Collegare Cloudflare (una volta sola):** dash.cloudflare.com → *Workers e Pages → Crea → Importa un repository* → `Aileorb/pycoil`. Build command `npm run build`, deploy command `npx wrangler deploy` (legge `wrangler.jsonc`: pubblica la cartella `dist` e il Worker `worker/index.js` con il Durable Object dei promemoria).
+
+**Spostare il vecchio indirizzo:** quando l'app è online su Cloudflare, imposta la variabile del repository `PYCOIL_URL` (*Settings → Secrets and variables → Actions → Variables*) con il nuovo indirizzo, per esempio `https://pycoil.nome.workers.dev/`. Al push successivo https://aileorb.github.io/pycoil/ diventa una pagina che legge i progressi salvati lì e li porta al nuovo indirizzo con un link (o un codice da incollare su iPhone), e il vecchio service worker si disinstalla.
+
+In locale: `npm run build` e poi `npx wrangler dev` servono app e `/api` insieme.
 
 ## Scrivere contenuti
 

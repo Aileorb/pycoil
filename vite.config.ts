@@ -3,8 +3,9 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// Il sito viene pubblicato su GitHub Pages come project site: https://<utente>.github.io/pycoil/
-const base = process.env.PYCOIL_BASE ?? '/pycoil/';
+// L'app sta su Cloudflare Workers, alla radice del dominio (pycoil.<account>.workers.dev).
+// PYCOIL_BASE serve solo per la vecchia copia su GitHub Pages (https://aileorb.github.io/pycoil/).
+const base = process.env.PYCOIL_BASE ?? '/';
 
 export default defineConfig({
   base,
@@ -41,7 +42,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,webmanifest}', 'icons/pycoil-v2-180.png', 'icons/pycoil-v2-192.png'],
         globIgnores: ['content/**'],
         navigateFallback: 'index.html',
-        navigateFallbackDenylist: [/\/content\//],
+        navigateFallbackDenylist: [/\/content\//, /\/api\//],
+        // notifiche del promemoria giornaliero (public/push-sw.js)
+        importScripts: ['push-sw.js'],
         // Il motore Python (Pyodide e le sue librerie) e i pacchetti presi da PyPI finiscono in una
         // cache dell'app, così le Impostazioni possono misurarli e liberare le librerie non più usate.
         runtimeCaching: [

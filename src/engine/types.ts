@@ -173,6 +173,14 @@ export interface AppState {
   scroll: Record<string, number>;
   /** Fotografia presa alla prima task del giorno: permette di azzerare la giornata con precisione. */
   daySnap?: DaySnap;
+  /** Promemoria giornaliero: orario scelto, se lo vuoi, e se la domanda della prima apertura è già stata fatta. */
+  reminder?: Reminder;
+}
+
+export interface Reminder {
+  time: string; // "HH:MM"
+  enabled: boolean;
+  asked: boolean;
 }
 
 export interface DaySnap {
