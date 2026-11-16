@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { NUDGES } from '../src/data/nudges';
 import { dayBefore, dayIn, nextFire, reminderText, validTime, validTz, zonedToUtc } from '../worker/schedule';
 
 const ROME = 'Europe/Rome';
@@ -45,3 +46,15 @@ describe('calendario dei promemoria', () => {
     expect(reminderText('2026-11-16', {})?.title).toBe('Le tue 3 task di oggi');
   });
 });
+
+describe('frasi dei promemoria', () => {
+  it('quaranta frasi diverse, una diversa ogni giorno', () => {
+    expect(NUDGES.length).toBeGreaterThanOrEqual(40);
+    expect(new Set(NUDGES).size).toBe(NUDGES.length);
+    const a = reminderText('2026-11-16', {})?.body;
+    const b = reminderText('2026-11-17', {})?.body;
+    expect(a && b && a !== b).toBe(true);
+    expect(reminderText('2026-11-17', { streak: 5, lastFullDay: '2026-11-16' })?.body).not.toContain('{s}');
+  });
+});
+

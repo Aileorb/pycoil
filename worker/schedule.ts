@@ -1,4 +1,5 @@
 // Calcoli di calendario per i promemoria, nel fuso orario dell'utente (puri, testati in tests/reminder.test.ts).
+import { NUDGES, STREAK_NUDGES, pickNudge } from '../src/data/nudges';
 
 const FALLBACK_TZ = 'Europe/Rome';
 
@@ -77,15 +78,16 @@ export interface Progress {
   lastFullDay?: string;
 }
 
-/** Il testo del promemoria, oppure null se oggi le task sono già fatte (niente notifica). */
+/** Il testo del promemoria, oppure null se oggi le task sono già fatte (niente notifica).
+ *  La frase cambia ogni giorno (src/data/nudges.ts). */
 export function reminderText(today: string, p: Progress): { title: string; body: string } | null {
   if (p.doneDate === today) return null;
+  const seed = Math.floor(Date.parse(today + 'T12:00:00Z') / 86_400_000);
   const streak = p.streak ?? 0;
   if (streak > 0 && p.lastFullDay === dayBefore(today)) {
-    return {
-      title: `Streak di ${streak} ${streak === 1 ? 'giorno' : 'giorni'}`,
-      body: 'Non spezzarla: le 3 task di oggi ti aspettano, dieci minuti e hai finito.'
-    };
+    // una volta su due la frase sulla streak, le altre una frase qualsiasi
+    const body = seed % 2 ? pickNudge(STREAK_NUDGES, seed >> 1, streak) : pickNudge(NUDGES, seed, streak);
+    return { title: `Streak di ${streak} ${streak === 1 ? 'giorno' : 'giorni'}`, body };
   }
-  return { title: 'Le tue 3 task di oggi', body: 'Dieci minuti di Python ti aspettano. Una spira al giorno.' };
+  return { title: 'Le tue 3 task di oggi', body: pickNudge(NUDGES, seed) };
 }
