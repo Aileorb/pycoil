@@ -8,7 +8,7 @@
     "content": "node scripts/build-content.mjs",
     "icons": "node scripts/build-icons.mjs",
     "dev": "npm run content && vite",
-    "build": "npm run content && tsc --noEmit && vite build && node scripts/check-budget.mjs",
+    "build": "npm run content && tsc --noEmit && vite build && node scripts/patch-sw.mjs && node scripts/check-budget.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "check:content": "node scripts/build-content.mjs --check",

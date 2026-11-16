@@ -43,8 +43,8 @@ export default defineConfig({
         globIgnores: ['content/**'],
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/\/content\//, /\/api\//],
-        // notifiche del promemoria giornaliero (public/push-sw.js)
-        importScripts: ['push-sw.js'],
+        // il gestore delle notifiche (public/push-sw.js) lo mette in cima a sw.js scripts/patch-sw.mjs:
+        // con importScripts di Workbox finirebbe dentro define() e Safari su iPhone lo ignorerebbe
         // Il motore Python (Pyodide e le sue librerie) e i pacchetti presi da PyPI finiscono in una
         // cache dell'app, così le Impostazioni possono misurarli e liberare le librerie non più usate.
         runtimeCaching: [
