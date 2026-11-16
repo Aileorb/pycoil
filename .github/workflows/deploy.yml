@@ -55,7 +55,7 @@ jobs:
       # finché è vuota, lì resta una copia dell'app (senza notifiche).
       - name: Vecchio indirizzo GitHub Pages
         env:
-          PYCOIL_URL: ${{ vars.PYCOIL_URL }}
+          PYCOIL_URL: ${{ vars.PYCOIL_URL || 'https://pycoil.e-franchini99.workers.dev/' }}
         run: |
           if [ -n "$PYCOIL_URL" ]; then
             node scripts/build-moved.mjs pages

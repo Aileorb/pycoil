@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../store';
-import { enablePush, isSubscribed, pushSupport } from '../push';
+import { enablePush, isSubscribed, preparePush, pushSupport } from '../push';
 
 /**
  * In Oggi: hai scelto un orario ma su questo dispositivo le notifiche non sono ancora attive
@@ -16,6 +16,7 @@ export function ReminderBanner() {
   useEffect(() => {
     if (!r?.enabled) return;
     let alive = true;
+    preparePush();
     Promise.all([pushSupport(), isSubscribed()]).then(([support, sub]) => alive && setShow(support === 'ok' && !sub));
     return () => {
       alive = false;

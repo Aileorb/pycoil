@@ -6,7 +6,7 @@
 
 PyCoil è una web app installabile (PWA) che insegna Python a chi studia ingegneria meccanica: tre micro-task al giorno da circa dieci minuti dal telefono, più due task avanzate facoltative da fare al computer.
 
-**App:** su Cloudflare (`https://pycoil.<account>.workers.dev`) · su iPhone: Condividi → *Aggiungi alla schermata Home*. Il vecchio indirizzo https://aileorb.github.io/pycoil/ porta al nuovo con i progressi (vedi sotto).
+**App:** https://pycoil.e-franchini99.workers.dev · su iPhone: Condividi → *Aggiungi alla schermata Home*. Il vecchio indirizzo https://aileorb.github.io/pycoil/ porta al nuovo con i progressi (vedi sotto).
 
 ## Cosa fa
 

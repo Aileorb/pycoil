@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../store';
-import { DEFAULT_TIME, enablePush, pushSupport, type PushSupport } from '../push';
+import { DEFAULT_TIME, enablePush, preparePush, pushSupport, type PushSupport } from '../push';
 
 /** Alla prima apertura (dopo la scelta del livello): a che ora vuoi il promemoria? */
 export function ReminderAsk() {
@@ -11,6 +11,7 @@ export function ReminderAsk() {
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
+    preparePush();
     pushSupport().then(setSupport);
   }, []);
 

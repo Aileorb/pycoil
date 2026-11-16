@@ -100,8 +100,8 @@ export class Promemoria extends DurableObject {
   }
 
   async status() {
-    const [sub, settings, alarm] = await Promise.all([this.ctx.storage.get('sub'), this.ctx.storage.get('settings'), this.ctx.storage.getAlarm()]);
-    return { sub: !!sub, settings: settings || null, next: alarm || null };
+    const [sub, settings, alarm, last] = await Promise.all([this.ctx.storage.get('sub'), this.ctx.storage.get('settings'), this.ctx.storage.getAlarm(), this.ctx.storage.get('last')]);
+    return { sub: !!sub, settings: settings || null, next: alarm || null, last: last || null };
   }
 
   async unsubscribe() {
@@ -142,13 +142,16 @@ export class Promemoria extends DurableObject {
         }
       });
     } catch (e) {
+      await this.ctx.storage.put('last', { at: Date.now(), err: String(e).slice(0, 200) });
       return { ok: false, err: String(e) };
     }
+    const err = r.ok ? undefined : (await r.text()).slice(0, 200);
+    await this.ctx.storage.put('last', { at: Date.now(), status: r.status, err });
     if (r.status === 404 || r.status === 410) { // abbonamento scaduto: l'app lo rinnova alla prossima apertura
       await this.ctx.storage.delete('sub');
       await this.ctx.storage.deleteAlarm();
     }
-    return { ok: r.ok, status: r.status, err: r.ok ? undefined : (await r.text()).slice(0, 200) };
+    return { ok: r.ok, status: r.status, err };
   }
 }
 

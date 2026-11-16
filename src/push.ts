@@ -54,6 +54,42 @@ const isStandalone = () =>
   (navigator as Navigator & { standalone?: boolean }).standalone === true || window.matchMedia('(display-mode: standalone)').matches;
 
 let serverOk: Promise<boolean> | null = null;
+let vapidKey: Promise<string | null> | null = null;
+/** La chiave pubblica del Durable Object di questo dispositivo (precaricata, così il tocco su «Attiva» non aspetta la rete). */
+function serverKey(): Promise<string | null> {
+  vapidKey ??= call<{ ok: boolean; key?: string }>('vapid').then((r) => r.key ?? null).catch(() => {
+    vapidKey = null;
+    return null;
+  });
+  return vapidKey;
+}
+
+const b64uOf = (buf: ArrayBuffer | null | undefined) => {
+  if (!buf) return '';
+  let t = '';
+  new Uint8Array(buf).forEach((b) => (t += String.fromCharCode(b)));
+  return btoa(t).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+
+/**
+ * L'abbonamento di questo dispositivo, solo se è legato alla chiave del server: uno fatto con un'altra chiave
+ * (per esempio dopo aver cancellato i dati del sito) verrebbe rifiutato dal servizio push, quindi si toglie.
+ */
+async function currentSubscription(reg: ServiceWorkerRegistration): Promise<PushSubscription | null> {
+  const sub = await reg.pushManager.getSubscription();
+  if (!sub) return null;
+  const key = await serverKey();
+  if (key && b64uOf(sub.options?.applicationServerKey) !== key) {
+    await sub.unsubscribe().catch(() => undefined);
+    return null;
+  }
+  return sub;
+}
+
+/** Da chiamare all'apertura di Impostazioni o della domanda iniziale: scalda server e chiave. */
+export function preparePush(): void {
+  void hasServer().then((ok) => (ok ? serverKey() : null));
+}
 function hasServer(): Promise<boolean> {
   serverOk ??= fetch(`${API}ping`, { cache: 'no-store' })
     .then((r) => (r.ok ? r.json() : null))
@@ -96,17 +132,19 @@ function keyBytes(b64u: string): Uint8Array<ArrayBuffer> {
  * Restituisce un messaggio d'errore leggibile se qualcosa non va.
  */
 export async function enablePush(time: string): Promise<{ ok: true } | { ok: false; err: string }> {
-  const support = await pushSupport();
-  if (support === 'ios-browser') return { ok: false, err: 'Su iPhone le notifiche funzionano solo con PyCoil aperta dall’icona sulla schermata Home.' };
-  if (support === 'unsupported') return { ok: false, err: 'Questo browser non supporta le notifiche push.' };
-  if (support === 'no-server') return { ok: false, err: 'Le notifiche funzionano solo sull’indirizzo ufficiale dell’app.' };
+  if (isIOS() && !isStandalone()) return { ok: false, err: 'Su iPhone le notifiche funzionano solo con PyCoil aperta dall’icona sulla schermata Home.' };
+  if (!('Notification' in window) || !('PushManager' in window)) return { ok: false, err: 'Questo browser non supporta le notifiche push.' };
+  // Safari vuole la richiesta di permesso subito dopo il tocco: prima di qualsiasi attesa di rete.
+  const permission = Notification.permission === 'granted' ? Promise.resolve<NotificationPermission>('granted') : Notification.requestPermission();
   try {
-    const perm = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+    if (!(await hasServer())) return { ok: false, err: 'Le notifiche funzionano solo sull’indirizzo ufficiale dell’app.' };
+    const perm = await permission;
     if (perm !== 'granted') return { ok: false, err: 'Permesso negato: puoi riattivarlo dalle impostazioni del sistema, alla voce PyCoil.' };
     const reg = await registration();
-    let sub = await reg.pushManager.getSubscription();
+    let sub = await currentSubscription(reg);
     if (!sub) {
-      const { key } = await call<{ ok: boolean; key: string }>('vapid');
+      const key = await serverKey();
+      if (!key) return { ok: false, err: 'Il server non risponde: riprova tra poco.' };
       sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) });
     }
     const s = await call('subscribe', { sub: sub.toJSON() });
@@ -143,12 +181,51 @@ export async function disablePush(): Promise<void> {
   }
 }
 
-export async function testPush(): Promise<boolean> {
+/** Il server manda subito una notifica: restituisce l'esito del servizio push (Apple, Google, Mozilla…). */
+export async function testPush(): Promise<{ ok: boolean; status?: number; err?: string }> {
   try {
-    return (await call('test', {})).ok;
+    return await call<{ ok: boolean; status?: number; err?: string }>('test', {});
+  } catch (e) {
+    return { ok: false, err: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/** Notifica mostrata direttamente dal telefono, senza server: dice se il sistema le visualizza. */
+export async function localTestPush(): Promise<boolean> {
+  try {
+    const reg = await registration();
+    await reg.showNotification('Prova dal telefono', { body: 'Se vedi questa, il sistema mostra le notifiche di PyCoil.', tag: 'pycoil-locale', icon: 'icons/pycoil-v2-192.png' });
+    return true;
   } catch {
     return false;
   }
+}
+
+export interface PushDiag {
+  permission: string;
+  service: string | null; // host del servizio push dell'abbonamento
+  server: { sub: boolean; next: number | null; last?: { at: number; status?: number; err?: string } } | null;
+}
+
+/** Stato completo, per capire dove si ferma una notifica. */
+export async function pushDiag(): Promise<PushDiag> {
+  const permission = 'Notification' in window ? Notification.permission : 'non supportate';
+  let service: string | null = null;
+  try {
+    const reg = await registration();
+    const sub = await reg.pushManager.getSubscription();
+    service = sub ? new URL(sub.endpoint).hostname : null;
+  } catch {
+    /* niente */
+  }
+  let server: PushDiag['server'] = null;
+  try {
+    const r = await call<{ ok: boolean; sub: boolean; next: number | null; last?: { at: number; status?: number; err?: string } }>('status');
+    server = { sub: r.sub, next: r.next, last: r.last };
+  } catch {
+    /* offline */
+  }
+  return { permission, service, server };
 }
 
 /**
@@ -159,10 +236,10 @@ export async function syncPush(time: string, day: { today: string; done: boolean
   try {
     if (!(await hasServer())) return;
     const reg = await registration();
-    let sub = await reg.pushManager.getSubscription();
+    let sub = await currentSubscription(reg);
     if (!sub && Notification.permission === 'granted') {
-      const { key } = await call<{ ok: boolean; key: string }>('vapid');
-      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) }).catch(() => null);
+      const key = await serverKey();
+      if (key) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) }).catch(() => null);
     }
     if (!sub) return;
     await call('subscribe', { sub: sub.toJSON() });
