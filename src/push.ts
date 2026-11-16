@@ -86,9 +86,18 @@ async function currentSubscription(reg: ServiceWorkerRegistration): Promise<Push
   return sub;
 }
 
-/** Da chiamare all'apertura di Impostazioni o della domanda iniziale: scalda server e chiave. */
+// Registrazione e chiave già pronte: così, al tocco su «Attiva», subscribe() parte subito,
+// dentro il gesto dell'utente (come in Di&T). Safari altrimenti può rifiutare o non mostrare il permesso.
+let readyReg: ServiceWorkerRegistration | null = null;
+let readyKey: string | null = null;
+
+/** Da chiamare all'apertura di Impostazioni, della domanda iniziale e del banner: scalda server, chiave e service worker. */
 export function preparePush(): void {
-  void hasServer().then((ok) => (ok ? serverKey() : null));
+  void hasServer().then(async (ok) => {
+    if (!ok) return;
+    readyKey = await serverKey();
+    if ('serviceWorker' in navigator) readyReg = await registration();
+  });
 }
 function hasServer(): Promise<boolean> {
   serverOk ??= fetch(`${API}ping`, { cache: 'no-store' })
@@ -134,14 +143,24 @@ function keyBytes(b64u: string): Uint8Array<ArrayBuffer> {
 export async function enablePush(time: string): Promise<{ ok: true } | { ok: false; err: string }> {
   if (isIOS() && !isStandalone()) return { ok: false, err: 'Su iPhone le notifiche funzionano solo con PyCoil aperta dall’icona sulla schermata Home.' };
   if (!('Notification' in window) || !('PushManager' in window)) return { ok: false, err: 'Questo browser non supporta le notifiche push.' };
-  // Safari vuole la richiesta di permesso subito dopo il tocco: prima di qualsiasi attesa di rete.
-  const permission = Notification.permission === 'granted' ? Promise.resolve<NotificationPermission>('granted') : Notification.requestPermission();
+  // Come Di&T: se registrazione e chiave sono pronte, subscribe() parte per primo, nel gesto dell'utente,
+  // e chiede da sé il permesso. Altrimenti si chiede il permesso subito e si aspetta il resto.
+  const early =
+    readyReg && readyKey
+      ? readyReg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(readyKey) }).catch((e: unknown) => e)
+      : null;
+  const permission = early || Notification.permission === 'granted' ? null : Notification.requestPermission();
   try {
     if (!(await hasServer())) return { ok: false, err: 'Le notifiche funzionano solo sull’indirizzo ufficiale dell’app.' };
-    const perm = await permission;
-    if (perm !== 'granted') return { ok: false, err: 'Permesso negato: puoi riattivarlo dalle impostazioni del sistema, alla voce PyCoil.' };
+    let sub: PushSubscription | null = null;
+    if (early) {
+      const r = await early;
+      if (r instanceof PushSubscription) sub = r;
+    }
+    if (permission && (await permission) !== 'granted') return { ok: false, err: 'Permesso negato: puoi riattivarlo dalle impostazioni del sistema, alla voce PyCoil.' };
+    if (Notification.permission === 'denied') return { ok: false, err: 'Permesso negato: puoi riattivarlo dalle impostazioni del sistema, alla voce PyCoil.' };
     const reg = await registration();
-    let sub = await currentSubscription(reg);
+    if (!sub) sub = await currentSubscription(reg);
     if (!sub) {
       const key = await serverKey();
       if (!key) return { ok: false, err: 'Il server non risponde: riprova tra poco.' };
