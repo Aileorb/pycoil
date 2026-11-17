@@ -4,6 +4,8 @@ title: Glossario
 ---
 I termini del libro in ordine alfabetico, ognuno con un esempio minimo. Tra parentesi la parte in cui il concetto viene spiegato.
 
+**API web** — un servizio che risponde a richieste HTTP con dati (di solito JSON) invece che con pagine da leggere. (Parte IX)
+
 **Argomento** — il valore che passi a una funzione quando la chiami: in `area(20)` l'argomento è `20`. Il nome che lo riceve nella definizione è il **parametro**. (Parte 0)
 
 **Array** — tabella di numeri dello stesso tipo (NumPy), con operazioni elemento per elemento: `np.array([1, 2, 3]) * 2` dà `[2 4 6]`. (Parte III)
@@ -22,9 +24,13 @@ I termini del libro in ordine alfabetico, ognuno con un esempio minimo. Tra pare
 
 **Commento** — testo dopo `#`, ignorato da Python, che spiega il codice a chi lo legge: `L = 4.0  # m`. (Parte 0)
 
+**Commit** — una fotografia del progetto salvata da Git, con un messaggio che descrive cosa è cambiato. (Parte IX)
+
 **Comprehension** — espressione compatta che costruisce una lista, un dizionario o un insieme da un'altra sequenza: `[x**2 for x in range(4)]` dà `[0, 1, 4, 9]`. (Parte I)
 
 **Condizione** — un'espressione vera o falsa che decide quale ramo eseguire in un `if`/`elif`/`else`. (Parte 0)
+
+**Database** — archivio di dati organizzato in tabelle, interrogato con SQL; SQLite lo tiene in un solo file. (Parte IX)
 
 **Dataclass** — classe che contiene soprattutto dati; `@dataclass` ne scrive `__init__`, `__repr__` ed `__eq__`. (Parte II)
 
@@ -38,6 +44,8 @@ I termini del libro in ordine alfabetico, ognuno con un esempio minimo. Tra pare
 
 **Espressione** — qualunque pezzo di codice che produce un valore: `F / A`, `len(lista)`, `x > 0`. (Parte 0)
 
+**Espressione regolare** — (*regex*) schema che descrive la forma di un testo, per cercarlo ed estrarlo: `r"\d+\.\d+"` trova i numeri decimali. (Parte IX)
+
 **f-string** — stringa preceduta da `f` in cui si inseriscono espressioni tra graffe: `f"σ = {sigma:.1f} MPa"`. (Parte 0, appendice D)
 
 **float** — numero con la virgola (in Python si scrive col punto): `2.5`, `1e-3`. È un'approssimazione binaria: `0.1 + 0.2` dà `0.30000000000000004`. (Parte 0)
@@ -45,6 +53,10 @@ I termini del libro in ordine alfabetico, ognuno con un esempio minimo. Tra pare
 **Funzione** — un blocco di codice con un nome, che riceve argomenti e restituisce un risultato con `return`; si definisce con `def`. (Parte 0)
 
 **Generatore** — funzione con `yield` che produce valori uno alla volta, senza tenerli tutti in memoria. (Parte II)
+
+**Git** — il sistema di controllo di versione: tiene la storia del codice e permette di tornare indietro e lavorare in gruppo. (Parte IX)
+
+**Idempotente** — si dice di uno script che, lanciato due volte, dà lo stesso risultato che lanciato una: requisito degli script pianificati. (Parte IX)
 
 **Immutabile** — oggetto che non può cambiare dopo la creazione (`int`, `float`, `str`, `tuple`). (Parte I)
 
@@ -55,6 +67,8 @@ I termini del libro in ordine alfabetico, ognuno con un esempio minimo. Tra pare
 **Interprete** — il programma `python` che legge il tuo codice ed esegue le istruzioni una alla volta. (Appendice A)
 
 **Iterabile** — qualunque oggetto su cui si può fare `for` (liste, stringhe, file, dizionari, `range`). (Parte II)
+
+**JSON** — formato di testo per scambiare dati tra programmi: oggetti `{}` e array `[]`, che in Python diventano dizionari e liste. (Parti VIII e IX)
 
 **Libreria** — codice scritto da altri da importare e usare: NumPy, pandas, SciPy. Si installa con `pip` e si carica con `import`. (Parte I)
 
@@ -72,6 +86,8 @@ I termini del libro in ordine alfabetico, ognuno con un esempio minimo. Tra pare
 
 **Oggetto** — qualunque valore in Python (un numero, una lista, una trave): ha un tipo, dei dati e dei metodi. (Parte II)
 
+**Pacchetto** — cartella di moduli con un file `__init__.py`; con un `pyproject.toml` si installa con pip. (Parti I e IX)
+
 **Pattern matching** — l'istruzione `match` che confronta un valore con la sua forma. (Parte II)
 
 **pip** — l'installatore di librerie Python dal Python Package Index (PyPI): `python -m pip install numpy`. (Parte II, appendice A)
@@ -81,6 +97,10 @@ I termini del libro in ordine alfabetico, ognuno con un esempio minimo. Tra pare
 **Script** — file `.py` che si esegue dal terminale con `python nome.py`. (Parte 0, appendice A)
 
 **Slicing** — estrazione di una porzione di sequenza con `inizio:fine:passo`: `v[1:3]` prende gli elementi 1 e 2, la fine è esclusa. (Parte 0)
+
+**Sottoprocesso** — un altro programma lanciato da Python con `subprocess.run`, di cui si leggono il codice di uscita e l'output. (Parte IX)
+
+**SQL** — il linguaggio dei database: `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `WHERE`, `GROUP BY`. (Parte IX)
 
 **Stringa** (`str`) — testo tra virgolette: `"S355"`. `"3"` è un testo, non un numero: per calcolarci serve `float("3")`. (Parte 0)
 

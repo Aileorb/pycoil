@@ -318,7 +318,9 @@ pre.code.out { background: transparent; border-style: dashed; color: var(--text2
 .stat3 div { background: var(--card); border-radius: 18px; padding: 12px; display: flex; flex-direction: column; gap: 2px; }
 .stat3 b { font-size: 28px; font-weight: 700; }
 .stat3 span { font-size: 13px; color: var(--text2); }
-.skills { display: grid; grid-template-columns: repeat(3, 1fr); row-gap: 16px; padding: 16px 8px; }
+.skills { display: flex; flex-wrap: wrap; justify-content: center; row-gap: 16px; padding: 16px 8px; }
+.skills > div { width: 33.333%; }
+@media (min-width: 600px) { .skills > div { width: 20%; } }
 .skills div { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; text-align: center; }
 .week { position: relative; height: 200px; display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; border-bottom: 0.5px solid var(--sep); }
 .week .col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 200px; position: relative; }

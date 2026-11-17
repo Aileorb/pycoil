@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "findall con un gruppo",
+    "code": "import re\ntesto = \"D1=20.012 D2=19.987 L1=50.10\"\nprint(re.findall(r\"D\\d=(\\d+\\.\\d+)\", testo))",
+    "options": [
+      "['20.012', '19.987']",
+      "['D1=20.012', 'D2=19.987']",
+      "['20.012', '19.987', '50.10']",
+      "[20.012, 19.987]"
+    ],
+    "answer": 0,
+    "explain": "Con un gruppo tra parentesi, `findall` restituisce solo la parte catturata, come **testo**. `L1` non corrisponde perché lo schema vuole una `D` seguita da una cifra."
+  },
+  {
+    "kind": "prevedi",
+    "title": "Avida o pigra",
+    "code": "import re\ns = \"<F>12.5</F><T>23.1</T>\"\nprint(len(re.findall(r\"<.*>\", s)), len(re.findall(r\"<.*?>\", s)))",
+    "options": [
+      "1 4",
+      "4 4",
+      "1 1",
+      "2 4"
+    ],
+    "answer": 0,
+    "explain": "`.*` è avido: prende tutto dal primo `<` all'**ultimo** `>`, una sola corrispondenza. `.*?` si ferma al primo `>`: trova i quattro tag `<F>`, `</F>`, `<T>`, `</T>`."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Leggere le righe del banco",
+    "prompt": "Ogni riga del log del banco ha la forma `\"08:05:42 P01 Fmax=48,2kN\"` (ora, provino, forza massima con la virgola **o** il punto decimale). Scrivi `leggi_forze(testo)` che restituisce un dizionario `{provino: forza in newton}` per tutte le righe che rispettano questa forma, ignorando le altre righe del testo.",
+    "starter": "import re\n\ndef leggi_forze(testo):\n    ...\n\nLOG = \"\"\"08:05:42 P01 Fmax=48,2kN\n08:07:10 avviso: temperatura alta\n08:12:03 P02 Fmax=47.9kN\"\"\"\nprint(leggi_forze(LOG))",
+    "tests": "LOG = \"08:05:42 P01 Fmax=48,2kN\\n08:07:10 avviso: temperatura alta\\n08:12:03 P02 Fmax=47.9kN\\n\"\nassert leggi_forze(LOG) == {\"P01\": 48200.0, \"P02\": 47900.0}, \"kN in N, virgola o punto decimale\"\nassert leggi_forze(\"niente di utile\") == {}, \"senza righe valide il dizionario è vuoto\"\nassert leggi_forze(\"09:00:00 P10 Fmax=5kN\") == {\"P10\": 5000.0}, \"anche i numeri senza decimali\"",
+    "solution": "import re\n\nRIGA = re.compile(r\"(\\d{2}:\\d{2}:\\d{2}) (\\w+) Fmax=(\\d+(?:[.,]\\d+)?)kN\")\n\ndef leggi_forze(testo):\n    forze = {}\n    for m in RIGA.finditer(testo):\n        forze[m.group(2)] = float(m.group(3).replace(\",\", \".\")) * 1000\n    return forze\n\nLOG = \"\"\"08:05:42 P01 Fmax=48,2kN\n08:07:10 avviso: temperatura alta\n08:12:03 P02 Fmax=47.9kN\"\"\"\nprint(leggi_forze(LOG))",
+    "hints": [
+      "`[.,]` accetta un punto o una virgola; `(?:[.,]\\d+)?` rende facoltativa la parte decimale.",
+      "Con `re.finditer` scorri tutte le corrispondenze; `float` vuole il punto: `.replace(\",\", \".\")`."
+    ]
+  }
+]

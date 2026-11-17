@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Il cursore dopo le celle",
+    "code": "from fpdf import FPDF\npdf = FPDF()\npdf.add_page()\npdf.set_font(\"Helvetica\", size=10)\nfor i in range(5):\n    pdf.cell(0, 6, f\"riga {i}\", new_x=\"LMARGIN\", new_y=\"NEXT\")\nprint(round(pdf.y))",
+    "options": [
+      "40",
+      "30",
+      "16",
+      "36"
+    ],
+    "answer": 0,
+    "explain": "Il cursore parte dal margine superiore (10 mm) e scende di 6 mm per ognuna delle 5 righe: 10 + 5 × 6 = 40 mm."
+  },
+  {
+    "kind": "prevedi",
+    "title": "Il segnaposto {nb}",
+    "code": "pagina = 2\ntesto = f\"Pagina {pagina} di {{nb}}\"\nprint(testo)",
+    "options": [
+      "Pagina 2 di {nb}",
+      "Pagina 2 di {{nb}}",
+      "Pagina 2 di nb",
+      "Pagina {pagina} di {nb}"
+    ],
+    "answer": 0,
+    "explain": "Nelle f-string le graffe doppie `{{` `}}` diventano graffe semplici: il testo contiene `{nb}`, il segnaposto che fpdf2 sostituisce alla fine con il numero totale di pagine."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Una scheda di prova in PDF",
+    "prompt": "Scrivi `scheda(file, titolo, valori)` che crea un PDF di una pagina: il titolo in Helvetica grassetto 14, poi una riga per ogni coppia `(nome, valore)` del dizionario `valori` nella forma `\"nome: valore\"` (Helvetica 11), una sotto l'altra. Salva il file e restituisci il numero di righe scritte sotto il titolo.",
+    "starter": "from fpdf import FPDF\n\ndef scheda(file, titolo, valori):\n    ...\n\nprint(scheda(\"scheda.pdf\", \"Prova P01\", {\"Rm\": \"512 MPa\", \"A\": \"24,1 %\"}))",
+    "tests": "from pathlib import Path\nn = scheda(\"scheda_test.pdf\", \"Prova P01\", {\"Rm\": \"512 MPa\", \"A\": \"24,1 %\", \"Esito\": \"OK\"})\nassert n == 3, \"una riga per valore\"\nassert Path(\"scheda_test.pdf\").read_bytes()[:5] == b\"%PDF-\", \"il file deve essere un PDF\"\nassert scheda(\"vuota.pdf\", \"Niente\", {}) == 0, \"senza valori, zero righe\"",
+    "solution": "from fpdf import FPDF\n\ndef scheda(file, titolo, valori):\n    pdf = FPDF()\n    pdf.add_page()\n    pdf.set_font(\"Helvetica\", style=\"B\", size=14)\n    pdf.cell(0, 10, titolo, new_x=\"LMARGIN\", new_y=\"NEXT\")\n    pdf.set_font(\"Helvetica\", size=11)\n    for nome, valore in valori.items():\n        pdf.cell(0, 7, f\"{nome}: {valore}\", new_x=\"LMARGIN\", new_y=\"NEXT\")\n    pdf.output(file)\n    return len(valori)\n\nprint(scheda(\"scheda.pdf\", \"Prova P01\", {\"Rm\": \"512 MPa\", \"A\": \"24,1 %\"}))",
+    "hints": [
+      "`pdf.set_font(\"Helvetica\", style=\"B\", size=14)` per il titolo, poi di nuovo `set_font` per il testo normale.",
+      "`new_x=\"LMARGIN\", new_y=\"NEXT\"` manda il cursore a capo dopo ogni cella."
+    ]
+  }
+]

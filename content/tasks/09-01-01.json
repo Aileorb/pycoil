@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "stem, suffix e parent",
+    "code": "from pathlib import Path\nf = Path(\"campagna\") / \"lotto_B\" / \"durezza_C45_07.csv\"\nprint(f.parent.name, f.stem.split(\"_\")[1], f.suffix)",
+    "options": [
+      "lotto_B C45 .csv",
+      "campagna C45 csv",
+      "lotto_B durezza .csv",
+      "lotto_B C45 csv"
+    ],
+    "answer": 0,
+    "explain": "`parent` è la cartella che contiene il file (`lotto_B`), `stem` il nome senza estensione (diviso sugli `_`, l'elemento 1 è `C45`), `suffix` l'estensione **con** il punto."
+  },
+  {
+    "kind": "prevedi",
+    "title": "glob non scende nelle sottocartelle",
+    "code": "from pathlib import Path\nfor rel in [\"a/P1.csv\", \"a/b/P2.csv\", \"P3.csv\"]:\n    f = Path(\"d\") / rel\n    f.parent.mkdir(parents=True, exist_ok=True)\n    f.write_text(\"x\")\nprint(len(list(Path(\"d\").glob(\"*.csv\"))), len(list(Path(\"d\").rglob(\"*.csv\"))))",
+    "options": [
+      "1 3",
+      "3 3",
+      "1 1",
+      "0 3"
+    ],
+    "answer": 0,
+    "explain": "`glob(\"*.csv\")` guarda solo dentro `d` (trova `P3.csv`); `rglob` scende in tutte le sottocartelle e li trova tutti e tre."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Il piano di rinomina",
+    "prompt": "Scrivi `piano_rinomina(nomi)` che riceve una lista di nomi di file come `\"P7_S355.csv\"` (provino, trattino basso, materiale) e restituisce una lista di coppie `(vecchio, nuovo)` con il nuovo nome nella forma `\"S355_P007.csv\"`: materiale prima, numero del provino a **tre cifre**. I nomi che non hanno esattamente due parti separate da `_`, o che non finiscono con `.csv`, vanno **saltati**. Mantieni l'ordine della lista.",
+    "starter": "from pathlib import Path\n\ndef piano_rinomina(nomi):\n    ...\n\nprint(piano_rinomina([\"P7_S355.csv\", \"P12_S235.csv\", \"note.txt\"]))",
+    "tests": "assert piano_rinomina([\"P7_S355.csv\"]) == [(\"P7_S355.csv\", \"S355_P007.csv\")], \"materiale prima, numero a tre cifre\"\nassert piano_rinomina([\"P12_S235.csv\", \"P3_C45.csv\"]) == [(\"P12_S235.csv\", \"S235_P012.csv\"), (\"P3_C45.csv\", \"C45_P003.csv\")], \"l'ordine resta quello della lista\"\nassert piano_rinomina([\"note.txt\", \"P1_S355_bis.csv\", \"P1.csv\"]) == [], \"i nomi fuori schema si saltano\"",
+    "solution": "from pathlib import Path\n\ndef piano_rinomina(nomi):\n    mosse = []\n    for nome in nomi:\n        f = Path(nome)\n        pezzi = f.stem.split(\"_\")\n        if f.suffix != \".csv\" or len(pezzi) != 2:\n            continue\n        provino, materiale = pezzi\n        numero = int(provino[1:])\n        mosse.append((nome, f\"{materiale}_P{numero:03d}.csv\"))\n    return mosse\n\nprint(piano_rinomina([\"P7_S355.csv\", \"P12_S235.csv\", \"note.txt\"]))",
+    "hints": [
+      "`Path(nome).stem.split(\"_\")` separa provino e materiale; `Path(nome).suffix` è l'estensione.",
+      "`int(\"P7\"[1:])` toglie la P; `f\"{7:03d}\"` dà `007`."
+    ]
+  }
+]

@@ -119,7 +119,7 @@ const sources = (list = []) =>
 const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'));
 
 /** Librerie esterne importate da un pezzo di codice (nomi di import), per la gestione dello spazio nell'app. */
-const LIBS = ['numpy', 'scipy', 'matplotlib', 'pandas', 'sympy', 'uncertainties', 'CoolProp', 'sklearn', 'pint', 'openpyxl', 'skfem', 'pytest'];
+const LIBS = ['numpy', 'scipy', 'matplotlib', 'pandas', 'sympy', 'uncertainties', 'CoolProp', 'sklearn', 'pint', 'openpyxl', 'skfem', 'pytest', 'docx', 'fpdf', 'sqlite3'];
 function libsOf(...codes) {
   const found = new Set();
   for (const code of codes) {
@@ -224,7 +224,7 @@ const katasIndex = katas.map((k) => {
   if (!sectionIds.has(k.section)) fail(`kata ${k.id}: sezione ${k.section} inesistente`);
   emit(`tasks/${k.id}.json`, {
     id: k.id, type: 'kata', section: k.section, title: k.title, minutes: k.minutes,
-    promptHtml: mdBlock(k.prompt), hints: (k.hints ?? []).map(mdInline), solution: k.solution, testFile: k.testFile, module: k.module
+    promptHtml: mdBlock(k.prompt), hints: (k.hints ?? []).map(mdInline), solution: k.solution, testFile: k.testFile, module: k.pc ? undefined : k.module
   });
   return { id: k.id, type: 'kata', section: k.section, title: k.title, minutes: k.minutes, libs: libsOf(k.solution, k.testFile?.code) };
 });

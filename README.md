@@ -39,7 +39,7 @@ content/            sorgenti didattici (Markdown + JSON) → public/content/*.js
   sections/*.md     testo delle sezioni; il pezzo prima di <!-- /card --> è la scheda "Impara"
   tasks/<sez>.json  esercizi Prevedi e Scrivi della sezione
   katas.json        task avanzate brevi (al computer, con file pytest)
-  projects/<id>/    i 9 progetti a tappe, a difficoltà crescente
+  projects/<id>/    i 10 progetti a tappe, a difficoltà crescente
   libraries*        le librerie da sapere assolutamente
   appendix/*.md     appendice A–G
   quiz.json         test di livello iniziale
@@ -126,8 +126,9 @@ Gli ID si generano da soli (`prevedi-03-01-01-a`, …). `verify_content.py` cont
 | VI | Calcolo simbolico con SymPy e Lagrange | 3 |
 | VII | CoolProp, meccanismi, fatica, FEM 1D/2D, CadQuery | 7 |
 | VIII | Script, Excel, Arduino, prestazioni, modelli predittivi | 5 |
+| IX | Automazione avanzata: file in serie, regex, date e configurazioni, report Word e PDF, subprocess, script pianificati, API web, SQLite, progetti strutturati, Git | 11 |
 
-Più 210 esercizi *Prevedi*/*Scrivi* (tre per sezione), 22 kata e 9 progetti (formulario delle sezioni, catalogo materiali, trave appoggiata, vibrazioni di un albero, prova di trazione, collegamento bullonato, ciclo Rankine, FEM 2D con elementi CST, collaudo automatico), tutti verificati eseguendo il codice. Un'analisi automatica controlla anche che nessun esempio o esercizio usi costrutti spiegati più avanti.
+Più 243 esercizi *Prevedi*/*Scrivi* (tre per sezione), 27 kata e 10 progetti (formulario delle sezioni, catalogo materiali, trave appoggiata, vibrazioni di un albero, prova di trazione, collegamento bullonato, ciclo Rankine, FEM 2D con elementi CST, collaudo automatico, banco prova automatico), tutti verificati eseguendo il codice. Un'analisi automatica controlla anche che nessun esempio o esercizio usi costrutti spiegati più avanti.
 
 Nell'app, `pint`, `openpyxl` e `scikit-fem` (non inclusi in Pyodide) si installano da PyPI con micropip al primo uso.
 

@@ -1,0 +1,39 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Paragrafi e run",
+    "code": "from docx import Document\ndoc = Document()\np = doc.add_paragraph(\"Rm = \")\np.add_run(\"512 MPa\").bold = True\ndoc.add_heading(\"Esito\", level=2)\nprint(len(doc.paragraphs), len(p.runs), p.text)",
+    "options": [
+      "2 2 Rm = 512 MPa",
+      "3 2 Rm = 512 MPa",
+      "2 1 Rm = ",
+      "1 2 Rm = 512 MPa"
+    ],
+    "answer": 0,
+    "explain": "Anche il titolo è un paragrafo (con stile Heading 2): i paragrafi sono 2. Il primo ha due run, `\"Rm = \"` e `\"512 MPa\"` in grassetto; `p.text` li unisce."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Una tabella dai dati",
+    "prompt": "Scrivi `tabella_prove(doc, prove)` che aggiunge a `doc` una tabella con l'intestazione `Provino`, `Rm [MPa]`, `Esito` e una riga per ogni elemento di `prove` (tuple `(provino, Rm, Rm_min)`): Rm con **zero** decimali, esito `\"OK\"` se `Rm >= Rm_min` altrimenti `\"KO\"`. L'intestazione va in **grassetto**. Restituisci la tabella.",
+    "starter": "from docx import Document\n\ndef tabella_prove(doc, prove):\n    ...\n\ndoc = Document()\nt = tabella_prove(doc, [(\"P01\", 512.4, 470), (\"P02\", 463.0, 470)])",
+    "tests": "from docx import Document\ndoc = Document()\nt = tabella_prove(doc, [(\"P01\", 512.4, 470), (\"P02\", 463.0, 470)])\nassert len(doc.tables) == 1, \"la tabella va aggiunta al documento\"\nrighe = [[c.text for c in r.cells] for r in t.rows]\nassert righe[0] == [\"Provino\", \"Rm [MPa]\", \"Esito\"], \"intestazione\"\nassert righe[1] == [\"P01\", \"512\", \"OK\"] and righe[2] == [\"P02\", \"463\", \"KO\"], \"righe dei dati\"\nassert t.rows[0].cells[0].paragraphs[0].runs[0].bold, \"intestazione in grassetto\"",
+    "solution": "from docx import Document\n\ndef tabella_prove(doc, prove):\n    t = doc.add_table(rows=1, cols=3)\n    for cella, testo in zip(t.rows[0].cells, [\"Provino\", \"Rm [MPa]\", \"Esito\"]):\n        cella.text = testo\n        cella.paragraphs[0].runs[0].bold = True\n    for provino, Rm, Rm_min in prove:\n        c = t.add_row().cells\n        c[0].text = provino\n        c[1].text = f\"{Rm:.0f}\"\n        c[2].text = \"OK\" if Rm >= Rm_min else \"KO\"\n    return t\n\ndoc = Document()\nt = tabella_prove(doc, [(\"P01\", 512.4, 470), (\"P02\", 463.0, 470)])",
+    "hints": [
+      "`doc.add_table(rows=1, cols=3)` crea la riga d'intestazione; `t.add_row().cells` aggiunge una riga.",
+      "Dopo `cella.text = ...` la cella ha un paragrafo con un run: `cella.paragraphs[0].runs[0].bold = True`."
+    ]
+  },
+  {
+    "kind": "scrivi",
+    "title": "Segnaposto nel modello",
+    "prompt": "Scrivi `compila(doc, valori)` che in tutti i paragrafi del documento sostituisce i segnaposto `{{CHIAVE}}` con i valori del dizionario (convertiti in testo), lavorando **run per run** per non perdere la formattazione. Restituisci il numero di sostituzioni fatte.",
+    "starter": "from docx import Document\n\ndef compila(doc, valori):\n    ...\n\ndoc = Document()\ndoc.add_paragraph(\"Lotto {{LOTTO}}, {{N}} pezzi\")\nprint(compila(doc, {\"LOTTO\": \"2026-118\", \"N\": 48}), doc.paragraphs[0].text)",
+    "tests": "from docx import Document\ndoc = Document()\ndoc.add_paragraph(\"Lotto {{LOTTO}}, {{N}} pezzi\")\np = doc.add_paragraph(\"Cliente: \")\np.add_run(\"{{CLIENTE}}\").bold = True\nn = compila(doc, {\"LOTTO\": \"2026-118\", \"N\": 48, \"CLIENTE\": \"Officine Srl\"})\nassert doc.paragraphs[0].text == \"Lotto 2026-118, 48 pezzi\", \"sostituzione nel testo\"\nassert doc.paragraphs[1].text == \"Cliente: Officine Srl\", \"sostituzione nel secondo paragrafo\"\nassert doc.paragraphs[1].runs[1].bold, \"il grassetto del run deve restare\"\nassert n == 3, \"tre segnaposto sostituiti\"",
+    "solution": "from docx import Document\n\ndef compila(doc, valori):\n    fatte = 0\n    for p in doc.paragraphs:\n        for run in p.runs:\n            for chiave, valore in valori.items():\n                segnaposto = \"{{\" + chiave + \"}}\"\n                fatte += run.text.count(segnaposto)\n                run.text = run.text.replace(segnaposto, str(valore))\n    return fatte\n\ndoc = Document()\ndoc.add_paragraph(\"Lotto {{LOTTO}}, {{N}} pezzi\")\nprint(compila(doc, {\"LOTTO\": \"2026-118\", \"N\": 48}), doc.paragraphs[0].text)",
+    "hints": [
+      "Tre cicli annidati: paragrafi, run, chiavi del dizionario.",
+      "`run.text.count(s)` conta le occorrenze prima di sostituirle; `str(valore)` per i numeri."
+    ]
+  }
+]

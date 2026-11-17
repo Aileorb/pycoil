@@ -113,6 +113,16 @@ pytest -q
 
 Un punto per ogni test superato. Se un test fallisce, pytest mostra una `F`, la riga del test e i due valori confrontati: il tuo e quello atteso. Correggi, salva, rilancia `pytest -q`. Quando è tutto verde, nell'app segna la task come **Completata**.
 
+## 6. Git, per non perdere niente
+
+Quando i tuoi script diventano strumenti che usi davvero, installa anche **Git** da git-scm.com: tiene la storia di ogni modifica e ti permette di tornare alla versione che funzionava. Come si usa è spiegato nella sezione 9.4.2, «Git: la storia del tuo codice».
+
+```bash
+git --version
+git config --global user.name "Nome Cognome"
+git config --global user.email "nome@esempio.it"
+```
+
 ## Se qualcosa non va
 
 | Messaggio | Causa | Rimedio |
@@ -131,3 +141,4 @@ Un punto per ogni test superato. Se un test fallisce, pytest mostra una `F`, la 
 - Un ambiente virtuale per progetto: `python -m venv .venv`, attivalo, poi `pip install ...`.
 - VS Code: apri la cartella, scegli l'interprete `.venv`, usa il terminale integrato.
 - `pytest -q` lancia i test; quando sono verdi la task è completata.
+- Git tiene la storia del codice (sezione 9.4.2).

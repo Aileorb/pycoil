@@ -19,14 +19,19 @@ export const LIB_LABEL: Record<string, string> = {
   pint: 'pint',
   openpyxl: 'openpyxl',
   skfem: 'scikit-fem',
-  pytest: 'pytest'
+  pytest: 'pytest',
+  docx: 'python-docx',
+  fpdf: 'fpdf2',
+  sqlite3: 'SQLite'
 };
 
 /** Librerie che non sono in Pyodide e arrivano da PyPI: pacchetti PyPI e dipendenze già in Pyodide. */
 export const FROM_PYPI: Record<string, { pypi: string[]; pyodide: string[] }> = {
   pint: { pypi: ['pint', 'flexcache', 'flexparser'], pyodide: ['platformdirs', 'typing-extensions'] },
   openpyxl: { pypi: ['openpyxl', 'et-xmlfile'], pyodide: [] },
-  skfem: { pypi: ['scikit-fem'], pyodide: ['numpy', 'scipy'] }
+  skfem: { pypi: ['scikit-fem'], pyodide: ['numpy', 'scipy'] },
+  docx: { pypi: ['python-docx'], pyodide: ['lxml', 'typing-extensions'] },
+  fpdf: { pypi: ['fpdf2', 'defusedxml'], pyodide: ['pillow', 'fonttools'] }
 };
 
 export interface LockPackage {

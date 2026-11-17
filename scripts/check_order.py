@@ -28,6 +28,9 @@ TEACH = {
     "import:scipy": "04-01-01", "import:pandas": "05-01-01", "import:pint": "06-02-01", "import:uncertainties": "06-02-02",
     "import:sympy": "06-01-01", "import:CoolProp": "07-01-01", "import:skfem": "07-02-03", "import:argparse": "08-01-01",
     "import:openpyxl": "08-01-02", "import:sklearn": "08-02-03",
+    "import:shutil": "09-01-01", "import:re": "09-01-02", "import:tomllib": "09-01-03", "import:docx": "09-02-01",
+    "import:fpdf": "09-02-02", "import:subprocess": "09-03-01", "import:shlex": "09-03-01", "import:hashlib": "09-03-02",
+    "import:urllib": "09-03-03", "import:sqlite3": "09-03-04",
 }
 # Anticipazioni volute e spiegate nel testo: (sezione, costrutto).
 ALLOWED = {

@@ -22,7 +22,7 @@ export function Stats() {
 
   // capacità: la prima Parte non completa è "in corso", le successive bloccate
   let foundCurrent = false;
-  const skills = parts.slice(0, 9).map((p) => {
+  const skills = parts.map((p) => {
     const read = p.sections.filter((s) => state.sections.includes(s)).length;
     const total = p.sections.length;
     const pctP = total ? Math.round((read / total) * 100) : 0;

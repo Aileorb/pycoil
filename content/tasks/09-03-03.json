@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Da JSON a Python",
+    "code": "import json\nd = json.loads('{\"ok\": true, \"note\": null, \"valori\": [1, 2.5]}')\nprint(d[\"ok\"], d[\"note\"], type(d[\"valori\"][1]).__name__)",
+    "options": [
+      "True None float",
+      "true null float",
+      "True None str",
+      "1 None float"
+    ],
+    "answer": 0,
+    "explain": "`true` diventa `True`, `null` diventa `None`, gli array diventano liste e i numeri con il punto diventano `float`."
+  },
+  {
+    "kind": "prevedi",
+    "title": "Codici di stato",
+    "code": "def da_riprovare(codice):\n    return codice == 429 or codice >= 500\n\nprint([c for c in [200, 404, 429, 500, 503] if da_riprovare(c)])",
+    "options": [
+      "[429, 500, 503]",
+      "[404, 429, 500, 503]",
+      "[500, 503]",
+      "[200, 429]"
+    ],
+    "answer": 0,
+    "explain": "Ha senso riprovare dopo un'attesa solo per gli errori temporanei: 429 (troppe richieste) e i 5xx del server. Un 404 resta 404 anche riprovando."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Allarmi da una risposta annidata",
+    "prompt": "Una API restituisce il JSON `{\"letture\": [{\"t\": \"2026-03-14T08:00:00\", \"grandezze\": {\"T\": 41.2, \"vib\": 1.8}}, ...]}`. Scrivi `allarmi(testo_json, soglia)` che restituisce la lista degli orari `\"HH:MM\"` delle letture con vibrazione `vib` **maggiore** della soglia. Alcune letture non hanno `vib`: vanno ignorate senza errori.",
+    "starter": "import json\n\ndef allarmi(testo_json, soglia):\n    ...\n\nprint(allarmi('{\"letture\": [{\"t\": \"2026-03-14T08:20:00\", \"grandezze\": {\"vib\": 3.4}}]}', 3.0))",
+    "tests": "import json\nR = json.dumps({\"letture\": [\n    {\"t\": \"2026-03-14T08:00:00\", \"grandezze\": {\"T\": 41.2, \"vib\": 1.8}},\n    {\"t\": \"2026-03-14T08:10:00\", \"grandezze\": {\"T\": 43.9}},\n    {\"t\": \"2026-03-14T08:20:00\", \"grandezze\": {\"T\": 47.5, \"vib\": 3.4}},\n    {\"t\": \"2026-03-14T08:30:00\", \"grandezze\": {\"vib\": 3.0}}]})\nassert allarmi(R, 3.0) == [\"08:20\"], \"solo le vibrazioni maggiori della soglia, letture senza vib ignorate\"\nassert allarmi(R, 1.0) == [\"08:00\", \"08:20\", \"08:30\"], \"in ordine di arrivo\"\nassert allarmi('{\"letture\": []}', 1.0) == [], \"nessuna lettura, nessun allarme\"",
+    "solution": "import json\n\ndef allarmi(testo_json, soglia):\n    dati = json.loads(testo_json)\n    out = []\n    for l in dati[\"letture\"]:\n        v = l[\"grandezze\"].get(\"vib\")\n        if v is not None and v > soglia:\n            out.append(l[\"t\"][11:16])\n    return out\n\nprint(allarmi('{\"letture\": [{\"t\": \"2026-03-14T08:20:00\", \"grandezze\": {\"vib\": 3.4}}]}', 3.0))",
+    "hints": [
+      "`json.loads` dà un dizionario; le letture sono la lista `dati[\"letture\"]`.",
+      "`.get(\"vib\")` restituisce `None` se il campo manca; l'ora è `t[11:16]`."
+    ]
+  }
+]

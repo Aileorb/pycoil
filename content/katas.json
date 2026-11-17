@@ -372,7 +372,7 @@
     "title": "Prevedere l'usura dell'utensile",
     "minutes": 25,
     "module": "usura.py",
-    "prompt": "Crea il file **`usura.py`**. Scrivi `allena(df)` che allena una `LinearRegression` di scikit-learn su `log(vita)` in funzione di `log(v)`, `log(f)`, `log(ap)` (colonne di un DataFrame) e restituisce il modello; `esponenti(modello)` che restituisce il dizionario `{\"v\": …, \"f\": …, \"ap\": …}`; `vita_prevista(modello, v, f, ap)` che restituisce la vita in minuti (torna dalla scala logaritmica).\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).\n\nScarica il test nella stessa cartella e lancia `pytest -q`.",
+    "prompt": "Crea il file **`usura.py`**. Scrivi `allena(df)` che allena una `LinearRegression` di scikit-learn su `log(vita)` in funzione di `log(v)`, `log(f)`, `log(ap)` (colonne di un DataFrame) e restituisce il modello; `esponenti(modello)` che restituisce il dizionario `{\"v\": …, \"f\": …, \"ap\": …}`; `vita_prevista(modello, v, f, ap)` che restituisce la vita in minuti (torna dalla scala logaritmica).\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
     "hints": [
       "Lavora sui logaritmi: la legge di potenza diventa lineare.",
       "Per tornare ai minuti applica `np.exp` alla previsione."
@@ -381,6 +381,102 @@
     "testFile": {
       "name": "test_usura.py",
       "code": "import numpy as np\nimport pandas as pd\nfrom pytest import approx\nfrom usura import allena, esponenti, vita_prevista\n\n\ndef dati(n=300, seed=0):\n    rng = np.random.default_rng(seed)\n    v, f, ap = rng.uniform(100, 300, n), rng.uniform(0.05, 0.3, n), rng.uniform(0.5, 3, n)\n    vita = 6e5 * v**-1.6 * f**-0.6 * ap**-0.2 * rng.lognormal(0, 0.05, n)\n    return pd.DataFrame({\"v\": v, \"f\": f, \"ap\": ap, \"vita\": vita})\n\n\ndef test_esponenti():\n    e = esponenti(allena(dati()))\n    assert e[\"v\"] == approx(-1.6, abs=0.05)\n    assert e[\"f\"] == approx(-0.6, abs=0.05)\n\n\ndef test_previsione():\n    m = allena(dati())\n    atteso = 6e5 * 200**-1.6 * 0.1**-0.6 * 1.5**-0.2\n    assert vita_prevista(m, 200, 0.1, 1.5) == approx(atteso, rel=0.05)\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-archivio-prove",
+    "section": "09-01-01",
+    "title": "Riordinare l'archivio delle prove",
+    "minutes": 30,
+    "module": "archivio.py",
+    "prompt": "Crea il file **`archivio.py`**. In una cartella arrivano file come `trazione_S355_7.csv` (tipo di prova, materiale, numero).\n\n- `piano(cartella)` restituisce la lista ordinata delle coppie `(origine, destinazione)` come oggetti `Path`: ogni CSV con un nome di tre parti va in `cartella/materiale/tipo_NNN.csv` (numero a tre cifre); gli altri file restano dove sono.\n- `applica(mosse)` sposta i file creando le cartelle necessarie; se una destinazione esiste già solleva `FileExistsError` **prima di spostare qualunque file**.\n- `conteggio(cartella)` restituisce un dizionario `{materiale: numero di CSV}` contando i file nelle sottocartelle.\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "`f.stem.split(\"_\")` deve dare esattamente tre pezzi; `int(n)` e `f\"{n:03d}\"` per le tre cifre.",
+      "Per non spostare niente in caso di conflitto, controlla **tutte** le destinazioni in un primo ciclo e sposta solo in un secondo ciclo.",
+      "In `conteggio`, `d.iterdir()` con `is_dir()` trova le sottocartelle, `glob(\"*.csv\")` i file dentro."
+    ],
+    "solution": "import shutil\nfrom pathlib import Path\n\n\ndef piano(cartella):\n    cartella = Path(cartella)\n    mosse = []\n    for f in sorted(cartella.glob(\"*.csv\")):\n        pezzi = f.stem.split(\"_\")\n        if len(pezzi) != 3 or not pezzi[2].isdigit():\n            continue\n        tipo, materiale, n = pezzi\n        mosse.append((f, cartella / materiale / f\"{tipo}_{int(n):03d}.csv\"))\n    return mosse\n\n\ndef applica(mosse):\n    for _, dst in mosse:\n        if dst.exists():\n            raise FileExistsError(dst)\n    for src, dst in mosse:\n        dst.parent.mkdir(parents=True, exist_ok=True)\n        shutil.move(src, dst)\n\n\ndef conteggio(cartella):\n    return {d.name: len(list(d.glob(\"*.csv\"))) for d in sorted(Path(cartella).iterdir()) if d.is_dir()}\n",
+    "testFile": {
+      "name": "test_archivio.py",
+      "code": "from pathlib import Path\nimport pytest\nfrom archivio import applica, conteggio, piano\n\n\ndef prepara(d, nomi):\n    d = Path(d)\n    d.mkdir(exist_ok=True)\n    for n in nomi:\n        (d / n).write_text(\"x\")\n    return d\n\n\ndef test_piano(tmp_path=None):\n    d = prepara(tmp_path or \"arch1\", [\"trazione_S355_7.csv\", \"durezza_S235_12.csv\", \"note.csv\", \"foto.jpg\"])\n    mosse = piano(d)\n    assert [(s.name, t.relative_to(d).as_posix()) for s, t in mosse] == [\n        (\"durezza_S235_12.csv\", \"S235/durezza_012.csv\"),\n        (\"trazione_S355_7.csv\", \"S355/trazione_007.csv\"),\n    ]\n\n\ndef test_applica_e_conteggio(tmp_path=None):\n    d = prepara(tmp_path or \"arch2\", [\"trazione_S355_1.csv\", \"trazione_S355_2.csv\", \"durezza_S235_1.csv\"])\n    applica(piano(d))\n    assert conteggio(d) == {\"S235\": 1, \"S355\": 2}\n    assert not list(d.glob(\"*.csv\"))\n\n\ndef test_conflitto_non_sposta_niente(tmp_path=None):\n    d = prepara(tmp_path or \"arch3\", [\"trazione_S355_1.csv\", \"trazione_S355_2.csv\"])\n    (d / \"S355\").mkdir()\n    (d / \"S355\" / \"trazione_002.csv\").write_text(\"vecchio\")\n    with pytest.raises(FileExistsError):\n        applica(piano(d))\n    assert (d / \"trazione_S355_1.csv\").exists()\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-log-banco",
+    "section": "09-01-02",
+    "title": "Analizzare il log del banco",
+    "minutes": 30,
+    "module": "log_banco.py",
+    "prompt": "Crea il file **`log_banco.py`** con `analizza(testo)`, che legge un log del banco prova e restituisce un dizionario con:\n\n- `\"operatore\"`: il nome dalla riga `... INFO avvio, operatore=Rossi` (`None` se manca);\n- `\"Rm\"`: dizionario `{provino: Rm in MPa arrotondato a 1 decimale}` dalle righe `... MIS provino=P01 Fmax=48.2kN A=78.5mm2` (virgola o punto decimale);\n- `\"errori\"`: lista dei provini delle righe `... ERR provino=P03 messaggio`, in ordine;\n- `\"durata_min\"`: minuti interi tra la prima e l'ultima riga (ogni riga inizia con `AAAA-MM-GG HH:MM:SS`).\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "Una regex per tipo di riga, con gruppi con nome; `m := re.search(...)` dentro un `if` per provarle una dopo l'altra.",
+      "Rm = Fmax · 1000 / A; la virgola va sostituita con il punto prima di `float`.",
+      "La data è nei primi 19 caratteri: `datetime.strptime(riga[:19], \"%Y-%m-%d %H:%M:%S\")`."
+    ],
+    "solution": "import re\nfrom datetime import datetime\n\nOPER = re.compile(r\"INFO avvio, operatore=(?P<nome>\\w+)\")\nMIS = re.compile(r\"MIS provino=(?P<p>\\w+) Fmax=(?P<F>[\\d.,]+)kN A=(?P<A>[\\d.,]+)mm2\")\nERR = re.compile(r\"ERR provino=(?P<p>\\w+) \")\n\n\ndef _num(s):\n    return float(s.replace(\",\", \".\"))\n\n\ndef analizza(testo):\n    out = {\"operatore\": None, \"Rm\": {}, \"errori\": [], \"durata_min\": 0}\n    istanti = []\n    for riga in testo.splitlines():\n        if not riga.strip():\n            continue\n        istanti.append(datetime.strptime(riga[:19], \"%Y-%m-%d %H:%M:%S\"))\n        if m := OPER.search(riga):\n            out[\"operatore\"] = m[\"nome\"]\n        elif m := MIS.search(riga):\n            out[\"Rm\"][m[\"p\"]] = round(_num(m[\"F\"]) * 1000 / _num(m[\"A\"]), 1)\n        elif m := ERR.search(riga):\n            out[\"errori\"].append(m[\"p\"])\n    if istanti:\n        out[\"durata_min\"] = int((istanti[-1] - istanti[0]).total_seconds() // 60)\n    return out\n",
+    "testFile": {
+      "name": "test_log_banco.py",
+      "code": "from log_banco import analizza\n\nLOG = \"\"\"2026-03-14 08:01:10 INFO avvio, operatore=Rossi\n2026-03-14 08:05:42 MIS provino=P01 Fmax=48.2kN A=78.5mm2\n2026-03-14 08:12:03 MIS provino=P02 Fmax=47,9kN A=78.6mm2\n2026-03-14 08:15:30 ERR provino=P03 estensimetro scollegato\n2026-03-14 08:20:11 WARN temperatura olio 71 C\n2026-03-14 09:31:59 MIS provino=P04 Fmax=49.0kN A=78.4mm2\n\"\"\"\n\n\ndef test_completo():\n    r = analizza(LOG)\n    assert r[\"operatore\"] == \"Rossi\"\n    assert r[\"Rm\"] == {\"P01\": 614.0, \"P02\": 609.4, \"P04\": 625.0}\n    assert r[\"errori\"] == [\"P03\"]\n    assert r[\"durata_min\"] == 90\n\n\ndef test_senza_operatore():\n    r = analizza(\"2026-03-14 10:00:00 ERR provino=P09 cella di carico\\n\")\n    assert r[\"operatore\"] is None and r[\"errori\"] == [\"P09\"] and r[\"Rm\"] == {} and r[\"durata_min\"] == 0\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-relazione-word",
+    "section": "09-02-01",
+    "title": "La relazione di prova in Word",
+    "minutes": 30,
+    "module": "relazione.py",
+    "prompt": "Crea il file **`relazione.py`** con `relazione(file, lotto, prove, Rm_min)`: `prove` è una lista di `(provino, Rm)`. Il documento Word deve contenere, in quest'ordine:\n\n1. il titolo di livello 1 `Relazione di prova – lotto {lotto}`;\n2. un paragrafo `Provini: N, conformi: K.` (conforme se `Rm >= Rm_min`);\n3. una tabella con intestazione `Provino`, `Rm [MPa]`, `Esito` e una riga per prova (Rm con un decimale e la **virgola** decimale, esito `OK` o `KO`), intestazione in grassetto;\n4. se ci sono non conformi, un paragrafo `Non conformi: P02, P05.` con il testo dei provini in **grassetto**.\n\nSalva il file e restituisci il numero di conformi.\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "`doc.add_heading(testo, level=1)` per il titolo; i paragrafi in `doc.paragraphs` includono anche il titolo.",
+      "Per la virgola: `f\"{Rm:.1f}\".replace(\".\", \",\")`.",
+      "L'ultimo paragrafo ha due run: `p = doc.add_paragraph(\"Non conformi: \")` e poi `p.add_run(\"P02, P05.\").bold = True`."
+    ],
+    "solution": "from docx import Document\n\n\ndef relazione(file, lotto, prove, Rm_min):\n    doc = Document()\n    doc.add_heading(f\"Relazione di prova – lotto {lotto}\", level=1)\n    ko = [p for p, Rm in prove if Rm < Rm_min]\n    conformi = len(prove) - len(ko)\n    doc.add_paragraph(f\"Provini: {len(prove)}, conformi: {conformi}.\")\n    t = doc.add_table(rows=1, cols=3)\n    for c, testo in zip(t.rows[0].cells, [\"Provino\", \"Rm [MPa]\", \"Esito\"]):\n        c.text = testo\n        c.paragraphs[0].runs[0].bold = True\n    for provino, Rm in prove:\n        celle = t.add_row().cells\n        celle[0].text = provino\n        celle[1].text = f\"{Rm:.1f}\".replace(\".\", \",\")\n        celle[2].text = \"OK\" if Rm >= Rm_min else \"KO\"\n    if ko:\n        p = doc.add_paragraph(\"Non conformi: \")\n        p.add_run(\", \".join(ko) + \".\").bold = True\n    doc.save(file)\n    return conformi\n",
+    "testFile": {
+      "name": "test_relazione.py",
+      "code": "from docx import Document\nfrom relazione import relazione\n\nPROVE = [(\"P01\", 512.44), (\"P02\", 463.0), (\"P03\", 498.5), (\"P05\", 469.9)]\n\n\ndef test_documento():\n    assert relazione(\"rel_test.docx\", \"2026-118\", PROVE, 470) == 2\n    doc = Document(\"rel_test.docx\")\n    testi = [p.text for p in doc.paragraphs]\n    assert testi[0] == \"Relazione di prova – lotto 2026-118\"\n    assert doc.paragraphs[0].style.name == \"Heading 1\"\n    assert testi[1] == \"Provini: 4, conformi: 2.\"\n    righe = [[c.text for c in r.cells] for r in doc.tables[0].rows]\n    assert righe[0] == [\"Provino\", \"Rm [MPa]\", \"Esito\"]\n    assert righe[1] == [\"P01\", \"512,4\", \"OK\"] and righe[4] == [\"P05\", \"469,9\", \"KO\"]\n    assert doc.tables[0].rows[0].cells[0].paragraphs[0].runs[0].bold\n    assert testi[-1] == \"Non conformi: P02, P05.\"\n    assert doc.paragraphs[-1].runs[-1].bold\n\n\ndef test_tutto_conforme():\n    assert relazione(\"rel_ok.docx\", \"2026-119\", [(\"P01\", 500.0)], 470) == 1\n    assert len(Document(\"rel_ok.docx\").paragraphs) == 2\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-solutore-esterno",
+    "section": "09-03-01",
+    "title": "Pilotare un solutore esterno",
+    "minutes": 35,
+    "module": "pilota.py",
+    "pc": true,
+    "prompt": "Crea il file **`pilota.py`**. Un «solutore» esterno (nel test è uno script Python, `solutore.py`) legge un file di input con le righe `F=...` e `k=...` e stampa `spostamento = X mm`.\n\n- `scrivi_input(cartella, F, k)` crea `cartella/caso.inp` con le due righe e restituisce il percorso;\n- `esegui(cartella, programma)` lancia `[sys.executable, programma, \"caso.inp\"]` **nella cartella** del caso, con `capture_output=True`, `text=True` e un `timeout` di 30 s; se il codice di uscita non è 0 solleva `RuntimeError` con l'ultima riga di `stderr`; altrimenti restituisce lo spostamento letto dallo stdout come `float`;\n- `studio(base, programma, carichi, k)` crea una sottocartella `F{carico}` per ogni carico, esegue e restituisce `{carico: spostamento}`; i casi falliti valgono `None` senza fermare lo studio.\n\n**Da fare sul computer**: il browser non può lanciare programmi. Scarica il test nella stessa cartella e lancia `pytest -q`.",
+    "hints": [
+      "`subprocess.run(cmd, cwd=cartella, capture_output=True, text=True, timeout=30)`; il programma va passato con il percorso assoluto (`Path(programma).resolve()`) perché `cwd` cambia la cartella.",
+      "`re.search(r\"spostamento = ([-\\d.eE+]+) mm\", r.stdout)` trova il numero.",
+      "In `studio`, un `try`/`except RuntimeError` per ogni caso."
+    ],
+    "solution": "import re\nimport subprocess\nimport sys\nfrom pathlib import Path\n\n\ndef scrivi_input(cartella, F, k):\n    cartella = Path(cartella)\n    cartella.mkdir(parents=True, exist_ok=True)\n    f = cartella / \"caso.inp\"\n    f.write_text(f\"F={F}\\nk={k}\\n\")\n    return f\n\n\ndef esegui(cartella, programma):\n    r = subprocess.run([sys.executable, str(Path(programma).resolve()), \"caso.inp\"], cwd=cartella,\n                       capture_output=True, text=True, timeout=30)\n    if r.returncode != 0:\n        righe = r.stderr.strip().splitlines() or [\"errore sconosciuto\"]\n        raise RuntimeError(righe[-1])\n    m = re.search(r\"spostamento = ([-\\d.eE+]+) mm\", r.stdout)\n    if m is None:\n        raise RuntimeError(\"output senza spostamento\")\n    return float(m.group(1))\n\n\ndef studio(base, programma, carichi, k):\n    out = {}\n    for F in carichi:\n        cartella = Path(base) / f\"F{F}\"\n        scrivi_input(cartella, F, k)\n        try:\n            out[F] = esegui(cartella, programma)\n        except RuntimeError:\n            out[F] = None\n    return out\n",
+    "testFile": {
+      "name": "test_pilota.py",
+      "code": "from pathlib import Path\nimport pytest\nfrom pilota import esegui, scrivi_input, studio\n\nSOLUTORE = '''import sys\nvalori = dict(r.split(\"=\") for r in open(sys.argv[1]).read().split())\nF, k = float(valori[\"F\"]), float(valori[\"k\"])\nif F < 0:\n    sys.exit(\"carico negativo non ammesso\")\nprint(\"iterazione 1\")\nprint(f\"spostamento = {F / k:.4f} mm\")\n'''\n\n\ndef prepara(base):\n    base = Path(base)\n    base.mkdir(exist_ok=True)\n    prog = base / \"solutore.py\"\n    prog.write_text(SOLUTORE)\n    return base, prog\n\n\ndef test_un_caso(tmp_path=None):\n    base, prog = prepara(tmp_path or \"pil1\")\n    f = scrivi_input(base / \"c1\", 1200, 400)\n    assert f.read_text() == \"F=1200\\nk=400\\n\"\n    assert esegui(base / \"c1\", prog) == pytest.approx(3.0)\n\n\ndef test_errore(tmp_path=None):\n    base, prog = prepara(tmp_path or \"pil2\")\n    scrivi_input(base / \"c2\", -5, 400)\n    with pytest.raises(RuntimeError, match=\"negativo\"):\n        esegui(base / \"c2\", prog)\n\n\ndef test_studio(tmp_path=None):\n    base, prog = prepara(tmp_path or \"pil3\")\n    r = studio(base, prog, [400, -1, 800], 200)\n    assert r == {400: pytest.approx(2.0), -1: None, 800: pytest.approx(4.0)}\n    assert (base / \"F800\" / \"caso.inp\").exists()\n"
+    },
+    "nuovo": true
+  },
+  {
+    "id": "kata-archivio-sqlite",
+    "section": "09-03-04",
+    "title": "Un archivio SQLite delle prove",
+    "minutes": 35,
+    "module": "archivio_db.py",
+    "prompt": "Crea il file **`archivio_db.py`** con una classe `Archivio`:\n\n- `Archivio(file)` apre (o crea) il database e la tabella `prove` con `provino` (chiave primaria), `materiale`, `data` (testo ISO) e `Rm` (con il vincolo `Rm > 0`);\n- `importa(prove)` inserisce una lista di tuple `(provino, materiale, data, Rm)` **saltando** i provini già presenti (`INSERT OR IGNORE`) e restituisce quanti sono entrati davvero. Attenzione: `OR IGNORE` scarta in silenzio anche le righe che violano il `CHECK`; per questo, prima di inserire, se una prova ha `Rm <= 0` solleva `ValueError` senza inserire niente;\n- `statistiche(materiale, dal=None)` restituisce `(n, media, minimo)` delle prove del materiale, solo dalla data `dal` in poi se indicata (`(0, None, None)` se non ce ne sono);\n- `chiudi()` chiude la connessione.\n\nUsa sempre i segnaposto `?`.\n\nScarica il test nella stessa cartella e lancia `pytest -q` (oppure incolla il file nell'app e premi *Esegui i test*).",
+    "hints": [
+      "`con.total_changes` conta le righe modificate dall'apertura: la differenza prima/dopo `executemany` dice quante sono entrate.",
+      "Componi la query aggiungendo `AND data >= ?` e il parametro solo se `dal` non è `None`.",
+      "`SELECT COUNT(*), AVG(Rm), MIN(Rm)` restituisce `(0, None, None)` se non ci sono righe."
+    ],
+    "solution": "import sqlite3\n\n\nclass Archivio:\n    def __init__(self, file):\n        self.con = sqlite3.connect(file)\n        with self.con:\n            self.con.execute(\n                \"CREATE TABLE IF NOT EXISTS prove (provino TEXT PRIMARY KEY, materiale TEXT NOT NULL, \"\n                \"data TEXT NOT NULL, Rm REAL CHECK (Rm > 0))\"\n            )\n\n    def importa(self, prove):\n        sbagliate = [p[0] for p in prove if p[3] <= 0]\n        if sbagliate:\n            raise ValueError(f\"Rm non positivo: {', '.join(sbagliate)}\")\n        prima = self.con.total_changes\n        with self.con:\n            self.con.executemany(\"INSERT OR IGNORE INTO prove VALUES (?, ?, ?, ?)\", prove)\n        return self.con.total_changes - prima\n\n    def statistiche(self, materiale, dal=None):\n        sql = \"SELECT COUNT(*), AVG(Rm), MIN(Rm) FROM prove WHERE materiale = ?\"\n        parametri = [materiale]\n        if dal is not None:\n            sql += \" AND data >= ?\"\n            parametri.append(dal)\n        return self.con.execute(sql, parametri).fetchone()\n\n    def chiudi(self):\n        self.con.close()\n",
+    "testFile": {
+      "name": "test_archivio_db.py",
+      "code": "import sqlite3\nfrom pathlib import Path\nimport pytest\nfrom archivio_db import Archivio\n\nPROVE = [(\"P01\", \"S355\", \"2026-03-02\", 512.0), (\"P02\", \"S355\", \"2026-03-09\", 498.0), (\"P03\", \"S235\", \"2026-03-09\", 402.0)]\n\n\ndef test_importa_e_statistiche(tmp_path=None):\n    f = Path(tmp_path or \".\") / \"prove_test.db\"\n    a = Archivio(f)\n    assert a.importa(PROVE) == 3\n    assert a.importa(PROVE + [(\"P04\", \"S355\", \"2026-03-16\", 520.0)]) == 1\n    n, media, minimo = a.statistiche(\"S355\")\n    assert (n, minimo) == (3, 498.0) and media == pytest.approx(510.0)\n    assert a.statistiche(\"S355\", dal=\"2026-03-09\")[0] == 2\n    assert a.statistiche(\"C45\") == (0, None, None)\n    a.chiudi()\n    b = Archivio(f)\n    assert b.statistiche(\"S235\")[0] == 1\n    b.chiudi()\n\n\ndef test_vincolo(tmp_path=None):\n    a = Archivio(Path(tmp_path or \".\") / \"vincolo_test.db\")\n    with pytest.raises(ValueError, match=\"P09\"):\n        a.importa([(\"P08\", \"S355\", \"2026-03-02\", 500.0), (\"P09\", \"S355\", \"2026-03-02\", -1.0)])\n    assert a.statistiche(\"S355\")[0] == 0\n    with pytest.raises(sqlite3.IntegrityError):\n        a.con.execute(\"INSERT INTO prove VALUES ('P10', 'S355', '2026-03-02', -2.0)\")\n    a.chiudi()\n"
     },
     "nuovo": true
   }

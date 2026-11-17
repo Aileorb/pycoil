@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Differenza tra due date",
+    "code": "from datetime import date, timedelta\nultima = date(2026, 2, 20)\nscadenza = ultima + timedelta(days=30)\nprint(scadenza, (scadenza - date(2026, 3, 14)).days)",
+    "options": [
+      "2026-03-22 8",
+      "2026-03-20 6",
+      "2026-03-22 -8",
+      "2026-03-21 7"
+    ],
+    "answer": 0,
+    "explain": "Febbraio 2026 ha 28 giorni: dal 20 febbraio, 8 giorni portano al 28 e altri 22 al 22 marzo. Dal 14 al 22 marzo mancano 8 giorni."
+  },
+  {
+    "kind": "prevedi",
+    "title": "Unire configurazioni con |",
+    "code": "default = {\"soglia\": 1.0, \"formato\": \"xlsx\"}\nfile = {\"soglia\": 0.9}\ncli = {\"formato\": \"pdf\"}\ncfg = default | file | cli\nprint(cfg[\"soglia\"], cfg[\"formato\"])",
+    "options": [
+      "0.9 pdf",
+      "1.0 xlsx",
+      "0.9 xlsx",
+      "1.0 pdf"
+    ],
+    "answer": 0,
+    "explain": "Con `|` a parità di chiave vince il dizionario più a destra: la soglia arriva dal file, il formato dalla riga di comando."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Durata di ogni prova",
+    "prompt": "Scrivi `durate(righe)`: `righe` è una lista di stringhe `\"P01;14/03/2026 08:30;14/03/2026 09:10\"` (provino, inizio, fine). Restituisci un dizionario `{provino: durata in minuti}` (numeri interi). Se la fine è **prima** dell'inizio, solleva `ValueError` con il nome del provino nel messaggio.",
+    "starter": "from datetime import datetime\n\ndef durate(righe):\n    ...\n\nprint(durate([\"P01;14/03/2026 08:30;14/03/2026 09:10\"]))",
+    "tests": "assert durate([\"P01;14/03/2026 08:30;14/03/2026 09:10\"]) == {\"P01\": 40}, \"40 minuti\"\nassert durate([\"P02;14/03/2026 23:50;15/03/2026 00:20\"]) == {\"P02\": 30}, \"a cavallo della mezzanotte\"\ntry:\n    durate([\"P03;14/03/2026 10:00;14/03/2026 09:00\"])\n    raise AssertionError(\"una fine prima dell'inizio deve sollevare ValueError\")\nexcept ValueError as e:\n    assert \"P03\" in str(e), \"il messaggio deve contenere il nome del provino\"",
+    "solution": "from datetime import datetime\n\nFMT = \"%d/%m/%Y %H:%M\"\n\ndef durate(righe):\n    out = {}\n    for riga in righe:\n        provino, inizio, fine = riga.split(\";\")\n        d = datetime.strptime(fine, FMT) - datetime.strptime(inizio, FMT)\n        if d.total_seconds() < 0:\n            raise ValueError(f\"{provino}: la fine è prima dell'inizio\")\n        out[provino] = int(d.total_seconds() // 60)\n    return out\n\nprint(durate([\"P01;14/03/2026 08:30;14/03/2026 09:10\"]))",
+    "hints": [
+      "Il formato è `\"%d/%m/%Y %H:%M\"`; la differenza tra due `datetime` è un `timedelta`.",
+      "`d.total_seconds() // 60` dà i minuti; un `timedelta` negativo ha `total_seconds()` minore di zero."
+    ]
+  }
+]

@@ -27,7 +27,7 @@ async function boot(): Promise<Py> {
 }
 
 // Librerie in puro Python non incluse in Pyodide: si installano da PyPI con micropip al primo uso.
-const FROM_PYPI: Record<string, string> = { pint: 'pint', openpyxl: 'openpyxl', skfem: 'scikit-fem' };
+const FROM_PYPI: Record<string, string> = { pint: 'pint', openpyxl: 'openpyxl', skfem: 'scikit-fem', docx: 'python-docx', fpdf: 'fpdf2' };
 
 async function installFromPypi(py: Py, src: string): Promise<void> {
   const wanted = Object.keys(FROM_PYPI).filter((m) => new RegExp(`^\\s*(from|import)\\s+${m}\\b`, 'm').test(src));

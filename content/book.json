@@ -544,6 +544,87 @@
           ]
         }
       ]
+    },
+    {
+      "id": "p9",
+      "roman": "IX",
+      "title": "Automazione avanzata",
+      "short": "Strumenti",
+      "sources": [
+        "Automate the Boring Stuff with Python | https://automatetheboringstuff.com/",
+        "Python Packaging User Guide | https://packaging.python.org/",
+        "Pro Git | https://git-scm.com/book/it/v2"
+      ],
+      "chapters": [
+        {
+          "id": "09-01",
+          "title": "File e testi in serie",
+          "sections": [
+            {
+              "id": "09-01-01",
+              "title": "Cartelle di file: cercare, copiare, rinominare"
+            },
+            {
+              "id": "09-01-02",
+              "title": "Espressioni regolari per log e testi"
+            },
+            {
+              "id": "09-01-03",
+              "title": "Date, orari e file di configurazione"
+            }
+          ]
+        },
+        {
+          "id": "09-02",
+          "title": "Report automatici",
+          "sections": [
+            {
+              "id": "09-02-01",
+              "title": "Report Word con python-docx"
+            },
+            {
+              "id": "09-02-02",
+              "title": "Report PDF con fpdf2"
+            }
+          ]
+        },
+        {
+          "id": "09-03",
+          "title": "Programmi, servizi e dati",
+          "sections": [
+            {
+              "id": "09-03-01",
+              "title": "Lanciare altri programmi con subprocess"
+            },
+            {
+              "id": "09-03-02",
+              "title": "Script che girano da soli"
+            },
+            {
+              "id": "09-03-03",
+              "title": "API web e JSON"
+            },
+            {
+              "id": "09-03-04",
+              "title": "Database SQLite"
+            }
+          ]
+        },
+        {
+          "id": "09-04",
+          "title": "Lavorare da professionista",
+          "sections": [
+            {
+              "id": "09-04-01",
+              "title": "Organizzare un progetto vero"
+            },
+            {
+              "id": "09-04-02",
+              "title": "Git: la storia del tuo codice"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -19,7 +19,7 @@ export interface ChapterMeta {
 }
 
 export interface PartMeta {
-  id: string; // "p0" … "p8"
+  id: string; // "p0" … "p9"
   roman: string; // "0", "I", …
   title: string;
   short: string; // nome breve per le capacità

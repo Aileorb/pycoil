@@ -11,3 +11,5 @@ pint
 openpyxl
 scikit-fem
 scikit-learn
+python-docx
+fpdf2

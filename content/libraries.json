@@ -11,5 +11,8 @@
   { "id": "coolprop", "name": "CoolProp", "abbr": "CP", "part": "p7", "priority": "Molto utile", "color": "#C0392B", "desc": "Proprietà termodinamiche di acqua, aria, refrigeranti: le tabelle del vapore in codice", "url": "http://www.coolprop.org/" },
   { "id": "scikit-fem", "name": "scikit-fem", "abbr": "fem", "part": "p7", "priority": "Specialistica", "color": "#2E7D32", "desc": "Elementi finiti in puro Python, leggero e didattico", "url": "https://scikit-fem.readthedocs.io/" },
   { "id": "cadquery", "name": "CadQuery", "abbr": "cq", "part": "p7", "priority": "Specialistica", "color": "#455A64", "desc": "Modellazione CAD parametrica scritta in codice, esporta STEP e STL", "url": "https://cadquery.readthedocs.io/" },
-  { "id": "openpyxl", "name": "openpyxl", "abbr": "xl", "part": "p8", "priority": "Molto utile", "color": "#1D6F42", "desc": "Leggere e scrivere file Excel, per automatizzare i fogli dell'ufficio tecnico", "url": "https://openpyxl.readthedocs.io/" }
+  { "id": "openpyxl", "name": "openpyxl", "abbr": "xl", "part": "p8", "priority": "Molto utile", "color": "#1D6F42", "desc": "Leggere e scrivere file Excel, per automatizzare i fogli dell'ufficio tecnico", "url": "https://openpyxl.readthedocs.io/" },
+  { "id": "python-docx", "name": "python-docx", "abbr": "dx", "part": "p9", "priority": "Molto utile", "color": "#2B579A", "desc": "Scrivere e leggere documenti Word: relazioni e verbali generati dai dati", "url": "https://python-docx.readthedocs.io/" },
+  { "id": "fpdf2", "name": "fpdf2", "abbr": "pdf", "part": "p9", "priority": "Specialistica", "color": "#B3261E", "desc": "Disegnare PDF pagina per pagina: certificati, schede di prova, etichette", "url": "https://py-pdf.github.io/fpdf2/" },
+  { "id": "requests", "name": "Requests", "abbr": "rq", "part": "p9", "priority": "Molto utile", "color": "#3B7A57", "desc": "Richieste HTTP per parlare con API web, gestionali e sensori in rete", "url": "https://requests.readthedocs.io/" }
 ]

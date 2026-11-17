@@ -1,0 +1,40 @@
+[
+  {
+    "kind": "prevedi",
+    "title": "Leggere git status --porcelain",
+    "code": "stato = \" M analisi.py\\nM  report.py\\n?? nuovo.csv\"\npronti = [r[3:] for r in stato.splitlines() if r[0] not in \" ?\"]\nprint(pronti)",
+    "options": [
+      "['report.py']",
+      "['analisi.py', 'report.py']",
+      "['analisi.py']",
+      "['report.py', 'nuovo.csv']"
+    ],
+    "answer": 0,
+    "explain": "La prima lettera è l'area di preparazione: solo `report.py` ha una `M` lì. `analisi.py` è modificato ma non ancora aggiunto (spazio, poi `M`), `nuovo.csv` non è tracciato (`??`)."
+  },
+  {
+    "kind": "scrivi",
+    "title": "Controllare i file da ignorare",
+    "prompt": "Scrivi `da_ignorare(percorsi, regole)`: `regole` è una lista di schemi semplici di un `.gitignore`, che possono essere un nome di cartella terminato da `/` (es. `\".venv/\"`: ignora tutto ciò che sta dentro una cartella con quel nome, a qualunque livello) o uno schema per il nome del file (es. `\"*.log\"`, da confrontare con `fnmatch.fnmatch` sul solo nome). Restituisci la lista dei percorsi (stringhe con `/`) che verrebbero ignorati, nell'ordine dato.",
+    "starter": "from fnmatch import fnmatch\n\ndef da_ignorare(percorsi, regole):\n    ...\n\nprint(da_ignorare([\".venv/lib/x.py\", \"src/a.py\", \"log/oggi.log\"], [\".venv/\", \"*.log\"]))",
+    "tests": "P = [\".venv/lib/x.py\", \"src/a.py\", \"log/oggi.log\", \"src/__pycache__/a.cpython-313.pyc\", \"dati/prove.db\", \"README.md\"]\nR = [\".venv/\", \"__pycache__/\", \"*.log\", \"*.db\"]\nassert da_ignorare(P, R) == [\".venv/lib/x.py\", \"log/oggi.log\", \"src/__pycache__/a.cpython-313.pyc\", \"dati/prove.db\"], \"cartelle a ogni livello e schemi sul nome\"\nassert da_ignorare([\"src/a.py\"], R) == [], \"il codice non va ignorato\"\nassert da_ignorare([\"venv2/x.py\"], [\".venv/\"]) == [], \"il nome della cartella deve coincidere\"",
+    "solution": "from fnmatch import fnmatch\n\ndef da_ignorare(percorsi, regole):\n    out = []\n    for p in percorsi:\n        parti = p.split(\"/\")\n        cartelle, nome = parti[:-1], parti[-1]\n        for r in regole:\n            if r.endswith(\"/\"):\n                if r[:-1] in cartelle:\n                    out.append(p)\n                    break\n            elif fnmatch(nome, r):\n                out.append(p)\n                break\n    return out\n\nprint(da_ignorare([\".venv/lib/x.py\", \"src/a.py\", \"log/oggi.log\"], [\".venv/\", \"*.log\"]))",
+    "hints": [
+      "`p.split(\"/\")`: tutti gli elementi tranne l'ultimo sono cartelle, l'ultimo è il nome del file.",
+      "Per una regola `\"nome/\"` controlla se `nome` è tra le cartelle; per le altre usa `fnmatch(nome_file, regola)`. Un `break` evita di aggiungere due volte lo stesso percorso."
+    ]
+  },
+  {
+    "kind": "prevedi",
+    "title": "Cercare nella storia",
+    "code": "log = \"e4f1a2c Report PDF\\n9b07d33 Cpk corretto\\n51c8e90 Lettura: virgola decimale\\n2a6f0b1 Prima versione\"\ncommit = [r.split(\" \", 1) for r in log.splitlines()]\nprint(commit[0][0], len(commit), commit[-1][1])",
+    "options": [
+      "e4f1a2c 4 Prima versione",
+      "2a6f0b1 4 Prima versione",
+      "e4f1a2c 4 Prima",
+      "e4f1a2c 8 versione"
+    ],
+    "answer": 0,
+    "explain": "`git log --oneline` mostra il commit più recente per primo. `split(\" \", 1)` divide solo sul primo spazio: hash e messaggio intero."
+  }
+]
