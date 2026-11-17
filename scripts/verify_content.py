@@ -93,6 +93,39 @@ def _why(code: str, tests: str) -> str:
         return traceback.format_exc(limit=1).strip().splitlines()[-1]
 
 
+# ------------------------------------------------------------------ output promesso nei commenti
+ARROW = re.compile(r"#\s*→\s*(.*)$")
+
+
+def check_arrows(code: str) -> None:
+    """Esegue il blocco e confronta ogni `print(...)  # → atteso` con quello che stampa davvero.
+
+    Vale solo per le righe con un print eseguito una volta; una nota finale tra parentesi
+    dopo almeno due spazi (es. «# → 5   (perché…)») non fa parte dell'output.
+    """
+    expected = {}
+    for n, line in enumerate(code.splitlines(), start=1):
+        m = ARROW.search(line)
+        if m and "print(" in line:
+            want = re.split(r"\s{2,}\(", m.group(1).strip())[0].strip()
+            expected[n] = want
+    printed: dict[int, list[str]] = {}
+
+    def spy(*args, sep=" ", end="\n", file=None, flush=False):
+        frame = sys._getframe(1)
+        if frame.f_code.co_filename == "<exec>":
+            printed.setdefault(frame.f_lineno, []).append(sep.join(map(str, args)))
+        print(*args, sep=sep, end=end, file=file or sys.stdout, flush=flush)
+
+    run(code, {"print": spy, "__name__": "__main__"})
+    for n, want in expected.items():
+        got = printed.get(n)
+        if not got:
+            raise AssertionError(f"riga {n}: il print con «# → {want}» non è stato eseguito")
+        if len(got) == 1 and got[0].strip() != want:
+            raise AssertionError(f"riga {n}: il commento promette {want!r}, stampa {got[0].strip()!r}")
+
+
 # ------------------------------------------------------------------ sezioni
 FENCE = re.compile(r"```(\w+)([^\n]*)\n(.*?)```", re.S)
 for md in sorted([*(CONTENT / "sections").glob("*.md"), *(CONTENT / "libraries").glob("*.md"), *(CONTENT / "appendix").glob("*.md")]):
@@ -102,7 +135,7 @@ for md in sorted([*(CONTENT / "sections").glob("*.md"), *(CONTENT / "libraries")
         lang, flag, code = m.group(1), m.group(2).strip(), m.group(3)
         if lang in ("python", "py") and flag != "norun":
             def f(code=code):
-                run(code)
+                check_arrows(code)
             check(f"{md.stem} blocco {i + 1}", f)
 
 # ------------------------------------------------------------------ esercizi
