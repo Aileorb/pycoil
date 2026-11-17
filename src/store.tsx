@@ -1,10 +1,18 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { AppState, ContentIndex, Favorite } from './engine/types';
 import { dayKey, weekStart } from './engine/dates';
-import { compactHistory, completeAdvanced, completeTask, isDayComplete, learnIntroToday, markSectionRead, resetDay, refreshStreak, emptyState } from './engine/state';
+import { compactHistory, completeAdvanced, completeTask, isDayComplete, learnIntroToday, markSectionRead, resetDay, refreshStreak, emptyState, normalize } from './engine/state';
 import { buildToday, ensureToday, loadState, saveState, saveToday, clearToday, type TaskDraft, type TodayRecord } from './engine/storage';
 import { loadIndex } from './engine/content';
 import { syncDay, syncPush } from './push';
+import { applyRemote, foldLocalXp, stripLocal, xpTotal } from './engine/merge';
+import { dispositivo, dimenticaSessione, ErroreConto, inviaStato, sessione, type Sessione } from './conto';
+
+export interface SyncInfo {
+  busy: boolean;
+  at: number | null;
+  err: string | null;
+}
 
 export interface Completion {
   id: string;
@@ -40,6 +48,13 @@ interface Store {
   /** Salva (o con null cancella) la bozza di una task messa in pausa. */
   saveDraft: (id: string, draft: TaskDraft | null) => void;
   getIndex: () => Promise<ContentIndex>;
+  /** Account con passkey (null se non sei entrato) e stato della sincronizzazione. */
+  conto: Sessione | null;
+  syncInfo: SyncInfo;
+  syncNow: () => Promise<boolean>;
+  /** Dopo l'accesso: `sostituisci` usa i progressi dell'account, altrimenti li unisce a quelli di qui. */
+  entraNelConto: (remoto: AppState | null, sostituisci: boolean) => Promise<boolean>;
+  esciDalConto: () => void;
 }
 
 const Ctx = createContext<Store | null>(null);
@@ -54,8 +69,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [indexError, setIndexError] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<number>(0);
+  const showToastRef = useRef<(t: string) => void>(() => undefined);
   const stateRef = useRef(state);
   stateRef.current = state;
+  const [conto, setConto] = useState<Sessione | null>(() => sessione());
+  const [syncInfo, setSyncInfo] = useState<SyncInfo>({ busy: false, at: null, err: null });
 
   const getIndex = useCallback(async () => {
     try {
@@ -72,7 +90,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const update = useCallback((fn: (s: AppState) => AppState) => {
     setState((prev) => {
       const next = fn(prev);
-      if (next !== prev) void saveState(next);
+      if (next !== prev) {
+        void saveState(next);
+        stateRef.current = next;
+      }
       return next;
     });
   }, []);
@@ -104,6 +125,119 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       alive = false;
     };
   }, [ready, today, state.level, getIndex]);
+
+  // il piano di oggi entra nei progressi (così è lo stesso su tutti i dispositivi dell'account);
+  // se dalla sincronizzazione ne arriva uno diverso, creato prima altrove, le task di oggi si allineano
+  const plan = state.plan;
+  useEffect(() => {
+    if (!todayRec || todayRec.date !== today) return;
+    if (!plan || plan.date !== today) {
+      update((s) => (s.plan?.date === today ? s : { ...s, plan: { date: today, at: Date.now(), plan: todayRec.plan } }));
+      return;
+    }
+    if (JSON.stringify(plan.plan) === JSON.stringify(todayRec.plan)) return;
+    let alive = true;
+    const keep = { attempts: todayRec.attempts, drafts: todayRec.drafts };
+    getIndex()
+      .then((idx) => buildToday(idx, stateRef.current, today, plan.plan))
+      .then((rec) => {
+        if (!alive) return;
+        const merged = { ...rec, ...keep };
+        void saveToday(merged);
+        setTodayRec(merged);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [todayRec, plan, today, update, getIndex]);
+
+  // ---------------------------------------------------------------- sincronizzazione con l'account
+  const syncing = useRef(false);
+  const again = useRef(false);
+  const lastSent = useRef('');
+  const syncNow = useCallback(async (): Promise<boolean> => {
+    if (!sessione()) return false;
+    if (syncing.current) {
+      again.current = true;
+      return true;
+    }
+    syncing.current = true;
+    setSyncInfo((i) => ({ ...i, busy: true }));
+    let ok = true;
+    try {
+      do {
+        again.current = false;
+        const dev = dispositivo();
+        const sent = foldLocalXp(stateRef.current, dev);
+        update((s) => foldLocalXp(s, dev));
+        const r = await inviaStato(stripLocal(sent));
+        update((s) => {
+          const n = applyRemote(s, r.stato, dayKey());
+          lastSent.current = JSON.stringify(stripLocal(n));
+          return n;
+        });
+      } while (again.current);
+      setSyncInfo({ busy: false, at: Date.now(), err: null });
+    } catch (e) {
+      ok = false;
+      if (e instanceof ErroreConto && e.status === 401) {
+        dimenticaSessione();
+        setConto(null);
+        showToastRef.current('Sessione scaduta: accedi di nuovo nelle Impostazioni');
+      }
+      setSyncInfo((i) => ({ ...i, busy: false, err: (e as Error).message }));
+    } finally {
+      syncing.current = false;
+    }
+    return ok;
+  }, [update]);
+
+  // all'apertura, quando l'app torna in primo piano, quando torna la rete
+  useEffect(() => {
+    if (!ready || !conto) return;
+    void syncNow();
+    const onVisible = () => document.visibilityState === 'visible' && void syncNow();
+    const onOnline = () => void syncNow();
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('online', onOnline);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('online', onOnline);
+    };
+  }, [ready, conto, syncNow]);
+
+  // dopo ogni modifica (una task, una sezione letta…), con qualche secondo di calma
+  useEffect(() => {
+    if (!ready || !conto) return;
+    const now = JSON.stringify(stripLocal(state));
+    if (now === lastSent.current) return;
+    const t = window.setTimeout(() => void syncNow(), 3000);
+    return () => window.clearTimeout(t);
+  }, [ready, conto, state, syncNow]);
+
+  const entraNelConto = useCallback(
+    async (remoto: AppState | null, sostituisci: boolean) => {
+      setConto(sessione());
+      if (remoto && sostituisci) {
+        const r = normalize(remoto);
+        update((s) => ({ ...r, reminder: s.reminder, xpSynced: xpTotal(r.xpDev), daySnap: undefined }));
+        await clearToday();
+        setTodayRec(null);
+      } else if (remoto) {
+        // unione: si adotta l'eventuale «Azzera tutto» dell'account, così i progressi di qui non vengono scartati
+        update((s) => ({ ...s, resetAt: remoto.resetAt }));
+      }
+      return syncNow();
+    },
+    [update, syncNow]
+  );
+
+  const esciDalConto = useCallback(() => {
+    dimenticaSessione();
+    setConto(null);
+    setSyncInfo({ busy: false, at: null, err: null });
+  }, []);
 
   // promemoria: all'apertura rinnova abbonamento e orario sul server; poi comunica quando la giornata è completa
   const pushSynced = useRef(false);
@@ -140,6 +274,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     window.clearTimeout(toastTimer.current);
     toastTimer.current = window.setTimeout(() => setToast(null), 2200);
   }, []);
+  showToastRef.current = showToast;
 
   const [lastCompletion, setLastCompletion] = useState<Completion | null>(null);
 
@@ -193,7 +328,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [update, showToast]
   );
 
-  const removeFavorite = useCallback((id: string) => update((s) => ({ ...s, favorites: s.favorites.filter((f) => f.id !== id) })), [update]);
+  const removeFavorite = useCallback(
+    (id: string) => update((s) => ({ ...s, favorites: s.favorites.filter((f) => f.id !== id), favGone: { ...(s.favGone ?? {}), [id]: Date.now() } })),
+    [update]
+  );
 
   const todayRef = useRef(todayRec);
   todayRef.current = todayRec;
@@ -259,8 +397,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [today, getIndex]);
 
   const value = useMemo<Store>(
-    () => ({ ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, resetToday, recordAttempt, saveDraft, getIndex, lastCompletion, learnIntro }),
-    [ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, resetToday, recordAttempt, saveDraft, getIndex, lastCompletion, learnIntro]
+    () => ({ ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, resetToday, recordAttempt, saveDraft, getIndex, lastCompletion, learnIntro, conto, syncInfo, syncNow, entraNelConto, esciDalConto }),
+    [ready, state, today, todayRec, todayError, index, indexError, toast, update, finishTask, finishAdvanced, readSection, addFavorite, removeFavorite, showToast, reloadToday, resetToday, recordAttempt, saveDraft, getIndex, lastCompletion, learnIntro, conto, syncInfo, syncNow, entraNelConto, esciDalConto]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

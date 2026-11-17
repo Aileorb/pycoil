@@ -6,9 +6,10 @@ import { normalize } from '../engine/state';
 import { PYODIDE_VERSION } from '../py/version';
 import { SpaceUsage } from '../components/SpaceUsage';
 import { ReminderSettings } from '../components/ReminderSettings';
+import { AccountSettings } from '../components/AccountSettings';
 
 export function Settings({ onClose }: { onClose: () => void }) {
-  const { state, today, update, reloadToday, resetToday, showToast, index } = useStore();
+  const { state, today, update, reloadToday, resetToday, showToast, index, conto } = useStore();
   const file = useRef<HTMLInputElement>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const [confirmDay, setConfirmDay] = useState(false);
@@ -45,7 +46,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
   return (
     <PageScreen title="Impostazioni" backLabel="Statistiche" onClose={onClose}>
       <div className="group">
-        <button className="row" onClick={() => { update((s) => ({ ...s, level: null })); void clearToday(); onClose(); }}>
+        <button className="row" onClick={() => { update((s) => ({ ...s, level: null, settingsAt: Date.now() })); void clearToday(); onClose(); }}>
           <span className="grow"><span className="t">Rifai il test di livello</span><span className="st">Livello attuale: {state.level}</span></span>
         </button>
         <button className="row" onClick={doExport}>
@@ -71,6 +72,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
           </button>
         )}
       </div>
+      <AccountSettings />
       <ReminderSettings />
       <SpaceUsage />
       <div className="group">
@@ -79,13 +81,13 @@ export function Settings({ onClose }: { onClose: () => void }) {
             <span className="grow"><span className="t" style={{ color: 'var(--red)' }}>Azzera tutti i progressi</span></span>
           </button>
         ) : (
-          <button className="row" onClick={() => { update(() => normalize({})); void clearToday(); onClose(); }}>
-            <span className="grow"><span className="t" style={{ color: 'var(--red)' }}>Conferma: cancella tutto</span><span className="st">Non si può annullare. Esporta prima, se vuoi.</span></span>
+          <button className="row" onClick={() => { update(() => ({ ...normalize({}), resetAt: Date.now() })); void clearToday(); onClose(); }}>
+            <span className="grow"><span className="t" style={{ color: 'var(--red)' }}>Conferma: cancella tutto</span><span className="st">{conto ? 'Anche sull’account e sugli altri dispositivi. Non si può annullare.' : 'Non si può annullare. Esporta prima, se vuoi.'}</span></span>
           </button>
         )}
       </div>
       <p style={{ fontSize: 13, color: 'var(--text2)', margin: '0 4px', lineHeight: 1.5 }}>
-        Sul dispositivo restano solo i contatori, i preferiti e le task di oggi: libro, documentazione e soluzioni stanno su GitHub.
+        Sul dispositivo restano solo i contatori, i preferiti e le task di oggi: libro, documentazione e soluzioni stanno su GitHub. Con l’account, gli stessi contatori e preferiti sono salvati anche sul server dell’app.
         Python {index?.python ?? '3.14'} nel browser con Pyodide {PYODIDE_VERSION}. Le novità di Python 3.15 sono segnate «Desktop».
       </p>
     </PageScreen>

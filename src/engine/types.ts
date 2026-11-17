@@ -1,3 +1,5 @@
+import type { DayPlan } from './scheduler';
+
 // ---------- Contenuti (letti a runtime da GitHub Pages, mai salvati in locale) ----------
 
 export type LevelId = 'principiante' | 'base' | 'intermedio' | 'avanzato';
@@ -144,6 +146,8 @@ export interface SectionDoc {
 export interface DayLog {
   done: string[]; // task obbligatorie completate
   adv: string[]; // avanzate completate
+  /** Quante volte la giornata è stata azzerata: tra due dispositivi vince l'azzeramento più recente. */
+  r?: number;
 }
 
 export interface Favorite {
@@ -175,6 +179,20 @@ export interface AppState {
   daySnap?: DaySnap;
   /** Promemoria giornaliero: orario scelto, se lo vuoi, e se la domanda della prima apertura è già stata fatta. */
   reminder?: Reminder;
+
+  // ---- sincronizzazione tra dispositivi (account con passkey) ----
+  /** Punti per dispositivo: guadagni (p) e tolti (n). Il totale è la somma: due dispositivi non si sovrascrivono. */
+  xpDev?: Record<string, { p: number; n: number }>;
+  /** Ultima modifica di livello e anno (vince la più recente). */
+  settingsAt?: number;
+  /** Il piano del giorno, uguale su tutti i dispositivi: vince quello creato per primo. */
+  plan?: { date: string; at: number; plan: DayPlan };
+  /** Preferiti tolti (id → quando), perché non ricompaiano da un altro dispositivo. */
+  favGone?: Record<string, number>;
+  /** «Azzera tutti i progressi»: vince l'azzeramento più recente, su tutti i dispositivi. */
+  resetAt?: number;
+  /** Solo locale: i punti già comunicati al server dall'ultima sincronizzazione. */
+  xpSynced?: number;
 }
 
 export interface Reminder {

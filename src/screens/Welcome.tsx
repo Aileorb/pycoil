@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from '../store';
 import { CoiledSnake } from '../components/Snake';
 import { Check, Todo } from '../components/icons';
 import type { LevelId, QuizQuestion } from '../engine/types';
 import { highlightLite } from '../components/highlight';
+import { accedi, contoDisponibile, passkeySupportate, preparaPasskey, scaricaStato } from '../conto';
 
 const LEVELS: { id: LevelId; name: string; desc: string; start: string }[] = [
   { id: 'principiante', name: 'Principiante', desc: 'Non ho mai programmato: spiegami tutto da zero.', start: 'Si parte dalla Parte 0 · Primi passi' },
@@ -19,7 +20,7 @@ export function Welcome({ onImport }: { onImport?: () => void }) {
   const [quiz, setQuiz] = useState<{ i: number; score: Record<string, number>; picked: number | null } | null>(null);
   const [suggested, setSuggested] = useState<LevelId | null>(null);
 
-  const start = (lv: LevelId) => update((s) => ({ ...s, level: lv, createdOn: s.createdOn ?? today }));
+  const start = (lv: LevelId) => update((s) => ({ ...s, level: lv, createdOn: s.createdOn ?? today, settingsAt: Date.now() }));
 
   if (quiz && index) {
     const qs = index.quiz;
@@ -101,7 +102,53 @@ export function Welcome({ onImport }: { onImport?: () => void }) {
         <button className="pill-btn" onClick={() => start(level)}>Inizia</button>
       )}
       <button className="ghost-btn" onClick={() => start(level)}>Salta il test e inizia dalla Parte {['0', 'I', 'II', 'III'][ORDER.indexOf(level)]}</button>
+      <AccediConPasskey />
       {onImport && <button className="ghost-btn" style={{ color: 'var(--text2)', fontSize: 15 }} onClick={onImport}>Hai già usato PyCoil? Importa i progressi</button>}
     </main>
+  );
+}
+
+/** Primo avvio su un dispositivo nuovo (es. l'iPhone): se hai già un account, entri e ritrovi tutto. Facoltativo. */
+function AccediConPasskey() {
+  const { entraNelConto, showToast } = useStore();
+  const [ok, setOk] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!passkeySupportate()) return;
+    contoDisponibile().then((d) => {
+      setOk(d);
+      if (d) preparaPasskey('accedi');
+    });
+  }, []);
+  if (!ok) return null;
+
+  const entra = async () => {
+    setErr(null);
+    setBusy(true);
+    const r = await accedi();
+    if (!r.ok) {
+      setBusy(false);
+      if (!r.annullato) setErr(r.err);
+      return;
+    }
+    try {
+      const { stato } = await scaricaStato();
+      await entraNelConto(stato, true);
+      showToast(stato?.level ? 'Bentornato: progressi ritrovati' : 'Account vuoto: scegli il livello per iniziare');
+    } catch (e) {
+      setErr((e as Error).message);
+    }
+    setBusy(false);
+  };
+
+  return (
+    <>
+      <button className="ghost-btn" style={{ fontSize: 15 }} onClick={entra} disabled={busy}>
+        {busy ? 'Accesso…' : 'Hai già un account? Accedi con la passkey'}
+      </button>
+      {err && <p style={{ margin: 0, fontSize: 13, color: 'var(--red)', textAlign: 'center' }}>{err}</p>}
+    </>
   );
 }

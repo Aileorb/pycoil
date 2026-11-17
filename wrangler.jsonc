@@ -13,8 +13,16 @@
     "run_worker_first": ["/api/*"]
   },
   "durable_objects": {
-    "bindings": [{ "name": "PROMEMORIA", "class_name": "Promemoria" }]
+    "bindings": [
+      { "name": "PROMEMORIA", "class_name": "Promemoria" },
+      // account facoltativi con passkey e progressi sincronizzati (worker/conto.js)
+      { "name": "CONTO", "class_name": "Conto" },
+      { "name": "SFIDE", "class_name": "Sfide" }
+    ]
   },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Promemoria"] }],
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["Promemoria"] },
+    { "tag": "v2", "new_sqlite_classes": ["Conto", "Sfide"] }
+  ],
   "observability": { "enabled": true }
 }

@@ -88,8 +88,8 @@ export function learnIntroToday(s: AppState, day: string, sectionId: string): Ap
  * Le sezioni lette nel Percorso restano.
  */
 export function resetDay(s: AppState, day: string): AppState {
-  const days = { ...s.days };
-  delete days[day];
+  // la giornata resta, vuota e con il contatore degli azzeramenti: così un altro dispositivo non la riporta indietro
+  const days = s.days[day] ? { ...s.days, [day]: { done: [], adv: [], r: (s.days[day].r ?? 0) + 1 } } : s.days;
   const snap = s.daySnap?.date === day ? s.daySnap : null;
   if (!snap) return { ...s, days };
   return {

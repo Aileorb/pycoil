@@ -225,7 +225,7 @@ describe('azzerare la giornata', () => {
     s = markSectionRead(s, 'altra').state;
     expect(s.streak.current).toBe(2);
     const r = resetDay(s, '2026-11-12');
-    expect(r.days['2026-11-12']).toBeUndefined();
+    expect(r.days['2026-11-12']).toEqual({ done: [], adv: [], r: 1 });
     expect(r.days['2026-11-11'].done).toEqual(['a', 'b', 'c']);
     expect(r.streak).toEqual(before.streak);
     expect(r.review).toEqual(before.review);

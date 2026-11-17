@@ -109,11 +109,14 @@ export async function ensureToday(
   getIndex: () => Promise<ContentIndex>
 ): Promise<TodayRecord | null> {
   const cached = await readToday();
+  // il piano di oggi già deciso (anche da un altro dispositivo dello stesso account) ha la precedenza
+  const keep = state.plan?.date === day ? state.plan.plan : undefined;
+  const same = (rec: TodayRecord) => !keep || JSON.stringify(rec.plan) === JSON.stringify(keep);
   // un piano di oggi nel formato precedente (senza introduzione) si ricalcola, tenendo tentativi e bozze
-  if (cached && cached.date === day && 'intro' in cached.plan) return cached;
+  if (cached && cached.date === day && 'intro' in cached.plan && same(cached)) return cached;
   if (cached && cached.date === day) {
     try {
-      const rec = await buildToday(await getIndex(), state, day);
+      const rec = await buildToday(await getIndex(), state, day, keep);
       const merged = { ...rec, attempts: cached.attempts, drafts: cached.drafts };
       await saveToday(merged);
       return merged;
@@ -123,7 +126,7 @@ export async function ensureToday(
   }
   if (cached) await clearToday();
   try {
-    return await buildToday(await getIndex(), state, day);
+    return await buildToday(await getIndex(), state, day, keep);
   } catch {
     return null; // offline e niente task di oggi: la Home lo segnala
   }

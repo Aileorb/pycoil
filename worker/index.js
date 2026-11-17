@@ -7,6 +7,8 @@
 // Stessa impostazione del Worker di Di&T.
 import { DurableObject } from 'cloudflare:workers';
 import { dayIn, nextFire, reminderText, validTime, validTz } from './schedule';
+import { gestisciConto } from './conto.js';
+export { Conto, Sfide } from './conto.js';
 
 const PUSH_HOSTS = /(^|\.)(push\.apple\.com|fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com|push\.api\.chromium\.org)$/;
 const enc = new TextEncoder();
@@ -163,7 +165,9 @@ export default {
   async fetch(req, env) {
     const url = new URL(req.url);
     if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(req);
-    if (url.pathname === '/api/ping') return json({ ok: true, push: true });
+    if (url.pathname === '/api/ping') return json({ ok: true, push: true, conto: !!env.CONTO });
+    const conto = await gestisciConto(req, env, url);
+    if (conto) return conto;
     const u = url.searchParams.get('u') || '';
     if (!/^[A-Za-z0-9_-]{16,64}$/.test(u)) return json({ ok: false, err: 'id non valido' }, 400);
     const p = env.PROMEMORIA.get(env.PROMEMORIA.idFromName(u));
