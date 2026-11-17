@@ -36,34 +36,14 @@ export default defineConfig({
           { src: 'icons/pycoil-v2-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
-      workbox: {
-        // Requisito vincolante: solo la shell dell'app in cache. I contenuti didattici
-        // restano su GitHub e si leggono a runtime, senza essere salvati.
+      // Service worker scritto a mano come in Di&T (src/sw.js), con le notifiche gestite nel file stesso.
+      // In build si inietta solo l'elenco dei file della shell: i contenuti didattici restano fuori dalla cache.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,webmanifest}', 'icons/pycoil-v2-180.png', 'icons/pycoil-v2-192.png'],
-        globIgnores: ['content/**'],
-        navigateFallback: 'index.html',
-        navigateFallbackDenylist: [/\/content\//, /\/api\//],
-        // il gestore delle notifiche (public/push-sw.js) lo mette in cima a sw.js scripts/patch-sw.mjs:
-        // con importScripts di Workbox finirebbe dentro define() e Safari su iPhone lo ignorerebbe
-        // Il motore Python (Pyodide e le sue librerie) e i pacchetti presi da PyPI finiscono in una
-        // cache dell'app, così le Impostazioni possono misurarli e liberare le librerie non più usate.
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/pyodide\//,
-            handler: 'CacheFirst',
-            options: { cacheName: 'pycoil-python', cacheableResponse: { statuses: [200] } }
-          },
-          {
-            urlPattern: /^https:\/\/files\.pythonhosted\.org\//,
-            handler: 'CacheFirst',
-            options: { cacheName: 'pycoil-python', cacheableResponse: { statuses: [200] } }
-          },
-          {
-            urlPattern: /^https:\/\/pypi\.org\/(simple|pypi)\//,
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'pycoil-python', cacheableResponse: { statuses: [200] } }
-          }
-        ]
+        globIgnores: ['content/**', 'sw.js']
       }
     })
   ],

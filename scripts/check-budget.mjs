@@ -14,7 +14,7 @@ for (const f of assets) {
 }
 const sw = readFileSync(join(DIST, 'sw.js'), 'utf8');
 const leaks = [];
-if (/content\//.test(sw)) leaks.push('sw.js precarica file di content/');
+if (/url:"content\//.test(sw) || /"url":"content\//.test(sw)) leaks.push('sw.js precarica file di content/');
 for (const f of assets) {
   const s = readFileSync(join(DIST, 'assets', f), 'utf8');
   if (s.includes('"promptHtml"') || s.includes('"solution":')) leaks.push(`${f} contiene contenuti didattici`);

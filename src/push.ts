@@ -169,7 +169,9 @@ export async function enablePush(time: string): Promise<{ ok: true } | { ok: fal
     const s = await call('subscribe', { sub: sub.toJSON() });
     if (!s.ok) return { ok: false, err: s.err ?? 'Abbonamento rifiutato.' };
     const c = await call('settings', { time, tz: timeZone(), enabled: true });
-    return c.ok ? { ok: true } : { ok: false, err: c.err ?? 'Orario non salvato.' };
+    if (!c.ok) return { ok: false, err: c.err ?? 'Orario non salvato.' };
+    void call('test', {}).catch(() => undefined); // come Di&T: subito una notifica di conferma
+    return { ok: true };
   } catch (e) {
     return { ok: false, err: `Non riesco ad attivarle: ${e instanceof Error ? e.message : String(e)}` };
   }
@@ -254,12 +256,11 @@ export async function pushDiag(): Promise<PushDiag> {
 export async function syncPush(time: string, day: { today: string; done: boolean; streak: number; lastFullDay: string | null }): Promise<void> {
   try {
     if (!(await hasServer())) return;
+    // come pushInit di Di&T: si rinnova sul server solo l'abbonamento legato alla chiave giusta,
+    // senza abbonarsi di nascosto (lo fa solo il tocco su «Attiva»)
+    if (Notification.permission !== 'granted') return;
     const reg = await registration();
-    let sub = await currentSubscription(reg);
-    if (!sub && Notification.permission === 'granted') {
-      const key = await serverKey();
-      if (key) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) }).catch(() => null);
-    }
+    const sub = await currentSubscription(reg);
     if (!sub) return;
     await call('subscribe', { sub: sub.toJSON() });
     await call('settings', { time, tz: timeZone(), enabled: true });

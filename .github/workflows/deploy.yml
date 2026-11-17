@@ -61,7 +61,6 @@ jobs:
             node scripts/build-moved.mjs pages
           else
             PYCOIL_BASE=/pycoil/ npx vite build --outDir pages --emptyOutDir
-            node scripts/patch-sw.mjs pages
             touch pages/.nojekyll
           fi
 

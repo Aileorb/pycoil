@@ -180,12 +180,12 @@ export async function pythonFiles(): Promise<{ files: CachedFile[]; lock: Lock |
   return { files, lock };
 }
 
-/** Dimensione della shell dell'app nella cache offline (precache di Workbox). */
+/** Dimensione della shell dell'app nella cache offline (src/sw.js). */
 export async function appShellSize(): Promise<number> {
   if (!hasCacheApi()) return 0;
   let total = 0;
   for (const name of await caches.keys()) {
-    if (!name.startsWith('workbox-precache')) continue;
+    if (!name.startsWith('pycoil-shell-') && !name.startsWith('workbox-precache')) continue;
     const cache = await caches.open(name);
     for (const req of await cache.keys()) total += (await (await cache.match(req))?.blob())?.size ?? 0;
   }
