@@ -2,42 +2,102 @@
 letter: E
 title: Glossario
 ---
-**Array** — tabella di numeri dello stesso tipo (NumPy), con operazioni elemento per elemento.
+I termini del libro in ordine alfabetico, ognuno con un esempio minimo. Tra parentesi la parte in cui il concetto viene spiegato.
 
-**Broadcasting** — regola con cui NumPy combina array di forme diverse espandendo le dimensioni di lunghezza 1.
+**Argomento** — il valore che passi a una funzione quando la chiami: in `area(20)` l'argomento è `20`. Il nome che lo riceve nella definizione è il **parametro**. (Parte 0)
 
-**Comprehension** — espressione compatta che costruisce una lista, un dizionario o un insieme da un'altra sequenza.
+**Array** — tabella di numeri dello stesso tipo (NumPy), con operazioni elemento per elemento: `np.array([1, 2, 3]) * 2` dà `[2 4 6]`. (Parte III)
 
-**Dataclass** — classe che contiene soprattutto dati; `@dataclass` ne scrive `__init__`, `__repr__` ed `__eq__`.
+**Assegnazione** — dare un nome a un valore con `=`: `F = 1200` vuol dire «da ora `F` indica 1200», non «F è uguale a 1200» in senso matematico. Il confronto si scrive `==`. (Parte 0)
 
-**Dunder** — metodo speciale con doppio trattino basso (`__len__`, `__add__`), chiamato dagli operatori.
+**Attributo** — un dato che appartiene a un oggetto, letto con il punto: `trave.L`, `array.shape`. (Parte II)
 
-**Eccezione** — oggetto che segnala un errore e interrompe il flusso finché qualcuno non lo gestisce con `except`.
+**Booleano** (`bool`) — il tipo con due soli valori, `True` e `False`, risultato dei confronti: `350 > 235` vale `True`. (Parte 0)
 
-**f-string** — stringa preceduta da `f` in cui si inseriscono espressioni tra graffe.
+**Broadcasting** — regola con cui NumPy combina array di forme diverse espandendo le dimensioni di lunghezza 1. (Parte III)
 
-**Generatore** — funzione con `yield` che produce valori uno alla volta, senza tenerli tutti in memoria.
+**Ciclo** — ripetere un blocco di codice: `for` scorre gli elementi di una sequenza, `while` ripete finché una condizione è vera. (Parte 0)
 
-**Immutabile** — oggetto che non può cambiare dopo la creazione (`int`, `str`, `tuple`).
+**Classe** — lo «stampo» che descrive un tipo di oggetto (dati e metodi); ogni oggetto creato dalla classe è una sua **istanza**: `t = Trave(4.0)`. (Parte II)
 
-**Iterabile** — qualunque oggetto su cui si può fare `for` (liste, stringhe, file, dizionari, `range`).
+**Commento** — testo dopo `#`, ignorato da Python, che spiega il codice a chi lo legge: `L = 4.0  # m`. (Parte 0)
 
-**Modulo** — file `.py` che si importa; un **pacchetto** è una cartella di moduli.
+**Comprehension** — espressione compatta che costruisce una lista, un dizionario o un insieme da un'altra sequenza: `[x**2 for x in range(4)]` dà `[0, 1, 4, 9]`. (Parte I)
 
-**Mutabile** — oggetto modificabile sul posto (`list`, `dict`, `set`, array NumPy).
+**Condizione** — un'espressione vera o falsa che decide quale ramo eseguire in un `if`/`elif`/`else`. (Parte 0)
 
-**Pattern matching** — l'istruzione `match` che confronta un valore con la sua forma.
+**Dataclass** — classe che contiene soprattutto dati; `@dataclass` ne scrive `__init__`, `__repr__` ed `__eq__`. (Parte II)
 
-**pip** — l'installatore di librerie Python dal Python Package Index (PyPI).
+**Dizionario** (`dict`) — raccolta di coppie chiave → valore: `fy = {"S235": 235, "S355": 355}`, poi `fy["S355"]` dà `355`. (Parte I)
 
-**Pyodide** — Python compilato in WebAssembly: è il motore che esegue il codice in questa app.
+**Docstring** — la stringa tra tripli apici subito sotto `def`, che descrive cosa fa la funzione; la mostra `help()`. (Parte I)
 
-**Slicing** — estrazione di una porzione di sequenza con `inizio:fine:passo`.
+**Dunder** — metodo speciale con doppio trattino basso (`__len__`, `__add__`), chiamato dagli operatori. (Parte II)
 
-**Traceback** — il resoconto di un errore, da leggere dal basso.
+**Eccezione** — oggetto che segnala un errore e interrompe il flusso finché qualcuno non lo gestisce con `except`. (Parti 0 e I, appendice C)
 
-**Type hint** — annotazione facoltativa del tipo (`def f(x: float) -> float`), controllabile con strumenti come mypy.
+**Espressione** — qualunque pezzo di codice che produce un valore: `F / A`, `len(lista)`, `x > 0`. (Parte 0)
 
-**Vettorizzazione** — scrivere il calcolo su interi array invece che con cicli elemento per elemento.
+**f-string** — stringa preceduta da `f` in cui si inseriscono espressioni tra graffe: `f"σ = {sigma:.1f} MPa"`. (Parte 0, appendice D)
 
-**Virtual environment** — cartella con un Python e le librerie di un singolo progetto.
+**float** — numero con la virgola (in Python si scrive col punto): `2.5`, `1e-3`. È un'approssimazione binaria: `0.1 + 0.2` dà `0.30000000000000004`. (Parte 0)
+
+**Funzione** — un blocco di codice con un nome, che riceve argomenti e restituisce un risultato con `return`; si definisce con `def`. (Parte 0)
+
+**Generatore** — funzione con `yield` che produce valori uno alla volta, senza tenerli tutti in memoria. (Parte II)
+
+**Immutabile** — oggetto che non può cambiare dopo la creazione (`int`, `float`, `str`, `tuple`). (Parte I)
+
+**Indice** — la posizione di un elemento in una sequenza, **da 0**: in `v = [10, 20, 30]`, `v[0]` è `10` e `v[-1]` è l'ultimo, `30`. (Parte 0)
+
+**int** — numero intero: `3`, `-12`, `12_000` (il trattino basso separa le migliaia ed è ignorato). (Parte 0)
+
+**Interprete** — il programma `python` che legge il tuo codice ed esegue le istruzioni una alla volta. (Appendice A)
+
+**Iterabile** — qualunque oggetto su cui si può fare `for` (liste, stringhe, file, dizionari, `range`). (Parte II)
+
+**Libreria** — codice scritto da altri da importare e usare: NumPy, pandas, SciPy. Si installa con `pip` e si carica con `import`. (Parte I)
+
+**Lista** (`list`) — sequenza ordinata e modificabile di valori: `carichi = [10, 25, 40]`; `carichi.append(55)` aggiunge in fondo. (Parte 0)
+
+**Metodo** — una funzione che appartiene a un oggetto, chiamata con il punto: `testo.upper()`, `lista.append(x)`. (Parte 0)
+
+**Modulo** — file `.py` che si importa; un **pacchetto** è una cartella di moduli. (Parte I)
+
+**Mutabile** — oggetto modificabile sul posto (`list`, `dict`, `set`, array NumPy). (Parte I)
+
+**None** — il valore che significa «niente»; è ciò che restituisce una funzione senza `return`. (Parte 0)
+
+**Notebook** — documento (Jupyter) che alterna celle di codice, risultati e testo: comodo per esplorare dati e scrivere relazioni. (Parte II)
+
+**Oggetto** — qualunque valore in Python (un numero, una lista, una trave): ha un tipo, dei dati e dei metodi. (Parte II)
+
+**Pattern matching** — l'istruzione `match` che confronta un valore con la sua forma. (Parte II)
+
+**pip** — l'installatore di librerie Python dal Python Package Index (PyPI): `python -m pip install numpy`. (Parte II, appendice A)
+
+**Pyodide** — Python compilato in WebAssembly: è il motore che esegue il codice in questa app. (Appendice G)
+
+**Script** — file `.py` che si esegue dal terminale con `python nome.py`. (Parte 0, appendice A)
+
+**Slicing** — estrazione di una porzione di sequenza con `inizio:fine:passo`: `v[1:3]` prende gli elementi 1 e 2, la fine è esclusa. (Parte 0)
+
+**Stringa** (`str`) — testo tra virgolette: `"S355"`. `"3"` è un testo, non un numero: per calcolarci serve `float("3")`. (Parte 0)
+
+**Terminale** — la finestra in cui si scrivono comandi (PowerShell, Terminale). (Parte 0, appendice A)
+
+**Test** — codice che controlla automaticamente che un'altra funzione dia il risultato atteso; con pytest sono funzioni che iniziano con `test_` e usano `assert`. (Parte II)
+
+**Tipo** — la natura di un valore (`int`, `float`, `str`, `list`…), che decide quali operazioni sono permesse; lo mostra `type(x)`. (Parte 0)
+
+**Traceback** — il resoconto di un errore, da leggere dal basso. (Parte 0, appendice C)
+
+**Tupla** (`tuple`) — sequenza come la lista ma immutabile, scritta con le tonde: `punto = (3.0, 4.5)`. (Parte I)
+
+**Type hint** — annotazione facoltativa del tipo (`def f(x: float) -> float`), controllabile con strumenti come mypy. (Parte II)
+
+**Variabile** — un nome che si riferisce a un valore: dopo `L = 4.0`, scrivere `L` equivale a scrivere `4.0`. (Parte 0)
+
+**Vettorizzazione** — scrivere il calcolo su interi array invece che con cicli elemento per elemento. (Parte III)
+
+**Virtual environment** — cartella con un Python e le librerie di un singolo progetto. (Parte II, appendice A)
