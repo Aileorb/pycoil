@@ -211,44 +211,6 @@ export async function testPush(): Promise<{ ok: boolean; status?: number; err?: 
   }
 }
 
-/** Notifica mostrata direttamente dal telefono, senza server: dice se il sistema le visualizza. */
-export async function localTestPush(): Promise<boolean> {
-  try {
-    const reg = await registration();
-    await reg.showNotification('Prova dal telefono', { body: 'Se vedi questa, il sistema mostra le notifiche di PyCoil.', tag: 'pycoil-locale', icon: 'icons/pycoil-v2-192.png' });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export interface PushDiag {
-  permission: string;
-  service: string | null; // host del servizio push dell'abbonamento
-  server: { sub: boolean; next: number | null; last?: { at: number; status?: number; err?: string } } | null;
-}
-
-/** Stato completo, per capire dove si ferma una notifica. */
-export async function pushDiag(): Promise<PushDiag> {
-  const permission = 'Notification' in window ? Notification.permission : 'non supportate';
-  let service: string | null = null;
-  try {
-    const reg = await registration();
-    const sub = await reg.pushManager.getSubscription();
-    service = sub ? new URL(sub.endpoint).hostname : null;
-  } catch {
-    /* niente */
-  }
-  let server: PushDiag['server'] = null;
-  try {
-    const r = await call<{ ok: boolean; sub: boolean; next: number | null; last?: { at: number; status?: number; err?: string } }>('status');
-    server = { sub: r.sub, next: r.next, last: r.last };
-  } catch {
-    /* offline */
-  }
-  return { permission, service, server };
-}
-
 /**
  * All'apertura: rinnova abbonamento e orario sul server (gli abbonamenti push possono scadere)
  * e comunica com'è andata la giornata, così il promemoria non arriva se hai già finito.
