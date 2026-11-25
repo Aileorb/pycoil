@@ -164,7 +164,8 @@ export function AccountSettings() {
           <p className="space-note">
             Facoltativo: senza account i progressi restano solo qui. La passkey si apre con Face ID o Touch ID e si salva nel Portachiavi
             di iCloud, quindi c’è già su iPhone, iPad e Mac con lo stesso Apple ID. Su un PC Windows scegli «Accedi» e inquadra con
-            l’iPhone il codice QR che compare.
+            l’iPhone il codice QR che compare. Attenzione: PyCoil aperta dall’icona (schermata Home o Dock) e PyCoil aperta in Safari
+            non condividono i dati, quindi entra nell’account in quella che usi.
           </p>
         </>
       ) : (

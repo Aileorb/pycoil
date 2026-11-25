@@ -51,7 +51,7 @@ interface Store {
   /** Account con passkey (null se non sei entrato) e stato della sincronizzazione. */
   conto: Sessione | null;
   syncInfo: SyncInfo;
-  syncNow: () => Promise<boolean>;
+  syncNow: (opts?: { keepalive?: boolean }) => Promise<boolean>;
   /** Dopo l'accesso: `sostituisci` usa i progressi dell'account, altrimenti li unisce a quelli di qui. */
   entraNelConto: (remoto: AppState | null, sostituisci: boolean) => Promise<boolean>;
   esciDalConto: () => void;
@@ -156,7 +156,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const syncing = useRef(false);
   const again = useRef(false);
   const lastSent = useRef('');
-  const syncNow = useCallback(async (): Promise<boolean> => {
+  const lastSyncAt = useRef(0);
+  const syncNow = useCallback(async (opts?: { keepalive?: boolean }): Promise<boolean> => {
     if (!sessione()) return false;
     if (syncing.current) {
       again.current = true;
@@ -171,13 +172,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const dev = dispositivo();
         const sent = foldLocalXp(stateRef.current, dev);
         update((s) => foldLocalXp(s, dev));
-        const r = await inviaStato(stripLocal(sent));
+        const r = await inviaStato(stripLocal(sent), opts?.keepalive);
         update((s) => {
           const n = applyRemote(s, r.stato, dayKey());
           lastSent.current = JSON.stringify(stripLocal(n));
           return n;
         });
       } while (again.current);
+      lastSyncAt.current = Date.now();
       setSyncInfo({ busy: false, at: Date.now(), err: null });
     } catch (e) {
       ok = false;
@@ -193,26 +195,42 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return ok;
   }, [update]);
 
-  // all'apertura, quando l'app torna in primo piano, quando torna la rete
+  // quando inviare e ricevere:
+  //  - all'apertura, quando l'app torna in primo piano o la finestra riprende il focus, quando torna la rete;
+  //  - ogni 90 secondi mentre è aperta (una pagina lasciata aperta sul computer si aggiorna da sola);
+  //  - subito, con keepalive, quando l'app va in background (su iPhone si chiude spesso appena finita l'ultima task).
   useEffect(() => {
     if (!ready || !conto) return;
     void syncNow();
-    const onVisible = () => document.visibilityState === 'visible' && void syncNow();
+    const dirty = () => JSON.stringify(stripLocal(stateRef.current)) !== lastSent.current;
+    const recente = () => Date.now() - lastSyncAt.current < 10_000;
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') void syncNow();
+      else if (dirty()) void syncNow({ keepalive: true });
+    };
+    const onPageHide = () => dirty() && void syncNow({ keepalive: true });
+    const onFocus = () => !recente() && void syncNow();
     const onOnline = () => void syncNow();
-    document.addEventListener('visibilitychange', onVisible);
+    const timer = window.setInterval(() => document.visibilityState === 'visible' && !recente() && void syncNow(), 90_000);
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('focus', onFocus);
     window.addEventListener('online', onOnline);
     return () => {
-      document.removeEventListener('visibilitychange', onVisible);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', onPageHide);
+      window.removeEventListener('focus', onFocus);
       window.removeEventListener('online', onOnline);
+      window.clearInterval(timer);
     };
   }, [ready, conto, syncNow]);
 
-  // dopo ogni modifica (una task, una sezione letta…), con qualche secondo di calma
+  // dopo ogni modifica (una task, una sezione letta…), appena si calma
   useEffect(() => {
     if (!ready || !conto) return;
     const now = JSON.stringify(stripLocal(state));
     if (now === lastSent.current) return;
-    const t = window.setTimeout(() => void syncNow(), 3000);
+    const t = window.setTimeout(() => void syncNow(), 1500);
     return () => window.clearTimeout(t);
   }, [ready, conto, state, syncNow]);
 

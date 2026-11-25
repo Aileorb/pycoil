@@ -79,7 +79,7 @@ export class ErroreConto extends Error {
   }
 }
 
-async function chiama<T>(route: string, body?: unknown, auth = false): Promise<T> {
+async function chiama<T>(route: string, body?: unknown, auth = false, keepalive = false): Promise<T> {
   const headers: Record<string, string> = {};
   if (body !== undefined) headers['content-type'] = 'application/json';
   if (auth) {
@@ -89,7 +89,9 @@ async function chiama<T>(route: string, body?: unknown, auth = false): Promise<T
   }
   let r: Response;
   try {
-    r = await fetch(API + route, body === undefined ? { headers, cache: 'no-store' } : { method: 'POST', headers, body: JSON.stringify(body) });
+    const testo = body === undefined ? '' : JSON.stringify(body);
+    // keepalive: la richiesta parte anche se l'app sta andando in background (limite dei browser: 64 KB)
+    r = await fetch(API + route, body === undefined ? { headers, cache: 'no-store' } : { method: 'POST', headers, body: testo, keepalive: keepalive && testo.length < 60_000 });
   } catch {
     throw new ErroreConto('Sei offline o il server non risponde.');
   }
@@ -249,7 +251,7 @@ export async function eliminaConto(): Promise<Esito> {
 }
 
 export const scaricaStato = () => chiama<{ stato: AppState | null; rev: number }>('stato', undefined, true);
-export const inviaStato = (stato: AppState) => chiama<{ stato: AppState; rev: number }>('sincronizza', { stato }, true);
+export const inviaStato = (stato: AppState, keepalive = false) => chiama<{ stato: AppState; rev: number }>('sincronizza', { stato }, true, keepalive);
 
 /** Ci sono progressi veri su questo dispositivo (da non perdere entrando in un account)? */
 export function haProgressi(s: AppState): boolean {
